@@ -19,7 +19,7 @@ public class SellerProfile {
     @Column(name = "seller_id")
     private UUID sellerId;
 
-    @Column(name = "first_name", length = 2000)
+    @Column(name = "firstName", length = 2000)
     private String bio;
 
     @CreatedDate

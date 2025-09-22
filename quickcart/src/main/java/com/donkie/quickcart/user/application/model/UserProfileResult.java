@@ -8,8 +8,8 @@ public final class UserProfileResult {
 
     public record Detail(
             UUID userId,
-            String first_name,
-            String last_name,
+            String firstName,
+            String lastName,
             String email,
             LocalDate dateOfBirth,
             Instant createdDate,
