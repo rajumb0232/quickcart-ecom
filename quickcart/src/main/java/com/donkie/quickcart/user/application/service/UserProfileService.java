@@ -5,7 +5,7 @@ import com.donkie.quickcart.user.application.model.UserProfileResult;
 import com.donkie.quickcart.user.domain.model.UserProfile;
 import com.donkie.quickcart.user.domain.repository.UserProfileRepo;
 import com.donkie.quickcart.user.infra.integration.client.KeycloakClient;
-import com.donkie.quickcart.user.infra.integration.model.UserCredentials;
+import com.donkie.quickcart.user.infra.integration.model.KeycloakUserData;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ public class UserProfileService {
 
     public UserProfileResult.Detail createUserProfile(UserProfileCommand.Create create) {
 
-        UserCredentials userCredentials = getCurrentUsername().map(keycloakClient::getUserDetails)
+        KeycloakUserData keycloakUserData = getCurrentUsername().map(keycloakClient::getUserDetails)
                 .orElseThrow(() -> new RuntimeException("User credentials not found"));
 
         UserProfile userProfile = UserProfile.builder()
@@ -28,8 +28,8 @@ public class UserProfileService {
                 .lastName(create.lastName())
                 .dateOfBirth(create.dateOfBirth())
                 .phoneNumber(create.phoneNumber())
-                .email(userCredentials.email())
-                .userId(userCredentials.userId())
+                .email(keycloakUserData.email())
+                .userId(keycloakUserData.userId())
                 .build();
 
         userProfileRepo.save(userProfile);
