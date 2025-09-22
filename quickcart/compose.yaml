@@ -12,15 +12,15 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-quickcart_db}"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 5
+      start_period: 30s
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.4
     command: start-dev
     environment:
-      # Only used on first startup when DB is empty
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       KC_DB: postgres
@@ -30,15 +30,19 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - backend
     restart: unless-stopped
+
+    # lightweight TCP health check (no curl required)
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      test: ["CMD-SHELL", "sh -c 'exec 3<>/dev/tcp/127.0.0.1/8080 || exit 1'"]
       interval: 10s
       timeout: 5s
-      retries: 12
+      retries: 20
+      start_period: 120s
 
   app:
     build:
@@ -52,19 +56,23 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-admin}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
       KEYCLOAK_JWKS_URI: ${KEYCLOAK_JWKS_URI:-http://keycloak:8080/realms/myrealm/protocol/openid-connect/certs}
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+      SPRING_PROFILES_ACTIVE: dev
     ports:
       - "8081:8080"
+    # <-- simple depends_on list (no condition: service_healthy)
     depends_on:
       - postgres
       - keycloak
+    volumes:
+      - .:/app
     networks:
       - backend
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 6
+
+    # remove health check for dev to avoid false unhealthy states.
+    # if you want a health check later, use a small script inside the image that polls Spring's actuator.
+    #health check: <removed>
 
 volumes:
   pgdata:

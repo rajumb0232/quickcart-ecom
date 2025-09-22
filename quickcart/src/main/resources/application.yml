@@ -5,7 +5,7 @@ spring:
     password: ${POSTGRES_PASSWORD:root}
   jpa:
     hibernate:
-      ddl-auto: validate   # set update for quick dev, use validate + Flyway in prod
+      ddl-auto: update   # set update for quick dev, use validate + Flyway in prod
     properties:
       hibernate:
         format_sql: false
@@ -17,6 +17,12 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${KEYCLOAK_JWKS_URI:http://localhost:8080/realms/myrealm/protocol/openid-connect/certs}
+
+keycloak:
+  url: http://keycloak:8080
+  realm: quickcart
+  admin-client-id: quickcart-backend
+  admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
 
 management:
   endpoints:
