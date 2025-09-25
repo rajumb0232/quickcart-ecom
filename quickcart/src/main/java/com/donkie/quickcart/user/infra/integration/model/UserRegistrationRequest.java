@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * Request model for registering a new user in Keycloak.
- * Maps to the Keycloak Admin API user creation request format.
+ * Request model for registering a new user in KeycloakRequestHandler.
+ * Maps to the KeycloakRequestHandler Admin API user creation request format.
  */
 public record UserRegistrationRequest(
         @JsonProperty("username") String username,
@@ -36,11 +36,11 @@ public record UserRegistrationRequest(
     }
     
     /**
-     * Creates a UserRegistrationRequest with default settings.
+     * Creates a UserCredentials with default settings.
      * 
      * @param email the user's email (also used as username)
      * @param password the user's password
-     * @return UserRegistrationRequest with enabled=true, emailVerified=true
+     * @return UserCredentials with enabled=true, emailVerified=true
      */
     public static UserRegistrationRequest create(String email, String password) {
         return new UserRegistrationRequest(

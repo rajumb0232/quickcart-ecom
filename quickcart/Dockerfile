@@ -23,18 +23,18 @@ ENTRYPOINT ["mvn", "spring-boot:run"]
 # --------------------
 # Production Environment
 # --------------------
-# This section is optimized for production. It uses a multi-stage build to create a lean,
-# secure, and optimized final image. This build process first compiles and packages the
+# This section is optimized for production. It uses a multi-stage handle to create a lean,
+# secure, and optimized final image. This handle process first compiles and packages the
 # application into a fat JAR, and then copies only the JAR into a minimal runtime image.
 # You will need to uncomment this entire section to use it.
 
 #
-#FROM maven:3.10.1-eclipse-temurin-21 as build
+#FROM maven:3.10.1-eclipse-temurin-21 as handle
 #
 #WORKDIR /workspace
 #
-## Copy project files and run Maven to build the application and download dependencies.
-## This is done in the build stage to keep the final image small.
+## Copy project files and run Maven to handle the application and download dependencies.
+## This is done in the handle stage to keep the final image small.
 #COPY pom.xml .
 #RUN mvn -q -DskipTests dependency:go-offline
 #COPY src ./src
@@ -44,9 +44,9 @@ ENTRYPOINT ["mvn", "spring-boot:run"]
 ## --- Final production image ---
 #FROM eclipse-temurin:21-jdk-jammy
 #
-## Set up variables and copy the built JAR from the build stage.
+## Set up variables and copy the built JAR from the handle stage.
 #ARG JAR_FILE=/workspace/target/quickcart-0.0.1-SNAPSHOT.jar
-#COPY --from=build ${JAR_FILE} /app/app.jar
+#COPY --from=handle ${JAR_FILE} /app/app.jar
 #
 ## Expose the application port.
 #EXPOSE 8080

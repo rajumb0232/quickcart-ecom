@@ -4,7 +4,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.Principal;
-import java.util.Objects;
 import java.util.Optional;
 
 public class CurrentUser {

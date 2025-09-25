@@ -3,8 +3,6 @@ package com.donkie.quickcart.user.api.dto.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -22,9 +20,6 @@ public record UserProfileResponse(
         
         @JsonProperty("email")
         String email,
-        
-        @JsonProperty("dateOfBirth")
-        LocalDate dateOfBirth,
         
         @JsonProperty("createdAt")
         Instant createdAt,

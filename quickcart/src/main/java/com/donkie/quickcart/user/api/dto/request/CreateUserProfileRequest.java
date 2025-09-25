@@ -19,10 +19,6 @@ public record CreateUserProfileRequest(
         @NotBlank(message = "Last name is required")
         String lastName,
         
-        @JsonProperty("dateOfBirth")
-        @Past(message = "Date of birth must be in the past")
-        LocalDate dateOfBirth,
-        
         @JsonProperty("phoneNumber")
         @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Phone number must be valid")
         String phoneNumber

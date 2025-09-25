@@ -1,7 +1,6 @@
 package com.donkie.quickcart.user.application.model;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.UUID;
 
 public final class UserProfileResult {
@@ -11,7 +10,6 @@ public final class UserProfileResult {
             String firstName,
             String lastName,
             String email,
-            LocalDate dateOfBirth,
             Instant createdDate,
             Instant lastModifiedDate
     ) {}

@@ -2,20 +2,34 @@ services:
   postgres:
     image: postgres:15
     environment:
+      # Default database for your application
       POSTGRES_DB: ${POSTGRES_DB:-quickcart_db}
       POSTGRES_USER: ${POSTGRES_USER:-admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d # <-- optional, to init extra DBs
     networks:
       - backend
+    ports:
+      - "5432:5432"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-quickcart_db}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-quickcart_db}" ]
       interval: 5s
       timeout: 3s
       retries: 5
       start_period: 30s
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - backend
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.4
@@ -24,7 +38,8 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       KC_DB: postgres
-      KC_DB_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/${POSTGRES_DB:-quickcart_db}}
+      # Separate database for KeycloakRequestHandler
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
       KC_DB_USERNAME: ${POSTGRES_USER:-admin}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-root}
     ports:
@@ -35,8 +50,6 @@ services:
     networks:
       - backend
     restart: unless-stopped
-
-    # lightweight TCP health check (no curl required)
     healthcheck:
       test: ["CMD-SHELL", "sh -c 'exec 3<>/dev/tcp/127.0.0.1/8080 || exit 1'"]
       interval: 10s
@@ -52,7 +65,8 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/${POSTGRES_DB:-quickcart_db}}
+      # Application connected to quickcart_db database
+      SPRING_DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/quickcart_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-admin}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
       KEYCLOAK_JWKS_URI: ${KEYCLOAK_JWKS_URI:-http://keycloak:8080/realms/myrealm/protocol/openid-connect/certs}
@@ -60,7 +74,6 @@ services:
       SPRING_PROFILES_ACTIVE: dev
     ports:
       - "8081:8080"
-    # <-- simple depends_on list (no condition: service_healthy)
     depends_on:
       - postgres
       - keycloak
@@ -69,10 +82,6 @@ services:
     networks:
       - backend
     restart: unless-stopped
-
-    # remove health check for dev to avoid false unhealthy states.
-    # if you want a health check later, use a small script inside the image that polls Spring's actuator.
-    #health check: <removed>
 
 volumes:
   pgdata:

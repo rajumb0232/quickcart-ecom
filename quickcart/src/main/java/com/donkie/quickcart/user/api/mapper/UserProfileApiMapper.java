@@ -1,8 +1,7 @@
 package com.donkie.quickcart.user.api.mapper;
 
-import com.donkie.quickcart.user.api.dto.request.CreateUserProfileRequest;
 import com.donkie.quickcart.user.api.dto.request.UpdateUserProfileRequest;
-import com.donkie.quickcart.user.api.dto.request.UserRegistrationRequest;
+import com.donkie.quickcart.user.api.dto.request.UserCredentials;
 import com.donkie.quickcart.user.api.dto.response.UserProfileResponse;
 import com.donkie.quickcart.user.application.model.UserProfileCommand;
 import com.donkie.quickcart.user.application.model.UserProfileResult;
@@ -17,22 +16,10 @@ public class UserProfileApiMapper {
     /**
      * Maps API registration request to application command.
      */
-    public UserProfileCommand.Register toRegisterCommand(UserRegistrationRequest request) {
+    public UserProfileCommand.Register toRegisterCommand(UserCredentials request) {
         return new UserProfileCommand.Register(
                 request.email(),
                 request.password()
-        );
-    }
-
-    /**
-     * Maps API create request to application command.
-     */
-    public UserProfileCommand.Create toCreateCommand(CreateUserProfileRequest request) {
-        return new UserProfileCommand.Create(
-                request.firstName(),
-                request.lastName(),
-                request.phoneNumber(),
-                request.dateOfBirth()
         );
     }
 
@@ -56,7 +43,6 @@ public class UserProfileApiMapper {
                 result.firstName(),
                 result.lastName(),
                 result.email(),
-                result.dateOfBirth(),
                 result.createdDate(),
                 result.lastModifiedDate()
         );

@@ -3,6 +3,7 @@ package com.donkie.quickcart.user.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -14,12 +15,13 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "seller_profile")
+@EntityListeners(AuditingEntityListener.class)
 public class SellerProfile {
     @Id
     @Column(name = "seller_id")
     private UUID sellerId;
 
-    @Column(name = "firstName", length = 2000)
+    @Column(name = "bio", length = 2000)
     private String bio;
 
     @CreatedDate
