@@ -1,6 +1,6 @@
 package com.donkie.quickcart.shared.jpa;
 
-import com.donkie.quickcart.user.infra.security.util.CurrentUser;
+import com.donkie.quickcart.shared.security.CurrentUser;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
 

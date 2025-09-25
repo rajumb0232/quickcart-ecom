@@ -1,6 +1,6 @@
 package com.donkie.quickcart.user.infra.integration.keycloak.tokens;
 
-import com.donkie.quickcart.user.infra.integration.model.AdminTokenResult;
+import com.donkie.quickcart.user.infra.integration.keycloak.model.AdminTokenResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

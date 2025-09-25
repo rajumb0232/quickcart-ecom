@@ -1,7 +1,7 @@
 package com.donkie.quickcart.user.infra.integration.keycloak.tokens;
 
 import com.donkie.quickcart.user.infra.integration.keycloak.KeycloakProperties;
-import com.donkie.quickcart.user.infra.integration.model.AdminTokenResult;
+import com.donkie.quickcart.user.infra.integration.keycloak.model.AdminTokenResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

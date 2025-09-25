@@ -6,9 +6,9 @@ import com.donkie.quickcart.user.application.service.UserProfileService;
 import com.donkie.quickcart.user.domain.model.UserProfile;
 import com.donkie.quickcart.user.domain.repository.UserProfileRepo;
 import com.donkie.quickcart.user.infra.integration.keycloak.KeycloakClient;
-import com.donkie.quickcart.user.infra.integration.model.KeycloakUserData;
-import com.donkie.quickcart.user.infra.integration.model.UserRegistrationRequest;
-import com.donkie.quickcart.user.infra.integration.model.UserRoleData;
+import com.donkie.quickcart.user.infra.integration.keycloak.model.KeycloakUserData;
+import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRegistrationRequest;
+import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRoleData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static com.donkie.quickcart.user.infra.security.util.CurrentUser.getCurrentUsername;
+import static com.donkie.quickcart.shared.security.CurrentUser.getCurrentUsername;
 
 /**
  * Service for managing user profiles and registration.
