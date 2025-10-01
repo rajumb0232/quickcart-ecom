@@ -2,9 +2,11 @@ package com.donkie.quickcart.shared.security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,5 +27,15 @@ public class CurrentUser {
 
     public static Optional<Authentication> getAuthentication() {
         return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    public static List<String> getCurrentUserRoles() {
+        return getAuthentication().map(auth -> auth.getAuthorities()
+                        .stream().map(GrantedAuthority::getAuthority).toList())
+                .orElse(List.of());
+    }
+
+    public static boolean doesUserHasRole(String role) {
+        return getCurrentUserRoles().contains(role);
     }
 }

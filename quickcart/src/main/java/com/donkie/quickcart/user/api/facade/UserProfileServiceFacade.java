@@ -32,4 +32,9 @@ public class UserProfileServiceFacade {
         UserProfileResult.Detail result = userProfileService.getCurrentUserProfile();
         return mapper.toResponse(result);
     }
+
+    public UserProfileResponse createSellerProfile() {
+        UserProfileResult.Detail detail = userProfileService.createSellerProfile();
+        return mapper.toResponse(detail);
+    }
 }

@@ -3,9 +3,13 @@ package com.donkie.quickcart.user.api.mapper;
 import com.donkie.quickcart.user.api.dto.request.UpdateUserProfileRequest;
 import com.donkie.quickcart.user.api.dto.request.UserCredentials;
 import com.donkie.quickcart.user.api.dto.response.UserProfileResponse;
+import com.donkie.quickcart.user.api.dto.response.UserRoleProfile;
 import com.donkie.quickcart.user.application.model.UserProfileCommand;
 import com.donkie.quickcart.user.application.model.UserProfileResult;
 import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.util.List;
 
 /**
  * Mapper for converting between API DTOs and Application models.
@@ -44,7 +48,21 @@ public class UserProfileApiMapper {
                 result.lastName(),
                 result.email(),
                 result.createdDate(),
-                result.lastModifiedDate()
+                result.lastModifiedDate(),
+                mapRoles(result.profiles())
         );
+    }
+
+    private List<UserRoleProfile.Role> mapRoles(List<UserProfileResult.RoleProfile> profiles) {
+        if (profiles == null || profiles.isEmpty()) return List.of();
+        return profiles.stream().map(this::mapRole).toList();
+    }
+
+    private UserRoleProfile.Role mapRole(UserProfileResult.RoleProfile p) {
+        return switch (p) {
+            case UserProfileResult.SellerProfileDetail s -> new UserRoleProfile.SellerRole(s.bio(), s.sellingSince());
+            case UserProfileResult.AdminProfileDetail ignored -> new UserRoleProfile.AdminRole();
+            case UserProfileResult.CustomerProfileDetail ignored -> new UserRoleProfile.CustomerRole();
+        };
     }
 }

@@ -11,5 +11,5 @@ public interface UserProfileService {
 
     UserProfileResult.Detail getCurrentUserProfile();
 
-
+    UserProfileResult.Detail createSellerProfile();
 }

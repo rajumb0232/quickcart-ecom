@@ -11,7 +11,7 @@ public final class SellerProfileResult {
             String last_name,
             String email,
             String bio,
-            String selling_since,
+            Instant selling_since,
             Instant createdDate,
             Instant lastModifiedDate
     ) { }

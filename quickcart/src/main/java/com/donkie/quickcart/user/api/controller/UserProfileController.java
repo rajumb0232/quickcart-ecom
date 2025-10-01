@@ -28,6 +28,15 @@ public class UserProfileController {
 
     private final UserProfileServiceFacade userProfileServiceFacade;
 
+
+    /**
+     * Health check endpoint for the user service.
+     */
+    @GetMapping("/public/health")
+    public ResponseEntity<ApiAck> health() {
+        return ResponseEntity.ok(ApiAck.success("User service is healthy"));
+    }
+
     /**
      * Registers a new user in the system.
      * Public endpoint - no authentication required.
@@ -71,11 +80,17 @@ public class UserProfileController {
         ));
     }
 
-    /**
-     * Health check endpoint for the user service.
-     */
-    @GetMapping("/public/health")
-    public ResponseEntity<ApiAck> health() {
-        return ResponseEntity.ok(ApiAck.success("User service is healthy"));
+    @PostMapping("/sellers/profile")
+    @PreAuthorize("hasAuthority('customer')")
+    public ResponseEntity<ApiResponse<UserProfileResponse>> createSellerProfile() {
+        log.info("Creating seller profile");
+
+        UserProfileResponse response = userProfileServiceFacade.createSellerProfile();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .location(URI.create("/api/v1/users/profile"))
+                .body(ApiResponse.success(
+                        "Seller Profile Created Successfully",
+                        response
+                ));
     }
 }

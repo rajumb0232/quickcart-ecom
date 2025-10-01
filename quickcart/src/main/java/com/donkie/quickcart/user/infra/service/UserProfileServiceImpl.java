@@ -1,9 +1,12 @@
 package com.donkie.quickcart.user.infra.service;
 
+import com.donkie.quickcart.user.application.model.SellerProfileResult;
 import com.donkie.quickcart.user.application.model.UserProfileCommand;
 import com.donkie.quickcart.user.application.model.UserProfileResult;
 import com.donkie.quickcart.user.application.service.UserProfileService;
+import com.donkie.quickcart.user.domain.model.SellerProfile;
 import com.donkie.quickcart.user.domain.model.UserProfile;
+import com.donkie.quickcart.user.domain.repository.SellerProfileRepo;
 import com.donkie.quickcart.user.domain.repository.UserProfileRepo;
 import com.donkie.quickcart.user.infra.integration.keycloak.KeycloakClient;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.KeycloakUserData;
@@ -14,8 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.UUID;
 
+import static com.donkie.quickcart.shared.security.CurrentUser.doesUserHasRole;
 import static com.donkie.quickcart.shared.security.CurrentUser.getCurrentUserId;
 
 /**
@@ -29,6 +34,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     private final UserProfileRepo userProfileRepo;
     private final KeycloakClient keycloakClient;
+    private final SellerProfileRepo sellerProfileRepo;
 
     private static final String CUSTOMER_ROLE = "customer";
     private static final int MAX_RETRY_ATTEMPTS = 3;
@@ -113,13 +119,13 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         if (!updated) {
             log.debug("No changes detected for user profile: {}", userId);
-            return mapToUserProfileResultDetail(existingProfile);
+            return UserProfileResult.buildDetailResponse(existingProfile);
         }
 
         UserProfile updatedProfile = userProfileRepo.save(existingProfile);
         log.info("Successfully updated user profile for user: {}", userId);
 
-        return mapToUserProfileResultDetail(updatedProfile);
+        return UserProfileResult.buildDetailResponse(updatedProfile);
     }
 
     /**
@@ -132,15 +138,34 @@ public class UserProfileServiceImpl implements UserProfileService {
     public UserProfileResult.Detail getCurrentUserProfile() {
         log.debug("Retrieving current user profile");
 
-        return getCurrentUserId()
-                .flatMap(username -> {
-                    log.debug("Current Username: {}", username);
-                    return userProfileRepo.findById(username);
-                })
-                .map(this::mapToUserProfileResultDetail)
-                .orElseThrow(() -> new RuntimeException("Failed to find user details."));
+        if (doesUserHasRole("seller")) {
+            return getCurrentUserId()
+                    .flatMap(sellerProfileRepo::findById)
+                    .map(UserProfileResult::buildDetailResponse)
+                    .orElseThrow(() -> new RuntimeException("Failed to find seller details."));
+        } else {
+            return getCurrentUserId()
+                    .flatMap(userProfileRepo::findById)
+                    .map(UserProfileResult::buildDetailResponse)
+                    .orElseThrow(() -> new RuntimeException("Failed to find user details."));
+        }
     }
 
+    @Override
+    @Transactional
+    public UserProfileResult.Detail createSellerProfile() {
+        var userId = getCurrentUserId().orElseThrow(() -> new RuntimeException("Failed to find user ID"));
+        var user = userProfileRepo.findById(userId).orElseThrow(() -> new RuntimeException("Failed to find user"));
+
+        SellerProfile profile = SellerProfile.builder()
+                .sellerId(userId)
+                .sellingSince(Instant.now())
+                .userProfile(user)
+                .build();
+
+        sellerProfileRepo.save(profile);
+        return UserProfileResult.buildDetailResponse(profile);
+    }
 
     /* ----------- Helper Methods ----------- */
 
@@ -185,19 +210,5 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .filter(role -> CUSTOMER_ROLE.equalsIgnoreCase(role.roleName()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Customer role not found in KeycloakRequestHandler"));
-    }
-
-    /**
-     * Maps UserProfile entity to UserProfileResult.Detail.
-     */
-    private UserProfileResult.Detail mapToUserProfileResultDetail(UserProfile userProfile) {
-        return new UserProfileResult.Detail(
-                userProfile.getUserId(),
-                userProfile.getFirstName(),
-                userProfile.getLastName(),
-                userProfile.getEmail(),
-                userProfile.getCreateDate(),
-                userProfile.getLastModifiedDate()
-        );
     }
 }
