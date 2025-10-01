@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @AllArgsConstructor
 public class AuthServiceFacade {
@@ -23,5 +25,9 @@ public class AuthServiceFacade {
                 result.refreshToken(),
                 result.refreshExpiresIn(),
                 result.tokenType());
+    }
+
+    public List<String> getUserRoles() {
+        return authService.getUserRoles();
     }
 }

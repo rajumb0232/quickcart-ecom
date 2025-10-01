@@ -23,7 +23,7 @@ public class CurrentUser {
         });
     }
 
-    private static Optional<Authentication> getAuthentication() {
+    public static Optional<Authentication> getAuthentication() {
         return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
     }
 }

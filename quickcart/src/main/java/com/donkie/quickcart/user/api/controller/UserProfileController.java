@@ -47,6 +47,7 @@ public class UserProfileController {
      * Requires authentication.
      */
     @PutMapping("/users/profile")
+    @PreAuthorize("hasAuthority('customer')")
     public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfile(@Valid @RequestBody UpdateUserProfileRequest request) {
         log.info("Update profile request received");
         UserProfileResponse response = userProfileServiceFacade.updateProfile(request);
