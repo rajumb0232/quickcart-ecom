@@ -47,7 +47,6 @@ public class UserProfileController {
      * Requires authentication.
      */
     @PutMapping("/users/profile")
-    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfile(@Valid @RequestBody UpdateUserProfileRequest request) {
         log.info("Update profile request received");
         UserProfileResponse response = userProfileServiceFacade.updateProfile(request);
@@ -61,7 +60,6 @@ public class UserProfileController {
      * Requires authentication.
      */
     @GetMapping("/users/profile")
-    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getCurrentProfile() {
         log.debug("Get current profile request received");
 

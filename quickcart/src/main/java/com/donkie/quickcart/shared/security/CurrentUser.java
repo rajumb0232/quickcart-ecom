@@ -1,19 +1,26 @@
 package com.donkie.quickcart.shared.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.security.Principal;
 import java.util.Optional;
+import java.util.UUID;
 
+@Slf4j
 public class CurrentUser {
 
     private CurrentUser() {
         // Class is for utility purpose only
     }
 
-    public static Optional<String> getCurrentUsername() {
-        return getAuthentication().map(Principal::getName);
+    public static Optional<UUID> getCurrentUserId() {
+        return getAuthentication().map(auth -> {
+            var sub = auth.getName();
+            if(sub != null) return UUID.fromString(sub);
+            else return null;
+        });
     }
 
     private static Optional<Authentication> getAuthentication() {

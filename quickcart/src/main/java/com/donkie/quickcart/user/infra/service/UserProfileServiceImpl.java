@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static com.donkie.quickcart.shared.security.CurrentUser.getCurrentUsername;
+import static com.donkie.quickcart.shared.security.CurrentUser.getCurrentUserId;
 
 /**
  * Service for managing user profiles and registration.
@@ -87,22 +87,16 @@ public class UserProfileServiceImpl implements UserProfileService {
     public UserProfileResult.Detail updateUserProfile(UserProfileCommand.Update update) {
         log.info("Updating user profile for authenticated user");
 
-        // 1. Get current user from security context
-        KeycloakUserData keycloakUserData = getCurrentUsername()
-                .map(keycloakClient::getUserDetails)
+        UUID userId = getCurrentUserId()
                 .orElseThrow(() -> new RuntimeException("User credentials not found"));
 
-        UUID userId = UUID.fromString(keycloakUserData.userId());
+        // 1. Find existing profile by email
+        UserProfile existingProfile = userProfileRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User profile not found for user: " + userId));
+
         log.debug("Updating profile for user ID: {}", userId);
 
-        String currentUsername = getCurrentUsername()
-                .orElseThrow(() -> new RuntimeException("User credentials not found"));
-
-        // 2. Find existing profile by email
-        UserProfile existingProfile = userProfileRepo.findByEmail(currentUsername)
-                .orElseThrow(() -> new RuntimeException("User profile not found for user: " + currentUsername));
-
-        // 3. Update fields (only non-null values)
+        // 2. Update fields (only non-null values)
         boolean updated = false;
         if (update.firstName() != null && !update.firstName().equals(existingProfile.getFirstName())) {
             existingProfile.setFirstName(update.firstName());
@@ -138,8 +132,11 @@ public class UserProfileServiceImpl implements UserProfileService {
     public UserProfileResult.Detail getCurrentUserProfile() {
         log.debug("Retrieving current user profile");
 
-        return getCurrentUsername()
-                .flatMap(userProfileRepo::findByEmail)
+        return getCurrentUserId()
+                .flatMap(username -> {
+                    log.debug("Current Username: {}", username);
+                    return userProfileRepo.findById(username);
+                })
                 .map(this::mapToUserProfileResultDetail)
                 .orElseThrow(() -> new RuntimeException("Failed to find user details."));
     }

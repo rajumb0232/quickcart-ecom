@@ -8,13 +8,13 @@ import jakarta.validation.constraints.Pattern;
  * All fields are optional for partial updates.
  */
 public record UpdateUserProfileRequest(
-        @JsonProperty("firstName")
+        @JsonProperty("first_name")
         String firstName,
         
-        @JsonProperty("lastName")
+        @JsonProperty("last_name")
         String lastName,
         
-        @JsonProperty("phoneNumber")
+        @JsonProperty("phone_number")
         @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Phone number must be valid")
         String phoneNumber
 ) {

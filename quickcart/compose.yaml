@@ -69,7 +69,7 @@ services:
       SPRING_DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/quickcart_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-admin}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
-      KEYCLOAK_JWKS_URI: ${KEYCLOAK_JWKS_URI:-http://keycloak:8080/realms/myrealm/protocol/openid-connect/certs}
+      KEYCLOAK_JWKS_URI: ${KEYCLOAK_JWKS_URI}
       KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
       SPRING_PROFILES_ACTIVE: dev
     ports:

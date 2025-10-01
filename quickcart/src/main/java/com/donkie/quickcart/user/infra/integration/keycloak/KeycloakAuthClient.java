@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 import java.util.Map;
@@ -43,17 +45,19 @@ public class KeycloakAuthClient {
 
         String path = "/realms/{realm}/protocol/openid-connect/token";
 
+        // Build form data for x-www-form-urlencoded
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("grant_type", "password");
+        formData.add("client_id", keycloakProperties.getAdminClientId());
+        formData.add("client_secret", keycloakProperties.getAdminClientSecret());
+        formData.add("username", command.email());
+        formData.add("password", command.password());
+
         TokenResponse token = restClient.post()
                 .uri(path, keycloakProperties.getRealm())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminTokenService.getAccessToken())
-                .body(Map.of(
-                        "grant_type", "password",
-                        "client_id", keycloakProperties.getAdminClientId(),
-                        "client_secret", keycloakProperties.getAdminClientSecret(),
-                        "username", command.email(),
-                        "password", command.password()
-                ))
+                .body(formData)
                 .retrieve()
                 .body(TokenResponse.class);
 

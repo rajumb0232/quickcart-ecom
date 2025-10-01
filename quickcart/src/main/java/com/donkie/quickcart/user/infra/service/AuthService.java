@@ -13,6 +13,6 @@ public class AuthService {
     private final KeycloakAuthClient keycloakAuthClient;
 
     public LoginResult.Detail loginUser(LoginCommand.Create create) {
-        return null;
+        return keycloakAuthClient.loginUser(create);
     }
 }
