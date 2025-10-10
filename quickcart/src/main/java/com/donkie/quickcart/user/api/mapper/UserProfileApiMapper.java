@@ -8,7 +8,6 @@ import com.donkie.quickcart.user.application.model.UserProfileCommand;
 import com.donkie.quickcart.user.application.model.UserProfileResult;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.List;
 
 /**

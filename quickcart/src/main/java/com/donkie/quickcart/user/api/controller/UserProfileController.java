@@ -2,6 +2,7 @@ package com.donkie.quickcart.user.api.controller;
 
 import com.donkie.quickcart.shared.dto.ApiAck;
 import com.donkie.quickcart.shared.dto.ApiResponse;
+import com.donkie.quickcart.user.api.dto.request.SellerEditRequest;
 import com.donkie.quickcart.user.api.dto.request.UpdateUserProfileRequest;
 import com.donkie.quickcart.user.api.dto.request.UserCredentials;
 import com.donkie.quickcart.user.api.dto.response.UserProfileResponse;
@@ -80,6 +81,12 @@ public class UserProfileController {
         ));
     }
 
+    /**
+     * Creates a seller profile for the authenticated user.
+     * Requires authentication.
+     *
+     * @return response indicating success or failure
+     */
     @PostMapping("/sellers/profile")
     @PreAuthorize("hasAuthority('customer')")
     public ResponseEntity<ApiResponse<UserProfileResponse>> createSellerProfile() {
@@ -93,4 +100,25 @@ public class UserProfileController {
                         response
                 ));
     }
+
+    /**
+     * Updates the seller profile for the authenticated user.
+     * Requires authentication.
+     *
+     * @param request request containing the seller's bio
+     * @return response indicating success or failure
+     */
+    @PutMapping("/sellers/profile")
+    @PreAuthorize("hasAuthority('seller')")
+    public ResponseEntity<ApiResponse<UserProfileResponse>> updateSellerProfile(SellerEditRequest request) {
+        log.info("Updating seller profile");
+
+        UserProfileResponse response = userProfileServiceFacade.updateSellerProfile(request);
+        return ResponseEntity
+                .ok(ApiResponse.success(
+                        "Seller Profile Updated Successfully",
+                        response
+                ));
+    }
+
 }
