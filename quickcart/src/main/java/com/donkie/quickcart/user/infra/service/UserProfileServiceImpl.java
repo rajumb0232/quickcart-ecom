@@ -146,7 +146,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     public UserProfileResult.Detail getCurrentUserProfile() {
         log.debug("Retrieving current user profile");
 
-        if (doesUserHasRole("seller")) {
+        if (doesUserHasRole(SELLER_ROLE)) {
             return getCurrentUserId()
                     .flatMap(sellerProfileRepo::findById)
                     .map(UserProfileResult::buildDetailResponse)
@@ -163,7 +163,8 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Transactional
     public UserProfileResult.Detail createSellerProfile() {
         // Throw if user already a seller
-        isUserASeller();
+        if (doesUserHasRole(SELLER_ROLE))
+            throw new RuntimeException("User is already a seller, cannot create seller profile");
 
         // Find user profile
         var userId = getCurrentUserId().orElseThrow(() -> new RuntimeException("Failed to find user ID"));
@@ -188,25 +189,23 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public UserProfileResult.Detail updateSellerProfile(SellerProfileCommand.Update update) {
         // check if the user is seller
-        isUserASeller();
+        if (!doesUserHasRole(SELLER_ROLE))
+            throw new RuntimeException("User is not a seller, cannot update seller profile");
 
         return sellerProfileRepo.findById(getCurrentUserId().orElseThrow(() -> new RuntimeException("Failed to find user ID")))
                 .map(seller -> {
+                    if (update.bio() == null || update.bio().isEmpty()) {
+                        log.info("not changes detected for seller profile.");
+                        return UserProfileResult.buildDetailResponse(seller);
+                    }
                     seller.setBio(update.bio());
                     sellerProfileRepo.save(seller);
+
                     return UserProfileResult.buildDetailResponse(seller);
                 }).orElseThrow(() -> new RuntimeException("Failed to update seller profile, seller profile not found."));
     }
 
     /* ----------- Helper Methods ----------- */
-
-    /**
-     *  Validates if the current user is seller, of not throws an exception.
-     */
-    private static void isUserASeller() {
-        if (getCurrentUserRoles().contains(SELLER_ROLE))
-            throw new RuntimeException("User already a seller");
-    }
 
     /**
      * Retries getting user details from KeycloakRequestHandler with exponential backoff.

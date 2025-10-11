@@ -110,7 +110,7 @@ public class UserProfileController {
      */
     @PutMapping("/sellers/profile")
     @PreAuthorize("hasAuthority('seller')")
-    public ResponseEntity<ApiResponse<UserProfileResponse>> updateSellerProfile(SellerEditRequest request) {
+    public ResponseEntity<ApiResponse<UserProfileResponse>> updateSellerProfile(@RequestBody @Valid SellerEditRequest request) {
         log.info("Updating seller profile");
 
         UserProfileResponse response = userProfileServiceFacade.updateSellerProfile(request);
