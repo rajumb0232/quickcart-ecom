@@ -7,10 +7,15 @@ spring:
     show-sql: true
     open-in-view: false
     hibernate:
-      ddl-auto: update   # set update for quick dev, use validate + Flyway in prod
+      ddl-auto: none   # disable auto-magic schema changes
     properties:
       hibernate:
         format_sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+    baseline-on-migrate: ${FLYWAY_BASELINE:false}  # ONLY for the first run on an existing DB
   cache:
     type: caffeine
 
