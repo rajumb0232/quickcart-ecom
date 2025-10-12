@@ -1,5 +1,6 @@
 package com.donkie.quickcart.user.infra.service;
 
+import com.donkie.quickcart.shared.exception.QuickcartBaseException;
 import com.donkie.quickcart.user.application.model.SellerProfileCommand;
 import com.donkie.quickcart.user.application.model.UserProfileCommand;
 import com.donkie.quickcart.user.application.model.UserProfileResult;
@@ -12,6 +13,7 @@ import com.donkie.quickcart.user.infra.integration.keycloak.KeycloakClient;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.KeycloakUserData;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRegistrationRequest;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRoleData;
+import com.donkie.quickcart.user.infra.service.helper.GetWithRetries;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.UUID;
 
+import static com.donkie.quickcart.shared.exception.handler.SafeExecutor.safeExecute;
+import static com.donkie.quickcart.shared.integration.helper.ClientResponseStatusResolver.resolveStatus;
 import static com.donkie.quickcart.shared.security.CurrentUser.*;
 
 /**
@@ -35,6 +39,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserProfileRepo userProfileRepo;
     private final KeycloakClient keycloakClient;
     private final SellerProfileRepo sellerProfileRepo;
+    private final GetWithRetries getWithRetries;
 
     private static final String CUSTOMER_ROLE = "customer";
     private static final String SELLER_ROLE = "seller";
@@ -59,34 +64,39 @@ public class UserProfileServiceImpl implements UserProfileService {
         if (userProfileRepo.existsByEmail(register.email()))
             throw new RuntimeException("User Already exists by Email");
 
-        try {
-            // 1. Register user in KeycloakRequestHandler
-            keycloakClient.registerNewUser(UserRegistrationRequest.create(register.email(), register.password()));
-            log.debug("User registered in KeycloakRequestHandler: {}", register.email());
+        safeExecute(
+                () -> registerUser(register),
+                (e) -> new QuickcartBaseException(
+                        resolveStatus(e),
+                        "Failed to Register user.",
+                        e)
+        );
+    }
 
-            // 2. Retrieve user data with retry logic (KeycloakRequestHandler might need time to propagate)
-            KeycloakUserData userData = retryGetUserDetails(register.email());
-            log.debug("Retrieved user data from KeycloakRequestHandler: {}", userData.userId());
+    private void registerUser(UserProfileCommand.Register register) {
+        // 1. Register user in KeycloakRequestHandler
+        keycloakClient.registerNewUser(UserRegistrationRequest.create(register.email(), register.password()));
+        log.debug("User registered in KeycloakRequestHandler: {}", register.email());
 
-            // 3. Find customer role
-            UserRoleData customerRole = findUserRole(CUSTOMER_ROLE);
+        // 2. Retrieve user data with retry logic (KeycloakRequestHandler might need time to propagate)
+        KeycloakUserData userData = retryGetUserDetails(register.email());
+        log.debug("Retrieved user data from KeycloakRequestHandler: {}", userData.userId());
 
-            // 4. Assign customer role to user
-            keycloakClient.mapRoleToKeyCloakUser(customerRole, UUID.fromString(userData.userId()));
-            log.info("Successfully registered user and assigned customer role: {}", register.email());
+        // 3. Find customer role
+        UserRoleData customerRole = findUserRole(CUSTOMER_ROLE);
 
-            // 5. Create User Profile
-            UserProfile profile = UserProfile.builder()
-                    .userId(UUID.fromString(userData.userId()))
-                    .email(userData.email())
-                    .build();
+        // 4. Assign customer role to user
+        keycloakClient.mapRoleToKeyCloakUser(customerRole, UUID.fromString(userData.userId()));
+        log.info("Successfully registered user and assigned customer role: {}", register.email());
 
-            // 6. Save UserProfile
-            userProfileRepo.save(profile);
-        } catch (Exception e) {
-            log.error("Failed to register user: {}", register.email(), e);
-            throw new RuntimeException("User registration failed for: " + register.email(), e);
-        }
+        // 5. Create User Profile
+        UserProfile profile = UserProfile.builder()
+                .userId(UUID.fromString(userData.userId()))
+                .email(userData.email())
+                .build();
+
+        // 6. Save UserProfile
+        userProfileRepo.save(profile);
     }
 
     /**
@@ -179,7 +189,13 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         // Update user role in keycloak
         var roleData = this.findUserRole(SELLER_ROLE);
-        keycloakClient.mapRoleToKeyCloakUser(roleData, userId);
+        safeExecute(
+                () -> keycloakClient.mapRoleToKeyCloakUser(roleData, userId),
+                (e) -> new QuickcartBaseException(
+                        resolveStatus(e),
+                        "Failed mapping role to the user.",
+                        e)
+        );
 
         // Save seller profile
         sellerProfileRepo.save(profile);
@@ -212,41 +228,28 @@ public class UserProfileServiceImpl implements UserProfileService {
      * KeycloakRequestHandler might need time to propagate user creation.
      */
     private KeycloakUserData retryGetUserDetails(String email) {
-        for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
-            try {
-                if (attempt > 1) {
-                    Thread.sleep(RETRY_DELAY_MS * attempt); // Exponential backoff
-                }
-
-                KeycloakUserData userData = keycloakClient.getUserDetails(email);
-                if (userData != null) {
-                    log.debug("Successfully retrieved user data on attempt {}: {}", attempt, email);
-                    return userData;
-                }
-
-                log.debug("User data not found on attempt {}: {}", attempt, email);
-
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException("Interrupted while waiting for user creation", e);
-            } catch (Exception e) {
-                log.warn("Failed to retrieve user data on attempt {}: {}", attempt, email, e);
-                if (attempt == MAX_RETRY_ATTEMPTS) {
-                    throw e;
-                }
-            }
-        }
-
-        throw new RuntimeException("User not found after " + MAX_RETRY_ATTEMPTS + " attempts: " + email);
+        return safeExecute(
+                () -> keycloakClient.getUserDetails(email),
+                (e) -> new QuickcartBaseException(
+                        resolveStatus(e),
+                        "Failed to load user details from Authentication service",
+                        e)
+        );
     }
 
     /**
      * Finds the customer role from available roles.
      */
     private UserRoleData findUserRole(String role) {
-        return keycloakClient.getAllUserRoles().stream()
-                .filter(r -> role.equalsIgnoreCase(r.roleName()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Customer role not found in KeycloakRequestHandler"));
+        return safeExecute(
+                () -> keycloakClient.getAllUserRoles().stream()
+                        .filter(r -> role.equalsIgnoreCase(r.roleName()))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Role " + role + " not found in Authentication Service.")),
+                (e) -> new QuickcartBaseException(
+                        resolveStatus(e),
+                        "Failed to retrieve user roles from Authentication Service.",
+                        e)
+        );
     }
 }

@@ -1,4 +1,8 @@
 spring:
+  application:
+     name: quickcart-backend
+  config:
+    import: classpath:configuration/resilience4j.yml
   datasource:
     url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/quickcart_db}
     username: ${POSTGRES_USER:admin}
@@ -44,3 +48,9 @@ logging:
   level:
     root: INFO
     org.springframework.security: INFO
+
+# APPLICATION PROPERTIES
+app:
+  admin:
+    username: ${ADMIN_USERNAME}
+    password: ${ADMIN_PASSWORD}

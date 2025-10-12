@@ -1,18 +1,17 @@
 package com.donkie.quickcart.user.api.exception;
 
 import com.donkie.quickcart.shared.dto.ApiAck;
-import com.donkie.quickcart.shared.dto.ApiResponse;
+import com.donkie.quickcart.shared.dto.ApiError;
+import com.donkie.quickcart.user.application.exception.UserLoginFailedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import static com.donkie.quickcart.shared.integration.helper.ClientResponseStatusResolver.resolveStatus;
+import static com.donkie.quickcart.user.infra.integration.helper.KeycloakResultStatusToMessageResolver.resolveMessageForClientResponseStatus;
 
 /**
  * Global exception handler for user API endpoints.
@@ -20,6 +19,18 @@ import java.util.Map;
 @RestControllerAdvice(basePackages = "com.donkie.quickcart.user.api")
 @Slf4j
 public class UserApiExceptionHandler {
+
+    public static final String COULDN_T_FIND_ROOT_CAUSE = "Sorry, couldn't find root cause.";
+
+    @ExceptionHandler(UserLoginFailedException.class)
+    public ResponseEntity<ApiError> handleUserLoginFailed(UserLoginFailedException ex) {
+        log.warn("User login failed: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(resolveStatus(ex.getCause()))
+                .body(ApiError.build(
+                        ex.getMessage(),
+                        ex.getCause()
+                ));
+    }
 
     /**
      * Handles access denied exceptions.

@@ -1,18 +1,23 @@
 package com.donkie.quickcart.user.infra.integration.keycloak;
 
+import com.donkie.quickcart.shared.integration.helper.HttpCallFallbackHandler;
 import com.donkie.quickcart.user.application.model.LoginCommand;
 import com.donkie.quickcart.user.application.model.LoginResult;
+import com.donkie.quickcart.user.infra.exception.ExternalServiceException;
 import com.donkie.quickcart.user.infra.integration.keycloak.tokens.AdminTokenService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
-import java.util.Map;
 import java.util.Objects;
+
+import static com.donkie.quickcart.user.infra.integration.helper.InfraExceptionBuilder.buildExternalServiceException;
 
 /**
  * Client for handling authentication operations against Keycloak using RestClient.
@@ -40,7 +45,8 @@ public class KeycloakAuthClient {
      * @param command login command containing email and password
      * @return mapped {@link LoginResult.Detail}
      */
-    public LoginResult.Detail loginUser(LoginCommand.Create command) {
+    @CircuitBreaker(name = "keycloak", fallbackMethod = "loginUserFallback")
+    public LoginResult.Detail loginUser(LoginCommand.Create command) throws ExternalServiceException {
         log.debug("Logging in user {}", command.email());
 
         String path = "/realms/{realm}/protocol/openid-connect/token";
@@ -63,19 +69,29 @@ public class KeycloakAuthClient {
 
         if (token == null) {
             log.error("Keycloak returned null token for user {}", command.email());
-            throw new RuntimeException("Empty token response from Keycloak");
+            throw new ExternalServiceException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to obtain tokens from Identity Service.");
         }
 
-        int accessExpires = token.expires_in != null ? token.expires_in : 0;
-        int refreshExpires = token.refresh_expires_in != null ? token.refresh_expires_in : 0;
+        return safeMapToLoginResultDetail(token);
+    }
+
+    private static LoginResult.Detail safeMapToLoginResultDetail(TokenResponse token) {
+        Objects.requireNonNull(token, "token must not be null");
 
         return new LoginResult.Detail(
                 Objects.requireNonNullElse(token.access_token, ""),
-                accessExpires,
+                token.expires_in != null ? token.expires_in : 0,
                 Objects.requireNonNullElse(token.refresh_token, ""),
-                refreshExpires,
+                token.refresh_expires_in != null ? token.refresh_expires_in : 0,
                 Objects.requireNonNullElse(token.token_type, "")
         );
+    }
+
+    @SuppressWarnings("unused") // Resilience4j fallback method
+    private LoginResult.Detail loginUserFallback(LoginCommand.Create command, Throwable t) {
+        return HttpCallFallbackHandler.throwException(() -> buildExternalServiceException(t, "Login"));
     }
 
     /**
@@ -88,5 +104,6 @@ public class KeycloakAuthClient {
             Integer refresh_expires_in,
             String refresh_token,
             String token_type
-    ) {}
+    ) {
+    }
 }

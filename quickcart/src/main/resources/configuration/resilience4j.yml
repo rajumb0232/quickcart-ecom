@@ -1,0 +1,25 @@
+resilience4j:
+  retry:
+    instances:
+      keycloak:
+        max-attempts: 3
+        wait-duration: 300ms
+        enable-exponential-backoff: true
+        retry-exceptions:
+          - org.springframework.web.client.ResourceAccessException
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException              # mapping 429 to this
+        ignore-exceptions:
+          - org.springframework.web.client.HttpClientErrorException
+  circuitbreaker:
+    instances:
+      keycloak:
+        sliding-window-size: 50
+        minimum-number-of-calls: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 20s
+  bulkhead:
+    instances:
+      keycloak:
+        max-concurrent-calls: 30
+        max-wait-duration: 0
