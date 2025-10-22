@@ -1,196 +1,209 @@
 package com.donkie.quickcart.user.infra.integration.keycloak;
 
-import com.donkie.quickcart.shared.integration.helper.HttpCallFallbackHandler;
+import com.donkie.quickcart.user.domain.model.UserRole;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.KeycloakUserData;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRegistrationRequest;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRoleData;
-import com.donkie.quickcart.user.infra.integration.keycloak.tokens.AdminTokenService;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
+import jakarta.ws.rs.core.Response;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RoleResource;
+import org.keycloak.admin.client.resource.RolesResource;
+import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-
-import static com.donkie.quickcart.shared.integration.helper.ClientResponseStatusResolver.resolveBaseExceptionStatus;
-import static com.donkie.quickcart.shared.integration.helper.ClientResponseStatusResolver.resolveStatus;
-import static com.donkie.quickcart.user.infra.integration.helper.InfraExceptionBuilder.buildExternalServiceException;
-import static com.donkie.quickcart.user.infra.integration.helper.KeycloakResultStatusToMessageResolver.resolveMessageForClientResponseStatus;
+import java.util.stream.Collectors;
 
 /**
- * Client for interacting with Keycloak Admin API using RestClient.
- * Provides user management and role assignment operations.
+ * Client for interacting with Keycloak Admin API using the Keycloak Admin Client.
  */
 @Component
 @Slf4j
+@AllArgsConstructor
 public class KeycloakClient {
 
-    private final AdminTokenService adminTokenService;
+    private final Keycloak keycloakAdminClient;
     private final KeycloakProperties keycloakProperties;
-    private final RestClient restClient;
 
-    /**
-     * Constructs a new KeycloakClient with the specified configuration.
-     *
-     * @param adminTokenService  Required for admin credentials while making HTTP Calls
-     * @param keycloakProperties Required for Keycloak Admin API URL and realm details
-     */
-    public KeycloakClient(AdminTokenService adminTokenService, KeycloakProperties keycloakProperties) {
-        this.adminTokenService = adminTokenService;
-        this.keycloakProperties = keycloakProperties;
-        this.restClient = RestClient.builder()
-                .baseUrl(keycloakProperties.getUrl())
-                .build();
+    private UsersResource usersResource() {
+        return keycloakAdminClient.realm(keycloakProperties.getRealm()).users();
     }
 
-    /* ---------------- GET Calls (Retry + CB + Bulkhead) ---------------- */
+    private RolesResource rolesResource() {
+        return keycloakAdminClient.realm(keycloakProperties.getRealm()).roles();
+    }
+
+    /* ---------------- GET Calls ---------------- */
 
     /**
-     * Retrieves user details by email. Uses Circuit Breaker for resilience.
-     *
-     * @param email The email of the user to retrieve details for.
-     * @return User details if found, otherwise null.
+     * Fetch user details by email.
      */
     @Retry(name = "keycloak")
     @CircuitBreaker(name = "keycloak", fallbackMethod = "getUserDetailsFallback")
     @Bulkhead(name = "keycloak", type = Bulkhead.Type.SEMAPHORE)
     public KeycloakUserData getUserDetails(String email) {
-        String path = "/admin/realms/{realm}/users";
-        List<KeycloakUserData> users = restClient.get()
-                .uri(uriBuilder -> uriBuilder.path(path).queryParam("username", email).build(keycloakProperties.getRealm()))
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminTokenService.getAccessToken())
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
-        return validateUserDataBeforeReturn(email, users);
+        List<UserRepresentation> users = usersResource()
+                .search(email, 0, 2); // search by username (same as email)
+
+        if (users.isEmpty()) {
+            log.warn("No user found with email: {}", email);
+            return null;
+        } else if (users.size() > 1) {
+            String errorMsg = "Multiple users found with the same email (username): " + email;
+            log.error(errorMsg);
+            throw new IllegalStateException(errorMsg);
+        }
+
+        UserRepresentation user = users.getFirst();
+        return new KeycloakUserData(user.getId(), user.getUsername(), user.getEmail());
     }
 
-    /**
-     * Fallback method for getUserDetails when an exception occurs. Logs the error and returns null.
-     *
-     * @param email The email of the user to retrieve details for.
-     * @param t     The exception that occurred during the request.
-     * @return null.
-     */
-    @SuppressWarnings("unused")
     private KeycloakUserData getUserDetailsFallback(String email, Throwable t) {
-        return HttpCallFallbackHandler.throwException(() -> buildExternalServiceException(t, "Fetch User Details"));
+        log.error("Error fetching user details for email {}", email, t);
+        return null;
     }
 
+
     /**
-     * Retrieves all user roles (catalogue). Uses Circuit Breaker for resilience.
-     *
-     * @return List of UserRoleData if found, otherwise null.
+     * Fetch all realm roles.
      */
     @Retry(name = "keycloak")
     @CircuitBreaker(name = "keycloak", fallbackMethod = "getAllUserRolesFallback")
     @Bulkhead(name = "keycloak", type = Bulkhead.Type.SEMAPHORE)
     public List<UserRoleData> getAllUserRoles() {
-        String path = "/admin/realms/{realm}/roles";
-        return restClient.get()
-                .uri(path, keycloakProperties.getRealm())
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminTokenService.getAccessToken())
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
+        List<RoleRepresentation> roles = rolesResource().list();
+        // Map RoleRepresentation to UserRoleData DTO
+        return roles.stream()
+                .map(role -> new UserRoleData(role.getId(), role.getName()))
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Fallback method for getAllUserRoles when an exception occurs. Logs the error and returns an empty list.
-     *
-     * @param t The exception that occurred during the request.
-     * @return null.
-     */
     private List<UserRoleData> getAllUserRolesFallback(Throwable t) {
-        return HttpCallFallbackHandler.throwException(() -> buildExternalServiceException(t, "Fetch User Roles"));
+        log.error("Error fetching user roles", t);
+        return Collections.emptyList();
     }
 
-    /*
-     * ---------------- POST Calls (CircuitBreaker only) ----------------
-     */
+    /* ---------------- POST Calls ---------------- */
 
     /**
-     * Registers a new user in Keycloak. Uses Circuit Breaker for resilience.
-     *
-     * @param request The user registration request.
+     * Registers a new user in Keycloak.
      */
     @CircuitBreaker(name = "keycloak", fallbackMethod = "registerNewUserFallback")
     public void registerNewUser(UserRegistrationRequest request) {
-        String path = "/admin/realms/{realm}/users";
-        restClient.post()
-                .uri(path, keycloakProperties.getRealm())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminTokenService.getAccessToken())
-                .body(request)
-                .retrieve()
-                .toBodilessEntity();
+        UserRepresentation user = new UserRepresentation();
+        user.setUsername(request.username());
+        user.setEmail(request.email());
+        user.setEnabled(true);
+        user.setEmailVerified(request.emailVerified());
+
+        List<CredentialRepresentation> credentials = request.credentials().stream().map(credential -> {
+            var representation = new CredentialRepresentation();
+            representation.setType(credential.type());
+            representation.setValue(credential.value());
+            representation.setTemporary(false);
+            return representation;
+        }).toList();
+
+        user.setCredentials(credentials);
+
+        try (Response response = usersResource().create(user)) {
+            if (response.getStatus() != 201 && response.getStatus() != 204 && response.getStatus() != 200) {
+                throw new RuntimeException("Failed to create user, status: " + response.getStatus());
+            }
+        }
+    }
+
+    private void registerNewUserFallback(UserRegistrationRequest request, Throwable t) {
+        log.error("Error registering new user: {}", request.email(), t);
     }
 
     /**
-     * Fallback method for registerNewUser when an exception occurs. Logs the error and does nothing.
-     *
-     * @param request The user registration request.
-     * @param t The exception that occurred during the request.
-     * @return null.
-     */
-    private Void registerNewUserFallback(UserRegistrationRequest request, Throwable t) {
-        return HttpCallFallbackHandler.throwException(() -> buildExternalServiceException(t, "Register user"));
-    }
-
-    /**
-     * Maps a role to a user in Keycloak. Uses Circuit Breaker for resilience.
-     *
-     * @param roleData The role data to map to the user.
-     * @param userId The user ID to map the role to.
+     * Maps a single role to a user.
      */
     @CircuitBreaker(name = "keycloak", fallbackMethod = "mapRoleFallback")
-    public void mapRoleToKeyCloakUser(UserRoleData roleData, UUID userId) {
-        String path = "/admin/realms/{realm}/users/{userId}/role-mappings/realm";
-        restClient.post()
-                .uri(path, keycloakProperties.getRealm(), userId.toString())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminTokenService.getAccessToken())
-                .body(List.of(roleData))
-                .retrieve()
-                .toBodilessEntity();
+    public void mapRoleToKeycloakUser(UserRoleData roleData, UUID userId) {
+        RoleResource roleResource = rolesResource().get(roleData.roleName());
+        RoleRepresentation roleRep = roleResource.toRepresentation();
+
+        usersResource().get(userId.toString())
+                .roles()
+                .realmLevel()
+                .add(Collections.singletonList(roleRep));
+    }
+
+    private void mapRoleFallback(UserRoleData roleData, UUID userId, Throwable t) {
+        log.error("Error mapping role {} to user {}", roleData.roleName(), userId, t);
     }
 
     /**
-     * Fallback method for mapRoleToKeyCloakUser when an exception occurs. Logs the error and does nothing.
-     *
-     * @param roleData The role data to map to the user.
-     * @param userId The user ID to map the role to.
-     * @param t The exception that occurred during the request.
-     * @return null.
+     * Maps multiple roles to a user.
      */
-    @SuppressWarnings("unused")
-    private Void mapRoleFallback(UserRoleData roleData, UUID userId, Throwable t) {
-        return HttpCallFallbackHandler.throwException(() -> buildExternalServiceException(t, "Role mapping"));
+    @CircuitBreaker(name = "keycloak", fallbackMethod = "mapRolesFallback")
+    public void mapRolesToKeycloakUser(List<UserRoleData> roles, UUID userId) {
+        List<RoleRepresentation> roleReps = roles.stream()
+                .map(role -> rolesResource().get(role.roleName()).toRepresentation())
+                .collect(Collectors.toList());
+
+        usersResource().get(userId.toString())
+                .roles()
+                .realmLevel()
+                .add(roleReps);
     }
+
+    private void mapRolesFallback(List<UserRoleData> roles, UUID userId, Throwable t) {
+        log.error("Error mapping roles to user {}", userId, t);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Retry(name = "keycloak")
+    @CircuitBreaker(name = "keycloak", fallbackMethod = "hasAtLeastOneRealUserWithRoleFallback")
+    @Bulkhead(name = "keycloak", type = Bulkhead.Type.SEMAPHORE)
+    public boolean hasAtLeastOneRealUserWithRole(UserRole role) {
+        Set<UserRepresentation> usersWithRole =rolesResource()
+                .get(role.getDisplayName())
+                .getRoleUserMembers(0, 10);
+
+        if (usersWithRole == null || usersWithRole.isEmpty()) {
+            return false;
+        }
+
+        return usersWithRole.stream()
+                .anyMatch(user -> !user.getUsername().startsWith("service-account"));
+    }
+
+    private boolean hasAtLeastOneRealUserWithRoleFallback(UserRole role, Throwable t) {
+        log.error("Failed to check users with role {} due to {}", role.getDisplayName(), t.toString());
+        return false;
+    }
+
 
     /* ---------------------- Helpers ----------------------- */
 
     /**
-     * Validates the user data before returning it. Logs warnings if no user is found or multiple users are found.
-     *
-     * @param email The email of the user to validate.
-     * @param users The list of user data retrieved from Keycloak.
-     * @return The validated user data or null if no user is found or multiple users are found.
+     * Validates user data before returning.
      */
-    private KeycloakUserData validateUserDataBeforeReturn(String email, List<KeycloakUserData> users) {
+    private KeycloakUserData validateUserDataBeforeReturn(String email, List<UserRepresentation> users) {
         if (users == null || users.isEmpty()) {
-            log.warn("No user found with email: {}", email);
             return null;
         }
         if (users.size() > 1) {
             log.warn("Multiple users found with email: {}. Using the first one.", email);
         }
-        return users.getFirst();
+        UserRepresentation user = users.getFirst();
+        // Convert to your KeycloakUserData model as needed
+        return new KeycloakUserData(user.getId(), user.getUsername(), user.getEmail());
     }
 }

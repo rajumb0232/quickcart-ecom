@@ -45,4 +45,9 @@ public class UserProfileServiceFacade {
         UserProfileResult.Detail detail = userProfileService.updateSellerProfile(update);
         return mapper.toResponse(detail);
     }
+
+    public void registerAdmin(UserCredentials credentials) {
+        UserProfileCommand.Register command = mapper.toRegisterCommand(credentials);
+        userProfileService.registerAdmin(command);
+    }
 }

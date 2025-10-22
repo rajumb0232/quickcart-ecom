@@ -28,11 +28,8 @@ public class SellerProfile {
     @Column(name = "selling_since")
     private Instant sellingSince;
 
-    /*
-    Using Composition over Inheritance for extending UserProfile features to seller.
-    This allows easy promotion of user from one role to another role.
-    */
-    @OneToOne
-    @JoinColumn(name = "user_profile_id")
+    @OneToOne(optional = false)
+    @JoinColumn(name = "seller_id", referencedColumnName = "user_id")
+    @MapsId
     private UserProfile userProfile;
 }

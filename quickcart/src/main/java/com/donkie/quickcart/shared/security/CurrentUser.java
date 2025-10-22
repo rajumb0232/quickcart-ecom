@@ -1,5 +1,6 @@
 package com.donkie.quickcart.shared.security;
 
+import com.donkie.quickcart.user.domain.model.UserRole;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,8 +21,14 @@ public class CurrentUser {
     public static Optional<UUID> getCurrentUserId() {
         return getAuthentication().map(auth -> {
             var sub = auth.getName();
-            if(sub != null) return UUID.fromString(sub);
-            else return null;
+            if(sub != null) {
+                try {
+                    return UUID.fromString(sub);
+                } catch (IllegalArgumentException e) {
+                    log.debug("User Unauthenticated, value: '{}'", sub);
+                    return null;
+                }
+            } else return null;
         });
     }
 
@@ -35,7 +42,7 @@ public class CurrentUser {
                 .orElse(List.of());
     }
 
-    public static boolean doesUserHasRole(String role) {
-        return getCurrentUserRoles().contains(role);
+    public static boolean doesUserHasRole(UserRole role) {
+        return getCurrentUserRoles().contains(role.getDisplayName());
     }
 }

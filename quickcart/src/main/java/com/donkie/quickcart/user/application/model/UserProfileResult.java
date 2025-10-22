@@ -49,34 +49,29 @@ public final class UserProfileResult {
 
     public static Detail buildDetailResponse(UserProfile u) {
         Objects.requireNonNull(u, "userProfile");
-        return new Detail(
-                u.getUserId(),
-                u.getFirstName(),
-                u.getLastName(),
-                u.getEmail(),
-                u.getCreateDate(),
-                u.getLastModifiedDate(),
-                List.of(new CustomerProfileDetail())
-        );
+        return buildDetail(u, List.of(new CustomerProfileDetail()));
     }
 
-    public static Detail buildDetailResponse(SellerProfile sellerProfile) {
+    public static Detail buildDetailResponse(UserProfile userProfile, SellerProfile sellerProfile) {
         Objects.requireNonNull(sellerProfile, "sellerProfile cannot be null");
-        UserProfile u = Objects.requireNonNull(sellerProfile.getUserProfile(), "UserProfile cannot be null");
 
+        return buildDetail(userProfile, List.of(
+                new CustomerProfileDetail(),
+                new SellerProfileDetail(
+                        sellerProfile.getBio(),
+                        sellerProfile.getSellingSince()
+                )));
+    }
+
+    private static Detail buildDetail(UserProfile userProfile, List<RoleProfile> roleProfileList) {
         return new Detail(
-                u.getUserId(),
-                u.getFirstName(),
-                u.getLastName(),
-                u.getEmail(),
-                u.getCreateDate(),
-                u.getLastModifiedDate(),
-                List.of(
-                        new CustomerProfileDetail(),
-                        new SellerProfileDetail(
-                                sellerProfile.getBio(),
-                                sellerProfile.getSellingSince()
-                        ))
+                userProfile.getUserId(),
+                userProfile.getFirstName(),
+                userProfile.getLastName(),
+                userProfile.getEmail(),
+                userProfile.getCreateDate(),
+                userProfile.getLastModifiedDate(),
+                roleProfileList
         );
     }
 }

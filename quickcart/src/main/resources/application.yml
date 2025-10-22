@@ -30,10 +30,10 @@ spring:
           jwk-set-uri: ${KEYCLOAK_JWKS_URI}
 
 keycloak:
-  url: http://keycloak:8080
-  realm: quickcart
-  admin-client-id: quickcart-backend
-  admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+  url: ${KEYCLOAK_URL:http://keycloak:8080}
+  realm: ${KEYCLOAK_REALM:quickcart}
+  admin-client-id: ${KEYCLOAK_CLIENT_ID:quickcart-backend}
+  admin-client-secret: ${KEYCLOAK_CLIENT_SECRET}
 
 management:
   endpoints:
@@ -52,5 +52,5 @@ logging:
 # APPLICATION PROPERTIES
 app:
   admin:
-    username: ${ADMIN_USERNAME}
-    password: ${ADMIN_PASSWORD}
+    username: ${APP_ADMIN_USERNAME}
+    password: ${APP_ADMIN_PASSWORD}

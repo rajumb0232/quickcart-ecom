@@ -2,6 +2,7 @@ package com.donkie.quickcart.user.api.controller;
 
 import com.donkie.quickcart.shared.dto.ApiAck;
 import com.donkie.quickcart.shared.dto.ApiResponse;
+import com.donkie.quickcart.user.api.dto.request.CreateUserProfileRequest;
 import com.donkie.quickcart.user.api.dto.request.SellerEditRequest;
 import com.donkie.quickcart.user.api.dto.request.UpdateUserProfileRequest;
 import com.donkie.quickcart.user.api.dto.request.UserCredentials;
@@ -28,7 +29,6 @@ import java.net.URI;
 public class UserProfileController {
 
     private final UserProfileServiceFacade userProfileServiceFacade;
-
 
     /**
      * Health check endpoint for the user service.
@@ -121,4 +121,14 @@ public class UserProfileController {
                 ));
     }
 
+    @PostMapping("/admins/register")
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity<ApiAck> registerAdmin(@Valid @RequestBody UserCredentials credentials) {
+        log.info("Creating new Admin");
+
+        userProfileServiceFacade.registerAdmin(credentials);
+        return ResponseEntity
+                .created(URI.create("/api/v1/users/profile"))
+                .body(ApiAck.success("Admin created successfully"));
+    }
 }

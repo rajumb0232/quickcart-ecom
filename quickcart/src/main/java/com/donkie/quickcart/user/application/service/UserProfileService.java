@@ -15,4 +15,6 @@ public interface UserProfileService {
     UserProfileResult.Detail createSellerProfile();
 
     UserProfileResult.Detail updateSellerProfile(SellerProfileCommand.Update update);
+
+    void registerAdmin(UserProfileCommand.Register register);
 }

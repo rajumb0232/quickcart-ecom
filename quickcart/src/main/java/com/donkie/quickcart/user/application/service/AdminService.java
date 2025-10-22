@@ -1,9 +1,8 @@
 package com.donkie.quickcart.user.application.service;
 
-import jakarta.annotation.PostConstruct;
+import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRegistrationRequest;
 
 public interface AdminService {
 
-    @PostConstruct
-    void createDefaultAdmin();
+    void createAdmin(UserRegistrationRequest request);
 }

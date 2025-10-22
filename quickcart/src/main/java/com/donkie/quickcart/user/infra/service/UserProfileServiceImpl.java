@@ -7,20 +7,22 @@ import com.donkie.quickcart.user.application.model.UserProfileResult;
 import com.donkie.quickcart.user.application.service.UserProfileService;
 import com.donkie.quickcart.user.domain.model.SellerProfile;
 import com.donkie.quickcart.user.domain.model.UserProfile;
+import com.donkie.quickcart.user.domain.model.UserRole;
 import com.donkie.quickcart.user.domain.repository.SellerProfileRepo;
 import com.donkie.quickcart.user.domain.repository.UserProfileRepo;
 import com.donkie.quickcart.user.infra.integration.keycloak.KeycloakClient;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.KeycloakUserData;
-import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRegistrationRequest;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRoleData;
-import com.donkie.quickcart.user.infra.service.helper.GetWithRetries;
+import com.donkie.quickcart.user.infra.service.usecase.AssignRoleUseCase;
+import com.donkie.quickcart.user.infra.service.usecase.RegisterUserUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static com.donkie.quickcart.shared.exception.handler.SafeExecutor.safeExecute;
@@ -39,13 +41,8 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserProfileRepo userProfileRepo;
     private final KeycloakClient keycloakClient;
     private final SellerProfileRepo sellerProfileRepo;
-    private final GetWithRetries getWithRetries;
-
-    private static final String CUSTOMER_ROLE = "customer";
-    private static final String SELLER_ROLE = "seller";
-    private static final String ADMIN_ROLE = "admin";
-    private static final int MAX_RETRY_ATTEMPTS = 3;
-    private static final long RETRY_DELAY_MS = 1000;
+    private final RegisterUserUseCase registerUserUseCase;
+    private final AssignRoleUseCase assignRoleUseCase;
 
     /**
      * Registers a new user in KeycloakRequestHandler and assigns the customer role.
@@ -56,47 +53,8 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Transactional
     @Override
     public void registerNewUser(UserProfileCommand.Register register) {
-        log.info("Starting user registration for email: {}", register.email());
-
-        if (getAuthentication().isPresent())
-            throw new AccessDeniedException("User already authenticated, cannot re-register");
-
-        if (userProfileRepo.existsByEmail(register.email()))
-            throw new RuntimeException("User Already exists by Email");
-
-        safeExecute(
-                () -> registerUser(register),
-                (e) -> new QuickcartBaseException(
-                        resolveStatus(e),
-                        "Failed to Register user.",
-                        e)
-        );
-    }
-
-    private void registerUser(UserProfileCommand.Register register) {
-        // 1. Register user in KeycloakRequestHandler
-        keycloakClient.registerNewUser(UserRegistrationRequest.create(register.email(), register.password()));
-        log.debug("User registered in KeycloakRequestHandler: {}", register.email());
-
-        // 2. Retrieve user data with retry logic (KeycloakRequestHandler might need time to propagate)
-        KeycloakUserData userData = retryGetUserDetails(register.email());
-        log.debug("Retrieved user data from KeycloakRequestHandler: {}", userData.userId());
-
-        // 3. Find customer role
-        UserRoleData customerRole = findUserRole(CUSTOMER_ROLE);
-
-        // 4. Assign customer role to user
-        keycloakClient.mapRoleToKeyCloakUser(customerRole, UUID.fromString(userData.userId()));
-        log.info("Successfully registered user and assigned customer role: {}", register.email());
-
-        // 5. Create User Profile
-        UserProfile profile = UserProfile.builder()
-                .userId(UUID.fromString(userData.userId()))
-                .email(userData.email())
-                .build();
-
-        // 6. Save UserProfile
-        userProfileRepo.save(profile);
+        KeycloakUserData userData = registerUserUseCase.createNewUser(register);
+        assignRoleUseCase.assignRolesToUser(UUID.fromString(userData.userId()), List.of(UserRole.CUSTOMER));
     }
 
     /**
@@ -121,19 +79,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         log.debug("Updating profile for user ID: {}", userId);
 
         // 2. Update fields (only non-null values)
-        boolean updated = false;
-        if (update.firstName() != null && !update.firstName().equals(existingProfile.getFirstName())) {
-            existingProfile.setFirstName(update.firstName());
-            updated = true;
-        }
-        if (update.lastName() != null && !update.lastName().equals(existingProfile.getLastName())) {
-            existingProfile.setLastName(update.lastName());
-            updated = true;
-        }
-        if (update.phoneNumber() != null && !update.phoneNumber().equals(existingProfile.getPhoneNumber())) {
-            existingProfile.setPhoneNumber(update.phoneNumber());
-            updated = true;
-        }
+        boolean updated = mapIfModified(update, existingProfile);
 
         if (!updated) {
             log.debug("No changes detected for user profile: {}", userId);
@@ -143,7 +89,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         UserProfile updatedProfile = userProfileRepo.save(existingProfile);
         log.info("Successfully updated user profile for user: {}", userId);
 
-        return UserProfileResult.buildDetailResponse(updatedProfile);
+        return buildUserProfileDetailResponse(updatedProfile);
     }
 
     /**
@@ -156,24 +102,17 @@ public class UserProfileServiceImpl implements UserProfileService {
     public UserProfileResult.Detail getCurrentUserProfile() {
         log.debug("Retrieving current user profile");
 
-        if (doesUserHasRole(SELLER_ROLE)) {
-            return getCurrentUserId()
-                    .flatMap(sellerProfileRepo::findById)
-                    .map(UserProfileResult::buildDetailResponse)
-                    .orElseThrow(() -> new RuntimeException("Failed to find seller details."));
-        } else {
-            return getCurrentUserId()
+        return getCurrentUserId()
                     .flatMap(userProfileRepo::findById)
-                    .map(UserProfileResult::buildDetailResponse)
+                    .map(this::buildUserProfileDetailResponse)
                     .orElseThrow(() -> new RuntimeException("Failed to find user details."));
-        }
     }
 
     @Override
     @Transactional
     public UserProfileResult.Detail createSellerProfile() {
         // Throw if user already a seller
-        if (doesUserHasRole(SELLER_ROLE))
+        if (doesUserHasRole(UserRole.SELLER))
             throw new RuntimeException("User is already a seller, cannot create seller profile");
 
         // Find user profile
@@ -188,62 +127,73 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .build();
 
         // Update user role in keycloak
-        var roleData = this.findUserRole(SELLER_ROLE);
-        safeExecute(
-                () -> keycloakClient.mapRoleToKeyCloakUser(roleData, userId),
-                (e) -> new QuickcartBaseException(
-                        resolveStatus(e),
-                        "Failed mapping role to the user.",
-                        e)
-        );
+        assignRoleUseCase.assignRolesToUser(userId, List.of(UserRole.SELLER));
 
         // Save seller profile
         sellerProfileRepo.save(profile);
-        return UserProfileResult.buildDetailResponse(profile);
+        return UserProfileResult.buildDetailResponse(profile.getUserProfile(), profile);
     }
 
     @Override
     public UserProfileResult.Detail updateSellerProfile(SellerProfileCommand.Update update) {
         // check if the user is seller
-        if (!doesUserHasRole(SELLER_ROLE))
+        if (!doesUserHasRole(UserRole.SELLER))
             throw new RuntimeException("User is not a seller, cannot update seller profile");
 
         return sellerProfileRepo.findById(getCurrentUserId().orElseThrow(() -> new RuntimeException("Failed to find user ID")))
                 .map(seller -> {
                     if (update.bio() == null || update.bio().isEmpty()) {
                         log.info("not changes detected for seller profile.");
-                        return UserProfileResult.buildDetailResponse(seller);
+                        return UserProfileResult.buildDetailResponse(seller.getUserProfile(), seller);
                     }
                     seller.setBio(update.bio());
                     sellerProfileRepo.save(seller);
 
-                    return UserProfileResult.buildDetailResponse(seller);
+                    return UserProfileResult.buildDetailResponse(seller.getUserProfile(), seller);
                 }).orElseThrow(() -> new RuntimeException("Failed to update seller profile, seller profile not found."));
+    }
+
+    @Override
+    public void registerAdmin(UserProfileCommand.Register register) {
+        KeycloakUserData userData = registerUserUseCase.createNewUser(register);
+        assignRoleUseCase.assignRolesToUser(UUID.fromString(userData.userId()), List.of(
+                UserRole.CUSTOMER,
+                UserRole.ADMIN
+        ));
     }
 
     /* ----------- Helper Methods ----------- */
 
     /**
-     * Retries getting user details from KeycloakRequestHandler with exponential backoff.
-     * KeycloakRequestHandler might need time to propagate user creation.
+     * Maps the fields of the update request to the existing profile if they are not null.
+     *
+     * @param update          the update command
+     * @param existingProfile the existing user profile
+     * @return true if any field was modified, false otherwise.
      */
-    private KeycloakUserData retryGetUserDetails(String email) {
-        return safeExecute(
-                () -> keycloakClient.getUserDetails(email),
-                (e) -> new QuickcartBaseException(
-                        resolveStatus(e),
-                        "Failed to load user details from Authentication service",
-                        e)
-        );
+    private static boolean mapIfModified(UserProfileCommand.Update update, UserProfile existingProfile) {
+        if (update.firstName() != null && !update.firstName().equals(existingProfile.getFirstName())) {
+            existingProfile.setFirstName(update.firstName());
+            return true;
+        }
+        if (update.lastName() != null && !update.lastName().equals(existingProfile.getLastName())) {
+            existingProfile.setLastName(update.lastName());
+            return true;
+        }
+        if (update.phoneNumber() != null && !update.phoneNumber().equals(existingProfile.getPhoneNumber())) {
+            existingProfile.setPhoneNumber(update.phoneNumber());
+            return true;
+        }
+        return false;
     }
 
     /**
      * Finds the customer role from available roles.
      */
-    private UserRoleData findUserRole(String role) {
+    private UserRoleData findUserRole(UserRole role) {
         return safeExecute(
                 () -> keycloakClient.getAllUserRoles().stream()
-                        .filter(r -> role.equalsIgnoreCase(r.roleName()))
+                        .filter(r -> role.getDisplayName().equalsIgnoreCase(r.roleName()))
                         .findFirst()
                         .orElseThrow(() -> new RuntimeException("Role " + role + " not found in Authentication Service.")),
                 (e) -> new QuickcartBaseException(
@@ -251,5 +201,18 @@ public class UserProfileServiceImpl implements UserProfileService {
                         "Failed to retrieve user roles from Authentication Service.",
                         e)
         );
+    }
+
+    private UserProfileResult.Detail buildUserProfileDetailResponse(UserProfile userProfile) {
+        SellerProfile sellerProfile = null;
+        for(String role : getCurrentUserRoles()){
+            if(role.equals(UserRole.SELLER.getDisplayName()))
+                sellerProfile = sellerProfileRepo.findById(userProfile.getUserId())
+                        .orElseGet(() -> {
+                            log.warn("User is seller, but not seller profile found.");
+                            return null;
+                        });
+        }
+        return UserProfileResult.buildDetailResponse(userProfile, sellerProfile);
     }
 }
