@@ -3,16 +3,17 @@ services:
     image: postgres:15
     environment:
       # Default database for your application
-      POSTGRES_DB: ${POSTGRES_DB:-quickcart_db}
-      POSTGRES_USER: ${POSTGRES_USER:-admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: UTC
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d # <-- optional, to init extra DBs
     networks:
       - backend
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-quickcart_db}" ]
@@ -39,9 +40,9 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       KC_DB: postgres
       # Separate database for KeycloakRequestHandler
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
-      KC_DB_USERNAME: ${POSTGRES_USER:-admin}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-root}
+      KC_DB_URL: ${KEYCLOAK_DB_URL}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "8080:8080"
     depends_on:
@@ -56,32 +57,6 @@ services:
       timeout: 5s
       retries: 20
       start_period: 120s
-
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: quickcart:local
-    env_file:
-      - .env
-    environment:
-      # Application connected to quickcart_db database
-      SPRING_DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/quickcart_db}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-admin}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-root}
-      KEYCLOAK_JWKS_URI: ${KEYCLOAK_JWKS_URI}
-      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
-      SPRING_PROFILES_ACTIVE: dev
-    ports:
-      - "8081:8080"
-    depends_on:
-      - postgres
-      - keycloak
-    volumes:
-      - .:/app
-    networks:
-      - backend
-    restart: unless-stopped
 
 volumes:
   pgdata:
