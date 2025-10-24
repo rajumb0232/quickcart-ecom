@@ -47,12 +47,12 @@ public final class UserProfileResult {
 
     /* ===================== Factory methods ===================== */
 
-    public static Detail buildDetailResponse(UserProfile u) {
+    public static Detail buildUserDetailResponse(UserProfile u) {
         Objects.requireNonNull(u, "userProfile");
         return buildDetail(u, List.of(new CustomerProfileDetail()));
     }
 
-    public static Detail buildDetailResponse(UserProfile userProfile, SellerProfile sellerProfile) {
+    public static Detail buildSellerDetailResponse(UserProfile userProfile, SellerProfile sellerProfile) {
         Objects.requireNonNull(sellerProfile, "sellerProfile cannot be null");
 
         return buildDetail(userProfile, List.of(
@@ -61,6 +61,19 @@ public final class UserProfileResult {
                         sellerProfile.getBio(),
                         sellerProfile.getSellingSince()
                 )));
+    }
+
+    public static Detail buildAdminDetailResponse(UserProfile userProfile, SellerProfile sellerProfile) {
+        Objects.requireNonNull(sellerProfile, "sellerProfile cannot be null");
+
+        return buildDetail(userProfile, List.of(
+                new CustomerProfileDetail(),
+                new SellerProfileDetail(
+                        sellerProfile.getBio(),
+                        sellerProfile.getSellingSince()
+                ),
+                new AdminProfileDetail()
+        ));
     }
 
     private static Detail buildDetail(UserProfile userProfile, List<RoleProfile> roleProfileList) {

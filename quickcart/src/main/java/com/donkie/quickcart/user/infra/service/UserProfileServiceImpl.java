@@ -1,6 +1,5 @@
 package com.donkie.quickcart.user.infra.service;
 
-import com.donkie.quickcart.shared.exception.QuickcartBaseException;
 import com.donkie.quickcart.user.application.model.SellerProfileCommand;
 import com.donkie.quickcart.user.application.model.UserProfileCommand;
 import com.donkie.quickcart.user.application.model.UserProfileResult;
@@ -12,12 +11,10 @@ import com.donkie.quickcart.user.domain.repository.SellerProfileRepo;
 import com.donkie.quickcart.user.domain.repository.UserProfileRepo;
 import com.donkie.quickcart.user.infra.integration.keycloak.KeycloakClient;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.KeycloakUserData;
-import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRoleData;
 import com.donkie.quickcart.user.infra.service.usecase.AssignRoleUseCase;
 import com.donkie.quickcart.user.infra.service.usecase.RegisterUserUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +22,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static com.donkie.quickcart.shared.exception.handler.SafeExecutor.safeExecute;
-import static com.donkie.quickcart.shared.integration.helper.ClientResponseStatusResolver.resolveStatus;
 import static com.donkie.quickcart.shared.security.CurrentUser.*;
 
 /**
@@ -83,7 +78,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         if (!updated) {
             log.debug("No changes detected for user profile: {}", userId);
-            return UserProfileResult.buildDetailResponse(existingProfile);
+            return UserProfileResult.buildUserDetailResponse(existingProfile);
         }
 
         UserProfile updatedProfile = userProfileRepo.save(existingProfile);
@@ -103,9 +98,9 @@ public class UserProfileServiceImpl implements UserProfileService {
         log.debug("Retrieving current user profile");
 
         return getCurrentUserId()
-                    .flatMap(userProfileRepo::findById)
-                    .map(this::buildUserProfileDetailResponse)
-                    .orElseThrow(() -> new RuntimeException("Failed to find user details."));
+                .flatMap(userProfileRepo::findById)
+                .map(this::buildUserProfileDetailResponse)
+                .orElseThrow(() -> new RuntimeException("Failed to find user details."));
     }
 
     @Override
@@ -131,7 +126,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         // Save seller profile
         sellerProfileRepo.save(profile);
-        return UserProfileResult.buildDetailResponse(profile.getUserProfile(), profile);
+        return UserProfileResult.buildSellerDetailResponse(profile.getUserProfile(), profile);
     }
 
     @Override
@@ -144,12 +139,12 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .map(seller -> {
                     if (update.bio() == null || update.bio().isEmpty()) {
                         log.info("not changes detected for seller profile.");
-                        return UserProfileResult.buildDetailResponse(seller.getUserProfile(), seller);
+                        return UserProfileResult.buildSellerDetailResponse(seller.getUserProfile(), seller);
                     }
                     seller.setBio(update.bio());
                     sellerProfileRepo.save(seller);
 
-                    return UserProfileResult.buildDetailResponse(seller.getUserProfile(), seller);
+                    return UserProfileResult.buildSellerDetailResponse(seller.getUserProfile(), seller);
                 }).orElseThrow(() -> new RuntimeException("Failed to update seller profile, seller profile not found."));
     }
 
@@ -187,32 +182,31 @@ public class UserProfileServiceImpl implements UserProfileService {
         return false;
     }
 
-    /**
-     * Finds the customer role from available roles.
-     */
-    private UserRoleData findUserRole(UserRole role) {
-        return safeExecute(
-                () -> keycloakClient.getAllUserRoles().stream()
-                        .filter(r -> role.getDisplayName().equalsIgnoreCase(r.roleName()))
-                        .findFirst()
-                        .orElseThrow(() -> new RuntimeException("Role " + role + " not found in Authentication Service.")),
-                (e) -> new QuickcartBaseException(
-                        resolveStatus(e),
-                        "Failed to retrieve user roles from Authentication Service.",
-                        e)
-        );
+    private UserProfileResult.Detail buildUserProfileDetailResponse(UserProfile userProfile) {
+
+        // 1. If Admin, the profile includes all roles - customer, seller and admin.
+        if (getCurrentUserRoles().contains(UserRole.ADMIN.getDisplayName())) {
+            var sellerProfile = getSellerProfile(userProfile);
+            return UserProfileResult.buildAdminDetailResponse(userProfile, sellerProfile);
+        }
+
+        // 2. If Seller, the profile includes roles such as - customer and seller.
+        else if (getCurrentUserRoles().contains(UserRole.SELLER.getDisplayName())) {
+            var sellerProfile = getSellerProfile(userProfile);
+            return UserProfileResult.buildSellerDetailResponse(userProfile, sellerProfile);
+        }
+
+        // 3. Customer has just one role as 'customer' itself.
+        else {
+            return UserProfileResult.buildUserDetailResponse(userProfile);
+        }
     }
 
-    private UserProfileResult.Detail buildUserProfileDetailResponse(UserProfile userProfile) {
-        SellerProfile sellerProfile = null;
-        for(String role : getCurrentUserRoles()){
-            if(role.equals(UserRole.SELLER.getDisplayName()))
-                sellerProfile = sellerProfileRepo.findById(userProfile.getUserId())
-                        .orElseGet(() -> {
-                            log.warn("User is seller, but not seller profile found.");
-                            return null;
-                        });
-        }
-        return UserProfileResult.buildDetailResponse(userProfile, sellerProfile);
+    private SellerProfile getSellerProfile(UserProfile userProfile) {
+        return sellerProfileRepo.findById(userProfile.getUserId())
+                .orElseGet(() -> {
+                    log.warn("User is seller, but not seller profile found.");
+                    return null;
+                });
     }
 }
