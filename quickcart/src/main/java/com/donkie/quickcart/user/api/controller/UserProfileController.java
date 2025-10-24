@@ -121,7 +121,7 @@ public class UserProfileController {
                 ));
     }
 
-    @PostMapping("/public/admins/register")
+    @PostMapping("/admins/register")
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<ApiAck> registerAdmin(@Valid @RequestBody UserCredentials credentials) {
         log.info("Creating new Admin");

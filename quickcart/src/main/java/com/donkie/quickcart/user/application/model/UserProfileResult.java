@@ -64,7 +64,7 @@ public final class UserProfileResult {
     }
 
     public static Detail buildAdminDetailResponse(UserProfile userProfile, SellerProfile sellerProfile) {
-        Objects.requireNonNull(sellerProfile, "sellerProfile cannot be null");
+//        Objects.requireNonNull(sellerProfile, "sellerProfile cannot be null");
 
         return buildDetail(userProfile, List.of(
                 new CustomerProfileDetail(),

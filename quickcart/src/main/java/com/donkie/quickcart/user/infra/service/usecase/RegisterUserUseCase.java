@@ -16,7 +16,6 @@ import java.util.UUID;
 
 import static com.donkie.quickcart.shared.exception.handler.SafeExecutor.safeExecute;
 import static com.donkie.quickcart.shared.integration.helper.ClientResponseStatusResolver.resolveStatus;
-import static com.donkie.quickcart.shared.security.CurrentUser.getAuthentication;
 import static com.donkie.quickcart.shared.security.CurrentUser.getCurrentUserId;
 
 @Service
@@ -36,9 +35,6 @@ public class RegisterUserUseCase {
     public KeycloakUserData createNewUser(UserProfileCommand.Register register) {
         log.info("Starting user registration for email: {}", register.email());
 
-        if (getCurrentUserId().isPresent()) {
-            throw new AccessDeniedException("User already authenticated, cannot re-register");
-        }
         if (userProfileRepo.existsByEmail(register.email()))
             throw new RuntimeException("User Already exists by Email");
 

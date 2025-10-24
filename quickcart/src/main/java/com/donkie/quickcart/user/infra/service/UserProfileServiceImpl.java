@@ -12,9 +12,11 @@ import com.donkie.quickcart.user.domain.repository.UserProfileRepo;
 import com.donkie.quickcart.user.infra.integration.keycloak.KeycloakClient;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.KeycloakUserData;
 import com.donkie.quickcart.user.infra.service.usecase.AssignRoleUseCase;
+import com.donkie.quickcart.user.infra.service.usecase.CreateSellerProfileUseCase;
 import com.donkie.quickcart.user.infra.service.usecase.RegisterUserUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final SellerProfileRepo sellerProfileRepo;
     private final RegisterUserUseCase registerUserUseCase;
     private final AssignRoleUseCase assignRoleUseCase;
+    private final CreateSellerProfileUseCase createSellerProfileUseCase;
 
     /**
      * Registers a new user in KeycloakRequestHandler and assigns the customer role.
@@ -48,6 +51,11 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Transactional
     @Override
     public void registerNewUser(UserProfileCommand.Register register) {
+        // Do not allow if the user is currently authenticated
+        if (getCurrentUserId().isPresent()) {
+            throw new AccessDeniedException("User already authenticated, cannot re-register");
+        }
+
         KeycloakUserData userData = registerUserUseCase.createNewUser(register);
         assignRoleUseCase.assignRolesToUser(UUID.fromString(userData.userId()), List.of(UserRole.CUSTOMER));
     }
@@ -112,21 +120,14 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         // Find user profile
         var userId = getCurrentUserId().orElseThrow(() -> new RuntimeException("Failed to find user ID"));
-        var user = userProfileRepo.findById(userId).orElseThrow(() -> new RuntimeException("Failed to find user"));
 
-        // Create seller profile
-        SellerProfile profile = SellerProfile.builder()
-                .sellerId(userId)
-                .sellingSince(Instant.now())
-                .userProfile(user)
-                .build();
+        // Create Seller Profile
+        SellerProfile profile = createSellerProfileUseCase.execute(userId);
 
         // Update user role in keycloak
-        assignRoleUseCase.assignRolesToUser(userId, List.of(UserRole.SELLER));
+        assignRoleUseCase.assignRolesToUser(profile.getSellerId(), List.of(UserRole.SELLER));
 
-        // Save seller profile
-        sellerProfileRepo.save(profile);
-        return UserProfileResult.buildSellerDetailResponse(profile.getUserProfile(), profile);
+        return buildUserProfileDetailResponse(profile.getUserProfile());
     }
 
     @Override
@@ -144,17 +145,20 @@ public class UserProfileServiceImpl implements UserProfileService {
                     seller.setBio(update.bio());
                     sellerProfileRepo.save(seller);
 
-                    return UserProfileResult.buildSellerDetailResponse(seller.getUserProfile(), seller);
+                    return buildUserProfileDetailResponse(seller.getUserProfile());
                 }).orElseThrow(() -> new RuntimeException("Failed to update seller profile, seller profile not found."));
     }
 
     @Override
     public void registerAdmin(UserProfileCommand.Register register) {
         KeycloakUserData userData = registerUserUseCase.createNewUser(register);
-        assignRoleUseCase.assignRolesToUser(UUID.fromString(userData.userId()), List.of(
-                UserRole.CUSTOMER,
-                UserRole.ADMIN
-        ));
+        createSellerProfileUseCase.execute(UUID.fromString(userData.userId()));
+
+        var roles = List.of(UserRole.ADMIN, UserRole.SELLER, UserRole.CUSTOMER);
+        assignRoleUseCase.assignRolesToUser(
+                UUID.fromString(userData.userId()),
+                roles
+        );
     }
 
     /* ----------- Helper Methods ----------- */
