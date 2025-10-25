@@ -10,7 +10,7 @@ The application supports **two primary roles**:
 Authentication and role-based access control are handled by **Keycloak**.  
 The system is fully containerized with **Docker Compose** for easy deployment.
 
----
+<br>
 
 ## 🚀 Tech Stack
 - **Backend:** Java, Spring Boot, Spring Security, Spring Data JPA  
@@ -21,28 +21,14 @@ The system is fully containerized with **Docker Compose** for easy deployment.
 - **Infrastructure:** Docker, Docker Compose, EC2 (for deployment)  
 - **Testing:** JUnit, Postman  
 
----
-
-## 📌 Features Implemented (Current Progress)
-- Requirement gathering and system design (Architecture, ERD, Flow diagrams).  
-- Dockerized infrastructure for **Backend + PostgreSQL + Keycloak**.  
-- Keycloak setup with **realm, clients, and roles** (Customer, Seller, Admin).  
-- Backend integration with Keycloak:  
-  - Obtain and refresh access tokens using client credentials.  
-  - Fetch roles from realm.  
-  - Register new users via backend → map roles → create/update profile in DB.  
-  - Store tokens in in-memory singleton beans with auto-refresh.  
-- Implemented **User Registration Flow** (Keycloak + DB profile sync).  
-- Entities and models structured using **DDD and Clean Architecture principles**.  
-
----
+<br>
 
 ## 🛠️ Setup & Installation
 
 ### Prerequisites
 - Docker & Docker Compose  
 - Git  
-- Java 17+ (if running backend outside Docker)  
+- Java 21+ (if running backend outside Docker)  
 
 ### Clone the repository
 ```bash
@@ -56,55 +42,24 @@ docker-compose up --build
 ```
 
 This starts:
-- **Backend** → http://localhost:8081  
+- **pgadmin** → http://localhost:5050
 - **Keycloak** → http://localhost:8080 (admin: `admin` / `admin`)  
-- **PostgreSQL** → exposed only to containers  
+- **PostgreSQL** → exposed only to containers
+
+```
+run spring boot application via IDE (on local setup)
+```
+
+This starts:
+- **Backend** → http://localhost:8081 (admin: admin@gmail.com, pwd: Admin@123)
 
 ### Access Keycloak
-1. Login to Keycloak Admin Console: http://localhost:8081  
+1. Login to Keycloak Admin Console: http://localhost:8080 
 2. Realm: `quickcart`  
 3. Roles: `customer`, `seller`, `admin`  
 4. Clients configured for backend + frontend
 
-⚠ **Requires admin registration, realm creation and roles assignment in the keycloak dashboard to successfully work**
-
----
-
-## 🔗 API Endpoints (Implemented So Far)
-
-### User Management
-- `POST /api/auth/register` → Register a new user (creates in Keycloak + DB profile).  
-- `GET /api/auth/roles` → Fetch roles from Keycloak realm.  
-- (More APIs in progress…)
-
-### Example Response (Register User)
-```json
-{
-    "success": true,
-    "message": "User registered successfully",
-    "data": {},
-    "timestamp": "2025-09-22T13:08:57.000979513"
-}
-```
-
----
-
-## 📅 Planned Work
-- **Backend:**  
-  - Product management (list, add, update, delete).  
-  - Cart and wishlist modules.  
-  - Order placement and history tracking.  
-
-- **Frontend:**  
-  - ReactJS interface with product browsing, cart, checkout.  
-  - Integration with backend APIs and Keycloak.  
-
-- **Testing & Deployment:**  
-  - Unit and integration tests.  
-  - User acceptance testing (UAT).  
-  - Deployment on EC2 with S3-hosted frontend.  
-
----
+<br>
 
 ## 📂 Repository Structure
 ```
@@ -119,10 +74,10 @@ quickcart-backend/
 └── docs/               # Diagrams (Architecture, ERD, Flows)
 ```
 
----
+
+<br>
 
 ## 👨‍💻 Author
 
 **Raju Gownda** | [rajugowda.in](https://rajugowda.in)
 
----
