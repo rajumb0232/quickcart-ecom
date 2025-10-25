@@ -32,7 +32,12 @@ public class AuthServiceFacade {
         return toAuthResponse(result);
     }
 
-    private static AuthResponse toAuthResponse(LoginResult.Detail result) {
+
+    public void logoutUser(String refreshToken, String accessToken) {
+        authService.logoutUser(refreshToken, accessToken);
+    }
+
+    private AuthResponse toAuthResponse(LoginResult.Detail result) {
         return new AuthResponse(
                 result.accessToken(),
                 result.accessExpiresIn(),

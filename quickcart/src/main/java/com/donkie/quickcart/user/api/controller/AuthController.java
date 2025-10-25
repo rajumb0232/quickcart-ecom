@@ -1,12 +1,12 @@
 package com.donkie.quickcart.user.api.controller;
 
+import com.donkie.quickcart.shared.dto.ApiAck;
 import com.donkie.quickcart.shared.dto.ApiResponse;
 import com.donkie.quickcart.user.api.dto.request.AuthResponse;
 import com.donkie.quickcart.user.api.dto.request.UserCredentials;
 import com.donkie.quickcart.user.api.facade.AuthServiceFacade;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +41,17 @@ public class AuthController {
                         "login successful",
                         response
                 ));
+    }
+
+    @PostMapping(value = "/public/logout", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ApiAck> logoutUser(
+            @RequestParam("refresh_token") String refreshToken,
+            @RequestParam(value = "access_token", required = false) String accessToken
+            ) {
+        authServiceFacade.logoutUser(refreshToken, accessToken);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .body(ApiAck.success("Logout Successful."));
     }
 
     @GetMapping("/users/roles")

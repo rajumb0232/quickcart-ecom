@@ -122,6 +122,39 @@ public class KeycloakAuthClient {
         return safeMapToLoginResultDetail(token);
     }
 
+    /**
+     * Logs out a user by revoking their refresh token.
+     * For username/password flow without SSO.
+     *
+     * @param refreshToken the refresh token to revoke
+     */
+    @CircuitBreaker(name = "keycloak", fallbackMethod = "logoutUserFallback")
+    public void logoutUser(String refreshToken) {
+        log.debug("Revoking refresh token for logout");
+
+        String path = "/realms/{realm}/protocol/openid-connect/logout";
+
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("client_id", keycloakProperties.getAdminClientId());
+        formData.add("client_secret", keycloakProperties.getAdminClientSecret());
+        formData.add("refresh_token", refreshToken);
+
+        try {
+            restClient.post()
+                    .uri(path, keycloakProperties.getRealm())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(formData)
+                    .retrieve()
+                    .toBodilessEntity();
+
+            log.debug("Refresh token revoked successfully");
+
+        } catch (Exception e) {
+            log.warn("Failed to revoke refresh token in Keycloak: {}", e.getMessage());
+            // Don't throw - logout should complete even if Keycloak call fails
+        }
+    }
+
     private static LoginResult.Detail safeMapToLoginResultDetail(TokenResponse token) {
         Objects.requireNonNull(token, "token must not be null");
 
@@ -142,6 +175,12 @@ public class KeycloakAuthClient {
     @SuppressWarnings("unused") // Resilience4j fallback method
     private LoginResult.Detail refreshTokenFallback(String refreshToken, Throwable t) {
         return HttpCallFallbackHandler.throwException(() -> buildExternalServiceException(t, "Token Refresh"));
+    }
+
+    @SuppressWarnings("unused")
+    private void logoutUserFallback(String refreshToken, Throwable t) {
+        log.warn("Logout fallback - Keycloak unavailable, allowing client-side cleanup");
+        // No exception thrown - graceful degradation
     }
 
     /**

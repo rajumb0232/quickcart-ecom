@@ -14,4 +14,6 @@ public interface AuthService {
     public List<String> getUserRoles();
 
     LoginResult.Detail refreshLogin(String refreshToken);
+
+    void logoutUser(String refreshToken, String accessToken);
 }

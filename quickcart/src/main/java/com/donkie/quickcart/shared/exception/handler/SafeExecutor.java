@@ -1,6 +1,7 @@
 package com.donkie.quickcart.shared.exception.handler;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
