@@ -1,7 +1,6 @@
 package com.donkie.quickcart.user.application.exception;
 
 import com.donkie.quickcart.shared.exception.QuickcartBaseException;
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 public class UserLoginFailedException extends QuickcartBaseException {

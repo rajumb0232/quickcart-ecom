@@ -20,15 +20,24 @@ public class AuthServiceFacade {
 
     public AuthResponse loginUser(@Valid UserCredentials userCredentials) {
         LoginResult.Detail result = authService.loginUser(new LoginCommand.Create(userCredentials.email(), userCredentials.password()));
+        return toAuthResponse(result);
+    }
+
+    public List<String> getUserRoles() {
+        return authService.getUserRoles();
+    }
+
+    public AuthResponse refreshLogin(String refreshToken) {
+        LoginResult.Detail result = authService.refreshLogin(refreshToken);
+        return toAuthResponse(result);
+    }
+
+    private static AuthResponse toAuthResponse(LoginResult.Detail result) {
         return new AuthResponse(
                 result.accessToken(),
                 result.accessExpiresIn(),
                 result.refreshToken(),
                 result.refreshExpiresIn(),
                 result.tokenType());
-    }
-
-    public List<String> getUserRoles() {
-        return authService.getUserRoles();
     }
 }

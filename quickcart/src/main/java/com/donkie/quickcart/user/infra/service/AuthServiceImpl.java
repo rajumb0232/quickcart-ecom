@@ -4,6 +4,7 @@ import com.donkie.quickcart.user.application.exception.UserLoginFailedException;
 import com.donkie.quickcart.user.application.model.LoginCommand;
 import com.donkie.quickcart.user.application.model.LoginResult;
 import com.donkie.quickcart.user.application.service.AuthService;
+import com.donkie.quickcart.user.infra.exception.UserLoginRefreshFailedException;
 import com.donkie.quickcart.user.infra.integration.keycloak.KeycloakAuthClient;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,5 +33,16 @@ public class AuthServiceImpl implements AuthService {
 
     public List<String> getUserRoles() {
         return getCurrentUserRoles();
+    }
+
+    @Override
+    public LoginResult.Detail refreshLogin(String refreshToken) {
+        return safeExecute(
+                () -> keycloakAuthClient.refreshToken(refreshToken),
+                (e) -> new UserLoginRefreshFailedException(
+                        resolveBaseExceptionStatus(e),
+                        e.getMessage(),
+                        e)
+        );
     }
 }

@@ -77,6 +77,51 @@ public class KeycloakAuthClient {
         return safeMapToLoginResultDetail(token);
     }
 
+    /**
+     * Refreshes the access token using a valid refresh token.
+     * Keycloak will return a new access token and a rotated refresh token.
+     *
+     * @param refreshToken the refresh token to exchange for new tokens
+     * @return mapped {@link LoginResult.Detail} containing new tokens
+     * @throws ExternalServiceException if refresh fails (e.g., refresh token expired/invalid)
+     */
+    @CircuitBreaker(name = "keycloak", fallbackMethod = "refreshTokenFallback")
+    public LoginResult.Detail refreshToken(String refreshToken) throws ExternalServiceException {
+        log.debug("Refreshing access token using refresh token");
+
+        String path = "/realms/{realm}/protocol/openid-connect/token";
+
+        // Build form data for refresh_token grant
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("grant_type", "refresh_token");
+        formData.add("client_id", keycloakProperties.getAdminClientId());
+        formData.add("client_secret", keycloakProperties.getAdminClientSecret());
+        formData.add("refresh_token", refreshToken);
+
+        TokenResponse token = restClient.post()
+                .uri(path, keycloakProperties.getRealm())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(formData)
+                .retrieve()
+                .onStatus(status -> status.value() == 400, (request, response) -> {
+                    log.error("Refresh token is invalid or expired");
+                    throw new ExternalServiceException(
+                            HttpStatus.UNAUTHORIZED,
+                            "Refresh token is invalid or expired. Please login again.");
+                })
+                .body(TokenResponse.class);
+
+        if (token == null) {
+            log.error("Keycloak returned null token during refresh");
+            throw new ExternalServiceException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to refresh tokens from Identity Service.");
+        }
+
+        log.debug("Successfully refreshed access token");
+        return safeMapToLoginResultDetail(token);
+    }
+
     private static LoginResult.Detail safeMapToLoginResultDetail(TokenResponse token) {
         Objects.requireNonNull(token, "token must not be null");
 
@@ -92,6 +137,11 @@ public class KeycloakAuthClient {
     @SuppressWarnings("unused") // Resilience4j fallback method
     private LoginResult.Detail loginUserFallback(LoginCommand.Create command, Throwable t) {
         return HttpCallFallbackHandler.throwException(() -> buildExternalServiceException(t, "Login"));
+    }
+
+    @SuppressWarnings("unused") // Resilience4j fallback method
+    private LoginResult.Detail refreshTokenFallback(String refreshToken, Throwable t) {
+        return HttpCallFallbackHandler.throwException(() -> buildExternalServiceException(t, "Token Refresh"));
     }
 
     /**
