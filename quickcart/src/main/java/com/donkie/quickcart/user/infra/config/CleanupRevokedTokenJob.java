@@ -20,9 +20,9 @@ public class CleanupRevokedTokenJob {
 
     /**
      * Clean up expired revoked tokens every minute.
-     * Runs at the start of every minute (e.g., 10:00:00, 10:01:00, 10:02:00).
+     * Runs at the start of every 30 minutes (e.g., 10:00:00, 10:30:00, 11:00:00).
      */
-    @Scheduled(cron = "0 * * * * *")  // Every minute at 0 seconds
+    @Scheduled(cron = "0 */30 * * * *")  // Every 30 minutes
     @Transactional
     public void cleanupExpiredTokens() {
         log.debug("Starting cleanup of expired revoked tokens");
