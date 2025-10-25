@@ -20,7 +20,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -90,7 +89,7 @@ public class UserProfileServiceImpl implements UserProfileService {
         }
 
         UserProfile updatedProfile = userProfileRepo.save(existingProfile);
-        log.info("Successfully updated user profile for user: {}", userId);
+        log.info("Successfully updated user profile for user: {}", updatedProfile.getUserId());
 
         return buildUserProfileDetailResponse(updatedProfile);
     }
@@ -139,9 +138,10 @@ public class UserProfileServiceImpl implements UserProfileService {
         return sellerProfileRepo.findById(getCurrentUserId().orElseThrow(() -> new RuntimeException("Failed to find user ID")))
                 .map(seller -> {
                     if (update.bio() == null || update.bio().isEmpty()) {
-                        log.info("not changes detected for seller profile.");
+                        log.debug("not changes detected for seller profile.");
                         return UserProfileResult.buildSellerDetailResponse(seller.getUserProfile(), seller);
                     }
+                    log.debug("Detected changes for bio, requested: {}, existing: {}", update.bio(), seller.getBio());
                     seller.setBio(update.bio());
                     sellerProfileRepo.save(seller);
 
@@ -171,19 +171,23 @@ public class UserProfileServiceImpl implements UserProfileService {
      * @return true if any field was modified, false otherwise.
      */
     private static boolean mapIfModified(UserProfileCommand.Update update, UserProfile existingProfile) {
+        boolean updated = false;
         if (update.firstName() != null && !update.firstName().equals(existingProfile.getFirstName())) {
+            log.debug("Detected difference in first name, requested: {}, existing: {}", update.firstName(), existingProfile.getFirstName());
             existingProfile.setFirstName(update.firstName());
-            return true;
+            updated = true;
         }
         if (update.lastName() != null && !update.lastName().equals(existingProfile.getLastName())) {
+            log.debug("Detected difference in last name, requested: {}, existing: {}", update.lastName(), existingProfile.getLastName());
             existingProfile.setLastName(update.lastName());
-            return true;
+            updated = true;
         }
         if (update.phoneNumber() != null && !update.phoneNumber().equals(existingProfile.getPhoneNumber())) {
+            log.debug("Detected difference in phone number, requested: {}, existing: {}", update.phoneNumber(), existingProfile.getPhoneNumber());
             existingProfile.setPhoneNumber(update.phoneNumber());
-            return true;
+            updated = true;
         }
-        return false;
+        return updated;
     }
 
     private UserProfileResult.Detail buildUserProfileDetailResponse(UserProfile userProfile) {
@@ -209,7 +213,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private SellerProfile getSellerProfile(UserProfile userProfile) {
         return sellerProfileRepo.findById(userProfile.getUserId())
                 .orElseGet(() -> {
-                    log.warn("User is seller, but not seller profile found.");
+                    log.warn("User is seller, but no seller profile found.");
                     return null;
                 });
     }

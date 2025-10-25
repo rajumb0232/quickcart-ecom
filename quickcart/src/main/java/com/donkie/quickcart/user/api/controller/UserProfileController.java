@@ -44,7 +44,7 @@ public class UserProfileController {
      */
     @PostMapping("/public/users/register")
     public ResponseEntity<ApiAck> registerUser(@Valid @RequestBody UserCredentials request) {
-        log.info("User registration request received for email: {}", request.email());
+        log.debug("User registration request received for email: {}", request.email());
         userProfileServiceFacade.registerNewUser(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -59,7 +59,7 @@ public class UserProfileController {
     @PutMapping("/users/profile")
     @PreAuthorize("hasAuthority('customer')")
     public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfile(@Valid @RequestBody UpdateUserProfileRequest request) {
-        log.info("Update profile request received");
+        log.debug("Update profile request received");
         UserProfileResponse response = userProfileServiceFacade.updateProfile(request);
 
         return ResponseEntity
@@ -90,7 +90,7 @@ public class UserProfileController {
     @PostMapping("/sellers/profile")
     @PreAuthorize("hasAuthority('customer')")
     public ResponseEntity<ApiResponse<UserProfileResponse>> createSellerProfile() {
-        log.info("Creating seller profile");
+        log.debug("Creating seller profile");
 
         UserProfileResponse response = userProfileServiceFacade.createSellerProfile();
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -111,7 +111,7 @@ public class UserProfileController {
     @PutMapping("/sellers/profile")
     @PreAuthorize("hasAuthority('seller')")
     public ResponseEntity<ApiResponse<UserProfileResponse>> updateSellerProfile(@RequestBody @Valid SellerEditRequest request) {
-        log.info("Updating seller profile");
+        log.debug("Updating seller profile");
 
         UserProfileResponse response = userProfileServiceFacade.updateSellerProfile(request);
         return ResponseEntity
@@ -124,7 +124,7 @@ public class UserProfileController {
     @PostMapping("/admins/register")
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<ApiAck> registerAdmin(@Valid @RequestBody UserCredentials credentials) {
-        log.info("Creating new Admin");
+        log.debug("Creating new Admin");
 
         userProfileServiceFacade.registerAdmin(credentials);
         return ResponseEntity

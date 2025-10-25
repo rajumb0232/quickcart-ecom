@@ -55,6 +55,7 @@ logging:
   level:
     root: INFO
     org.springframework.security: INFO
+    com.donkie.quickcart: DEBUG
 
 # APPLICATION PROPERTIES
 app:
