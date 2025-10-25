@@ -3,11 +3,12 @@ package com.donkie.quickcart.user.infra.integration.keycloak.tokens;
 import com.donkie.quickcart.user.infra.integration.keycloak.KeycloakProperties;
 import com.donkie.quickcart.user.infra.integration.keycloak.model.AdminTokenResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -19,7 +20,7 @@ import java.time.Instant;
  * to ensure admin tokens are always available for KeycloakRequestHandler administrative operations.
  * Tokens are refreshed proactively when they are within the buffer period of expiration.
  * </p>
- * 
+ *
  * @author QuickCart Team
  * @since 1.0
  */
@@ -27,7 +28,7 @@ import java.time.Instant;
 @Slf4j
 public class AdminTokenService {
 
-    private final WebClient webClient;
+    private final RestClient restClient;
     private final KeycloakProperties props;
     private final AdminTokens adminTokens;
 
@@ -37,14 +38,14 @@ public class AdminTokenService {
 
     /**
      * Constructs a new AdminTokenService with the specified configuration.
-     * 
+     *
      * @param props the KeycloakRequestHandler configuration properties
      * @param adminTokens the token storage component
      */
     public AdminTokenService(KeycloakProperties props, AdminTokens adminTokens) {
         this.props = props;
         this.adminTokens = adminTokens;
-        this.webClient = WebClient.builder().baseUrl(props.getUrl()).build();
+        this.restClient = RestClient.builder().baseUrl(props.getUrl()).build();
     }
 
     /**
@@ -53,7 +54,7 @@ public class AdminTokenService {
      * This method runs every 30 seconds and only fetches a new token if the current
      * token is missing or within the buffer period of expiration (60 seconds).
      * </p>
-     * 
+     *
      * @see #INITIAL_DELAY_MS
      * @see #FIXED_DELAY_MS
      * @see #BUFFER_SECONDS
@@ -81,7 +82,7 @@ public class AdminTokenService {
      * token needs refresh and attempting to fetch a new one if required. If token
      * refresh fails but an existing token is still present, the existing token is returned.
      * </p>
-     * 
+     *
      * @return a valid admin access token
      * @throws IllegalStateException if no token exists and refresh fails, or if token
      *                               fetch succeeds but returns null
@@ -118,7 +119,7 @@ public class AdminTokenService {
      * A token needs refresh if it's missing, has no expiration time, or is within
      * the buffer period of expiration.
      * </p>
-     * 
+     *
      * @return true if token needs refresh, false otherwise
      */
     private boolean needsRefresh() {
@@ -132,7 +133,7 @@ public class AdminTokenService {
 
     /**
      * Calculates the number of seconds until the current token expires.
-     * 
+     *
      * @return seconds until expiry, or -1 if expiration time is not available
      */
     private long secondsUntilExpiry() {
@@ -147,7 +148,7 @@ public class AdminTokenService {
      * This method is synchronized to prevent concurrent token requests and ensure
      * thread safety during token refresh operations.
      * </p>
-     * 
+     *
      * @throws IllegalStateException if the token response is invalid or null
      */
     private synchronized void fetchTokenAndSet() {
@@ -164,24 +165,25 @@ public class AdminTokenService {
      * Performs the actual HTTP request to fetch a new admin token from KeycloakRequestHandler.
      * <p>
      * Uses client credentials grant type to authenticate with KeycloakRequestHandler and obtain
-     * an admin access token. The request blocks for up to 30 seconds waiting for
-     * a response.
+     * an admin access token.
      * </p>
-     * 
+     *
      * @return the token result containing access token and expiration information
-     * @throws RuntimeException if the HTTP request fails or times out
+     * @throws RuntimeException if the HTTP request fails
      */
     private AdminTokenResult fetchToken() {
         String path = "/realms/{realm}/protocol/openid-connect/token";
-        Mono<AdminTokenResult> mono = webClient.post()
-                .uri(uriBuilder -> uriBuilder.path(path).build(props.getRealm()))
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .body(BodyInserters.fromFormData("grant_type", "client_credentials")
-                        .with("client_id", props.getAdminClientId())
-                        .with("client_secret", props.getAdminClientSecret()))
-                .retrieve()
-                .bodyToMono(AdminTokenResult.class);
 
-        return mono.block(Duration.ofSeconds(30));
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("grant_type", "client_credentials");
+        formData.add("client_id", props.getAdminClientId());
+        formData.add("client_secret", props.getAdminClientSecret());
+
+        return restClient.post()
+                .uri(uriBuilder -> uriBuilder.path(path).build(props.getRealm()))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(formData)
+                .retrieve()
+                .body(AdminTokenResult.class);
     }
 }

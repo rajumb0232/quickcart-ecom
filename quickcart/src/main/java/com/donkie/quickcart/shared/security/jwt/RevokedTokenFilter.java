@@ -61,6 +61,7 @@ public class RevokedTokenFilter extends OncePerRequestFilter {
         // Skip filter for public endpoints to improve performance
         String path = request.getRequestURI();
         return path.startsWith("/actuator/")
-                || path.startsWith("/api/v1/public/");
+                || path.startsWith("/api/v1/public/")
+                || path.startsWith("/docs");
     }
 }

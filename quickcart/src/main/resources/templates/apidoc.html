@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+    <link th:href="@{/docs/apidoc.css}" rel="stylesheet">
+    <script th:src="@{/docs/apidoc.js}" defer></script>
+    <link rel="icon" type="image/svg+xml" th:href="@{/docs/favicon.svg}">
+
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar">
+    <button class="mobile-sidebar-toggle" id="mobileSidebarToggle">☰ Menu</button>
+    <svg class="navbar-logo" viewBox="0 0 19 19" width="35" height="35" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 7h12l-1.2 12H7.2L6 7z" fill="#21808d"/>
+        <path d="M9 7a3 3 0 016 0" stroke="#1a1a1a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="17" cy="16" r="1.6" fill="#1a1a1a"/>
+    </svg>
+
+    <h1 class="navbar-title">QuickCart API Docs</h1>
+
+    <div class="last-updated" id="lastUpdated">
+        <span>⏱️</span>
+        <span id="lastUpdatedText">Loading...</span>
+    </div>
+
+    <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
+        <span class="refresh-icon" id="refreshIcon">↻</span>
+        <span>Refresh</span>
+    </button>
+</nav>
+
+<!-- Main container -->
+<div class="main-container">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>API Docs</h1>
+        </div>
+
+        <div class="category-list" id="categoryList">
+            <!-- Categories will be rendered here -->
+        </div>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div class="overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-body" id="contentBody">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <h3>Loading API Documentation</h3>
+                <p>Please wait...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

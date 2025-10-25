@@ -27,7 +27,7 @@ public class SecurityConfig {
 
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/actuator/info", "/api/v1/public/**").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/info", "/docs/**", "/api/v1/public/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
