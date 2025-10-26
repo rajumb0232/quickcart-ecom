@@ -1,0 +1,3 @@
+ALTER TABLE api_endpoint
+ADD COLUMN method VARCHAR(10) NOT NULL DEFAULT 'GET'
+CHECK (method IN ('GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'));

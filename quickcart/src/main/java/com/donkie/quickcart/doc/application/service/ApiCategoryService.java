@@ -90,6 +90,7 @@ public class ApiCategoryService {
                             e.getEndpointId(),
                             e.getTitle(),
                             e.getDisplayOrder(),
+                            e.getMethod(),
                             htmlContent  // Pass HTML as content
                     );
                 })

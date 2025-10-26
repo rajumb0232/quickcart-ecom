@@ -185,6 +185,7 @@ function renderSidebar() {
             <div class="endpoint-list" id="endpoints-${category.category_id}">
                 ${renderEndpoints(category)}
             </div>
+            <hr class="category-item-br">
         </div>
     `).join('');
 
@@ -200,13 +201,19 @@ function renderEndpoints(category) {
         return `<div class="endpoint-empty">No APIs under ${escapeHtml(category.name)}</div>`;
     }
 
-    return category.endpoints.map(endpoint => `
-        <a href="#category/${category.category_id}/endpoint/${endpoint.endpoint_id}"
-           class="endpoint-item ${currentEndpointId === endpoint.endpoint_id ? 'active' : ''}"
-           onclick="navigateToEndpoint('${category.category_id}', '${endpoint.endpoint_id}', event)">
-            ${escapeHtml(endpoint.title)}
-        </a>
-    `).join('');
+    return category.endpoints.map(endpoint => {
+        const method = endpoint.method ? endpoint.method.toUpperCase() : 'GET';
+        const methodClass = method.toLowerCase();
+
+        return `
+            <a href="#category/${category.category_id}/endpoint/${endpoint.endpoint_id}"
+               class="endpoint-item ${currentEndpointId === endpoint.endpoint_id ? 'active' : ''}"
+               onclick="navigateToEndpoint('${category.category_id}', '${endpoint.endpoint_id}', event)">
+                <span class="method-badge method-${methodClass}">${method}</span>
+                <span class="endpoint-title">${escapeHtml(endpoint.title)}</span>
+            </a>
+        `;
+    }).join('');
 }
 
 // Navigate to endpoint
@@ -242,6 +249,17 @@ function expandCategory(categoryId) {
     }
 }
 
+// Collapse a specific category
+function collapseCategory(categoryId) {
+    const endpointList = document.getElementById(`endpoints-${categoryId}`);
+    const toggleIcon = document.getElementById(`toggle-${categoryId}`);
+
+    if (endpointList && toggleIcon) {
+        endpointList.classList.remove('expanded');
+        toggleIcon.classList.remove('expanded');
+    }
+}
+
 // Render content area
 function renderContent(categoryId, endpointId) {
     if (!apiData) {
@@ -270,7 +288,14 @@ function renderContent(categoryId, endpointId) {
                 ${endpoint.content}
             </div>
         `;
-        contentBody.scrollTop = 0; // Scroll to top of content
+        contentBody.scrollTop = 0;
+
+        // Apply syntax highlighting to all code blocks
+        if (window.hljs) {
+            contentBody.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        }
     }
 
     // Update sidebar highlighting

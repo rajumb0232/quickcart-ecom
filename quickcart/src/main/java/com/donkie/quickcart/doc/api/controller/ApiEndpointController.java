@@ -4,6 +4,7 @@ import com.donkie.quickcart.doc.api.dto.ApiEndpointDetail;
 import com.donkie.quickcart.doc.api.dto.ApiEndpointRequest;
 import com.donkie.quickcart.doc.api.dto.ApiEndpointSummary;
 import com.donkie.quickcart.doc.application.service.ApiEndpointService;
+import com.donkie.quickcart.doc.domain.model.HttpMethod;
 import com.donkie.quickcart.shared.dto.ApiAck;
 import com.donkie.quickcart.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
@@ -39,6 +40,33 @@ public class ApiEndpointController {
                                                                   @RequestBody @Valid ApiEndpointRequest request) {
         ApiEndpointSummary summary = service.updateEndpointDoc(endpointId, request);
         return ResponseEntity.ok(ApiResponse.success("API Endpoint Updated.", summary));
+    }
+
+    @PatchMapping("/endpoint-docs/{endpointId}/method")
+    public ResponseEntity<ApiResponse<ApiEndpointSummary>> updateEndpointMethod(
+            @PathVariable UUID endpointId,
+            @RequestParam("value") HttpMethod methodType
+    ) {
+        ApiEndpointSummary summary = service.updateEndpointMethod(endpointId, methodType);
+        return ResponseEntity.ok(ApiResponse.success("API Endpoint Method Updated.", summary));
+    }
+
+    @PatchMapping("/endpoint-docs/{endpointId}/title")
+    public ResponseEntity<ApiResponse<ApiEndpointSummary>> updateEndpointTitle(
+            @PathVariable UUID endpointId,
+            @RequestParam("value") String title
+    ) {
+        ApiEndpointSummary summary = service.updateEndpointTitle(endpointId, title);
+        return ResponseEntity.ok(ApiResponse.success("API Endpoint Title Updated.", summary));
+    }
+
+    @PatchMapping("/endpoint-docs/{endpointId}/display-order")
+    public ResponseEntity<ApiResponse<ApiEndpointSummary>> updateEndpointDisplayOrder(
+            @PathVariable UUID endpointId,
+            @RequestParam("value") Integer displayOrder
+    ) {
+        ApiEndpointSummary summary = service.updateEndpointDisplayOrder(endpointId, displayOrder);
+        return ResponseEntity.ok(ApiResponse.success("API Endpoint Display Order Updated.", summary));
     }
 
     @DeleteMapping("/endpoint-docs/{endpointId}")

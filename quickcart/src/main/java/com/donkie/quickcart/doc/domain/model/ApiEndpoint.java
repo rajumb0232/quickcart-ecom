@@ -30,6 +30,10 @@ public class ApiEndpoint {
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
+    @Column(name = "method", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private HttpMethod method;
+
     @Column(name = "markdown_content", nullable = false, columnDefinition = "TEXT")
     private String markdownContent;
 

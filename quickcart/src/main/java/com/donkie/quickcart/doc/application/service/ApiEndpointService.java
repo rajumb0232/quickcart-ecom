@@ -5,6 +5,7 @@ import com.donkie.quickcart.doc.api.dto.ApiEndpointRequest;
 import com.donkie.quickcart.doc.api.dto.ApiEndpointSummary;
 import com.donkie.quickcart.doc.domain.model.ApiCategory;
 import com.donkie.quickcart.doc.domain.model.ApiEndpoint;
+import com.donkie.quickcart.doc.domain.model.HttpMethod;
 import com.donkie.quickcart.doc.domain.repository.ApiCategoryRepo;
 import com.donkie.quickcart.doc.domain.repository.ApiEndpointRepo;
 import jakarta.persistence.EntityNotFoundException;
@@ -42,8 +43,33 @@ public class ApiEndpointService {
         endpoint.setTitle(req.title());
         endpoint.setMarkdownContent(req.markdown());
         endpoint.setDisplayOrder(req.displayOrder());
+        endpoint.setMethod(req.method());
         ApiEndpoint saved = endpointRepo.save(endpoint);
-        return new ApiEndpointSummary(saved.getEndpointId(), saved.getTitle(), saved.getDisplayOrder());
+        return new ApiEndpointSummary(saved.getEndpointId(), saved.getTitle(), saved.getDisplayOrder(), saved.getMethod());
+    }
+
+    @Transactional
+    public ApiEndpointSummary updateEndpointMethod(UUID endpointId, HttpMethod methodType) {
+        var endpoint = getApiEndpoint(endpointId);
+        endpoint.setMethod(methodType);
+        ApiEndpoint saved = endpointRepo.save(endpoint);
+        return new ApiEndpointSummary(saved.getEndpointId(), saved.getTitle(), saved.getDisplayOrder(), saved.getMethod());
+    }
+
+    @Transactional
+    public ApiEndpointSummary updateEndpointTitle(UUID endpointId, String title) {
+        var endpoint = getApiEndpoint(endpointId);
+        endpoint.setTitle(title);
+        ApiEndpoint saved = endpointRepo.save(endpoint);
+        return new ApiEndpointSummary(saved.getEndpointId(), saved.getTitle(), saved.getDisplayOrder(), saved.getMethod());
+    }
+
+    @Transactional
+    public ApiEndpointSummary updateEndpointDisplayOrder(UUID endpointId, Integer displayOrder) {
+        var endpoint = getApiEndpoint(endpointId);
+        endpoint.setDisplayOrder(displayOrder);
+        ApiEndpoint saved = endpointRepo.save(endpoint);
+        return new ApiEndpointSummary(saved.getEndpointId(), saved.getTitle(), saved.getDisplayOrder(), saved.getMethod());
     }
 
     @Transactional
@@ -56,7 +82,7 @@ public class ApiEndpointService {
     public ApiEndpointDetail getEndpointDoc(UUID endpointId) {
         var endpoint = getApiEndpoint(endpointId);
         String htmlContent = markdownService.convertToHtml(endpoint.getMarkdownContent());
-        return new ApiEndpointDetail(endpoint.getEndpointId(), endpoint.getTitle(), endpoint.getDisplayOrder(), htmlContent);
+        return new ApiEndpointDetail(endpoint.getEndpointId(), endpoint.getTitle(), endpoint.getDisplayOrder(), endpoint.getMethod(), htmlContent);
     }
 
     private ApiEndpoint getApiEndpoint(UUID endpointId) {
