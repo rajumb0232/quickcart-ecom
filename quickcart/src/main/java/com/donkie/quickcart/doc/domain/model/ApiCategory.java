@@ -34,7 +34,7 @@ public class ApiCategory {
     @Column(name = "display_order")
     private Integer displayOrder = 0;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "Category", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
     private List<ApiEndpoint> endpoints = new ArrayList<>();
 

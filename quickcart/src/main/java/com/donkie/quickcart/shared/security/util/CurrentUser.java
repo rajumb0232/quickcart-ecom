@@ -1,4 +1,4 @@
-package com.donkie.quickcart.shared.security;
+package com.donkie.quickcart.shared.security.util;
 
 import com.donkie.quickcart.user.domain.model.UserRole;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

@@ -5,8 +5,6 @@ import com.donkie.quickcart.user.application.model.LoginResult;
 
 import java.util.List;
 
-import static com.donkie.quickcart.shared.security.CurrentUser.getCurrentUserRoles;
-
 public interface AuthService {
 
     public LoginResult.Detail loginUser(LoginCommand.Create create);

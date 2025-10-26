@@ -9,14 +9,12 @@ import com.donkie.quickcart.user.infra.integration.keycloak.model.KeycloakUserDa
 import com.donkie.quickcart.user.infra.integration.keycloak.model.UserRegistrationRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 import static com.donkie.quickcart.shared.exception.handler.SafeExecutor.safeExecute;
 import static com.donkie.quickcart.shared.integration.helper.ClientResponseStatusResolver.resolveStatus;
-import static com.donkie.quickcart.shared.security.CurrentUser.getCurrentUserId;
 
 @Service
 @AllArgsConstructor

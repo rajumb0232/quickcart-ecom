@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-import static com.donkie.quickcart.shared.security.CurrentUser.*;
+import static com.donkie.quickcart.shared.security.util.CurrentUser.*;
 
 /**
  * Service for managing user profiles and registration.

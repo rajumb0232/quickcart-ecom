@@ -16,7 +16,7 @@ import java.util.List;
 
 import static com.donkie.quickcart.shared.exception.handler.SafeExecutor.safeExecute;
 import static com.donkie.quickcart.shared.integration.helper.ClientResponseStatusResolver.resolveBaseExceptionStatus;
-import static com.donkie.quickcart.shared.security.CurrentUser.getCurrentUserRoles;
+import static com.donkie.quickcart.shared.security.util.CurrentUser.getCurrentUserRoles;
 
 @Slf4j
 @Service
