@@ -32,6 +32,7 @@ public class ApiEndpointService {
                 .category(category)
                 .markdownContent(req.markdown())
                 .displayOrder(req.displayOrder())
+                .method(req.method())
                 .build();
         ApiEndpoint saved = endpointRepo.save(endpoint);
         return saved.getEndpointId();

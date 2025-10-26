@@ -217,9 +217,20 @@ function renderEndpoints(category) {
 }
 
 // Navigate to endpoint
+// Navigate to endpoint
 function navigateToEndpoint(categoryId, endpointId, event) {
     event.preventDefault();
     window.location.hash = `category/${categoryId}/endpoint/${endpointId}`;
+
+    // Close mobile sidebar after navigation
+    closeMobileSidebar();
+
+    // Clear search if active
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput && searchInput.value.trim()) {
+        searchInput.value = '';
+        resetSearch();
+    }
 }
 
 // Toggle category expansion
