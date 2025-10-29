@@ -24,7 +24,7 @@ import java.util.UUID;
 public class Category {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) // Hibernate 6+ support
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "category_id", nullable = false, updatable = false)
     private UUID categoryId;
 
@@ -44,6 +44,20 @@ public class Category {
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Category> child = new ArrayList<>();
 
+    /**
+     * Category level in the tree.
+     * Allowed values: 1, 2, 3.
+     * Use this to limit depth in APIs or UI display.
+     */
+    @Column(name = "category_level", nullable = false)
+    private Integer categoryLevel = 1;
+
+    /**
+     * Optional icon URL for a category (nullable). Frontend may choose to use it.
+     */
+    @Column(name = "icon_url", length = 512)
+    private String iconUrl;
+
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
     private Instant createdDate;
@@ -60,4 +74,3 @@ public class Category {
     @Column(name = "last_modified_by")
     private String lastModifiedBy;
 }
-

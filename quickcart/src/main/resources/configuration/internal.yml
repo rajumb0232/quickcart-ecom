@@ -1,0 +1,21 @@
+# ================ Default Admin Configuration ================
+app:
+  admin:
+    username: ${APP_ADMIN_USERNAME}
+    password: ${APP_ADMIN_PASSWORD}
+
+# ================ External Services ================
+  services:
+
+    # ---------------- AWS S3 Configuration ----------------
+    aws:
+      region: ${AWS_REGION}
+      s3:
+        bucket: ${AWS_BUCKET}
+
+    # ---------------- Keycloak Configuration ----------------
+    keycloak:
+      url: ${KEYCLOAK_URL}
+      realm: ${KEYCLOAK_REALM}
+      admin-client-id: ${KEYCLOAK_CLIENT_ID}
+      admin-client-secret: ${KEYCLOAK_CLIENT_SECRET}

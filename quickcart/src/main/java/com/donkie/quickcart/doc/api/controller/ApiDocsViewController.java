@@ -7,31 +7,30 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 @RequestMapping("/docs")
 @RequiredArgsConstructor
 @Slf4j
-public class ApiDocController {
+public class ApiDocsViewController {
 
     private final ApiCategoryService service;
 
+    // "/docs" - All endpoints starting with URI "/docs/**" are public
     @GetMapping
     public String docs() {
         return "apidoc";
     }
 
+    // "/docs/fetch"
     @GetMapping("/fetch")
     public ResponseEntity<ApiResponse<List<ApiCategoryResponse>>> list() {
         log.debug("Attempting to list categories");
-        List<ApiCategoryResponse> all = service.getAllCategories(null, null);
+        List<ApiCategoryResponse> all = service.getAllDocs();
         return ResponseEntity.ok(ApiResponse.success("Categories fetched", all));
     }
 }

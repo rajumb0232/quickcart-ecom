@@ -28,7 +28,7 @@ public class ApiCategoryController {
 
     private final ApiCategoryService service;
 
-    @PostMapping("/categories")
+    @PostMapping("/api-categories")
     public ResponseEntity<ApiAck> create(@RequestBody @Valid ApiCategoryRequest request) {
         UUID id = service.createCategory(request);
         return ResponseEntity
@@ -36,14 +36,14 @@ public class ApiCategoryController {
                 .body(ApiAck.success("Category created successfully"));
     }
 
-    @PutMapping("/categories/{categoryId}")
+    @PutMapping("/api-categories/{categoryId}")
     public ResponseEntity<ApiResponse<ApiCategorySummary>> update(@PathVariable UUID categoryId,
                                                                   @RequestBody ApiCategoryRequest request) {
         ApiCategorySummary summary = service.updateCategory(categoryId, request);
         return ResponseEntity.ok(ApiResponse.success("API Category Updated.", summary));
     }
 
-    @DeleteMapping("/categories/{categoryId}")
+    @DeleteMapping("/api-categories/{categoryId}")
     public ResponseEntity<ApiAck> delete(@PathVariable UUID categoryId) {
         service.deleteCategory(categoryId);
         return ResponseEntity
@@ -51,7 +51,7 @@ public class ApiCategoryController {
                 .body(ApiAck.success("Category created successfully"));
     }
 
-    @GetMapping("/categories/{categoryId}")
+    @GetMapping("/api-categories/{categoryId}")
     public ResponseEntity<ApiResponse<ApiCategorySummary>> get(@PathVariable UUID categoryId) {
         ApiCategorySummary cat = service.getCategory(categoryId);
         return ResponseEntity

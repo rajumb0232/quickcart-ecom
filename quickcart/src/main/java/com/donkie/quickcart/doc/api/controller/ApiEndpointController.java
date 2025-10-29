@@ -26,7 +26,7 @@ public class ApiEndpointController {
 
     private final ApiEndpointService service;
 
-    @PostMapping("/categories/{categoryId}/endpoint-docs")
+    @PostMapping("/api-categories/{categoryId}/api-endpoints")
     public ResponseEntity<ApiAck> create(@PathVariable UUID categoryId,
                                          @RequestBody @Valid ApiEndpointRequest request) {
         UUID id = service.createEndpointDoc(categoryId, request);
@@ -35,14 +35,14 @@ public class ApiEndpointController {
                 .body(ApiAck.success("Endpoint created successfully"));
     }
 
-    @PutMapping("/endpoint-docs/{endpointId}")
+    @PutMapping("/api-endpoints/{endpointId}")
     public ResponseEntity<ApiResponse<ApiEndpointSummary>> update(@PathVariable UUID endpointId,
                                                                   @RequestBody @Valid ApiEndpointRequest request) {
         ApiEndpointSummary summary = service.updateEndpointDoc(endpointId, request);
         return ResponseEntity.ok(ApiResponse.success("API Endpoint Updated.", summary));
     }
 
-    @PatchMapping("/endpoint-docs/{endpointId}/method")
+    @PatchMapping("/api-endpoints/{endpointId}/method")
     public ResponseEntity<ApiResponse<ApiEndpointSummary>> updateEndpointMethod(
             @PathVariable UUID endpointId,
             @RequestParam("value") HttpMethod methodType
@@ -51,7 +51,7 @@ public class ApiEndpointController {
         return ResponseEntity.ok(ApiResponse.success("API Endpoint Method Updated.", summary));
     }
 
-    @PatchMapping("/endpoint-docs/{endpointId}/title")
+    @PatchMapping("/api-endpoints/{endpointId}/title")
     public ResponseEntity<ApiResponse<ApiEndpointSummary>> updateEndpointTitle(
             @PathVariable UUID endpointId,
             @RequestParam("value") String title
@@ -60,7 +60,7 @@ public class ApiEndpointController {
         return ResponseEntity.ok(ApiResponse.success("API Endpoint Title Updated.", summary));
     }
 
-    @PatchMapping("/endpoint-docs/{endpointId}/display-order")
+    @PatchMapping("/api-endpoints/{endpointId}/display-order")
     public ResponseEntity<ApiResponse<ApiEndpointSummary>> updateEndpointDisplayOrder(
             @PathVariable UUID endpointId,
             @RequestParam("value") Integer displayOrder
@@ -69,7 +69,7 @@ public class ApiEndpointController {
         return ResponseEntity.ok(ApiResponse.success("API Endpoint Display Order Updated.", summary));
     }
 
-    @DeleteMapping("/endpoint-docs/{endpointId}")
+    @DeleteMapping("/api-endpoints/{endpointId}")
     public ResponseEntity<ApiAck> delete(@PathVariable UUID endpointId) {
         service.deleteEndpointDoc(endpointId);
         return ResponseEntity
@@ -77,7 +77,7 @@ public class ApiEndpointController {
                 .body(ApiAck.success("Endpoint deleted successfully"));
     }
 
-    @GetMapping("/endpoint-docs/{endpointId}")
+    @GetMapping("/api-endpoints/{endpointId}")
     public ResponseEntity<ApiResponse<ApiEndpointDetail>> get(@PathVariable UUID endpointId) {
         ApiEndpointDetail detail = service.getEndpointDoc(endpointId);
         return ResponseEntity.ok(ApiResponse.success("Endpoint Fetched", detail));

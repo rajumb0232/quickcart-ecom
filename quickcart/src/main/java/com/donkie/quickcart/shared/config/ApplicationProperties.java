@@ -18,4 +18,5 @@ public class ApplicationProperties {
         private String username;
         private String password;
     }
+
 }

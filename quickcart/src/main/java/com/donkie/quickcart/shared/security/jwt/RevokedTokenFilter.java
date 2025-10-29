@@ -27,17 +27,18 @@ public class RevokedTokenFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-
+        log.debug("Attempting check if token is blocked/revoked");
         // Get authentication from Spring Security context (already validated by BearerTokenAuthenticationFilter)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         // Check if request is authenticated with JWT
         if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+            log.debug("Validating if the token is blocked/revoked");
             Jwt jwt = jwtAuth.getToken();
             String jti = jwt.getClaim("jti");
 
             if (jti != null && tokenRevocationService.isBlacklisted(jti)) {
-                log.warn("Blocked request with blacklisted token. JTI: {}", jti);
+                log.warn("Blocked request with blacklisted/revoked token. JTI: {}", jti);
 
                 // Clear security context
                 SecurityContextHolder.clearContext();
@@ -50,8 +51,10 @@ public class RevokedTokenFilter extends OncePerRequestFilter {
                 );
                 return;  // Stop filter chain
             }
+            log.debug("Token is not blocked/revoked");
         }
 
+        log.info("Continuing to next filters in the chain");
         // Continue with request if the token is valid
         filterChain.doFilter(request, response);
     }
@@ -60,8 +63,8 @@ public class RevokedTokenFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         // Skip filter for public endpoints to improve performance
         String path = request.getRequestURI();
-        return path.startsWith("/actuator/")
-                || path.startsWith("/api/v1/public/")
-                || path.startsWith("/docs");
+        return path.startsWith("/actuator/") // Skip Filtering to actuator endpoints
+                || path.startsWith("/api/v1/public/") // Skip Filtering to all public endpoints
+                || path.startsWith("/docs"); // Skip Filtering to all documentation endpoints (not "/api/v1/docs/**")
     }
 }

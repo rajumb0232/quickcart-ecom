@@ -69,7 +69,7 @@ public class ApiCategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<ApiCategoryResponse> getAllCategories(UUID categoryInViewId, UUID endpointInViewId) {
+    public List<ApiCategoryResponse> getAllDocs() {
         return categoryRepo.findAll().stream()
                 .sorted(Comparator.comparing(ApiCategory::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)))
                 .map(this::toResponse)
