@@ -12,6 +12,9 @@ app:
       region: ${AWS_REGION}
       s3:
         bucket: ${AWS_BUCKET}
+        presign:
+          download-ttl: ${AWS_S3_DOWNLOAD_TTL:10m}
+          upload-ttl: ${AWS_S3_UPLOAD_TTL:10m}
 
     # ---------------- Keycloak Configuration ----------------
     keycloak:

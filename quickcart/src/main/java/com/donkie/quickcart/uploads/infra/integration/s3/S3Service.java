@@ -1,17 +1,19 @@
-package com.donkie.quickcart.aws.service;
+package com.donkie.quickcart.uploads.infra.integration.s3;
 
-import com.donkie.quickcart.aws.config.AwsProperties;
+import com.donkie.quickcart.uploads.api.dto.ContentType;
+import com.donkie.quickcart.uploads.application.model.ObjectHead;
+import com.donkie.quickcart.uploads.infra.integration.config.AwsProperties;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.DeleteObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 
@@ -28,11 +30,11 @@ public class S3Service {
         this.bucket = props.getS3().getBucket();
     }
 
-    public URL generatePresignedPutUrl(String objectKey, Duration expiry) {
+    public URL generatePresignedPutUrl(ContentType contentType, String objectKey, Duration expiry) {
         PutObjectRequest putObjReq = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(objectKey)
-                .contentType("image/jpeg") // optional: restrict content-type
+                .contentType(contentType.value())
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -74,5 +76,30 @@ public class S3Service {
 
     public void deleteObject(String objectKey) {
         s3.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(objectKey).build());
+    }
+
+    public ObjectHead doesObjectExist(String objectKey) {
+        try {
+            var head = s3.headObject(HeadObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(objectKey)
+                    .build());
+            return ObjectHead.found(head.contentType());
+        } catch (NoSuchKeyException e) {
+            return ObjectHead.notFound();
+        } catch (S3Exception e) {
+            if (e.statusCode() == 404) ObjectHead.notFound();
+            throw e;
+        }
+    }
+
+    public byte[] getObject(String objectKey) throws IOException {
+        try (ResponseInputStream<GetObjectResponse> inputStream = s3.getObject(
+                GetObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(objectKey)
+                        .build())) {
+            return inputStream.readAllBytes();
+        }
     }
 }

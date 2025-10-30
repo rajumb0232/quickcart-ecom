@@ -1,8 +1,11 @@
 package com.donkie.quickcart.shared.exception.handler;
 
+import com.donkie.quickcart.shared.exception.QuickcartBaseException;
+
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -44,5 +47,29 @@ public class SafeExecutor {
         } catch (Exception e) {
             throw exceptionMapper.apply(e);
         }
+    }
+
+    public static void executeOrElseDo(
+            Runnable operation,
+            Consumer<? super QuickcartBaseException> alternateOperation) {
+
+        Objects.requireNonNull(operation, "operation must not be null");
+        Objects.requireNonNull(alternateOperation, "exceptionMapper must not be null");
+
+        try {
+            operation.run();
+        } catch (QuickcartBaseException e) {
+            alternateOperation.accept(e);
+        }
+    }
+
+    public static void actIf(
+            Supplier<Boolean> check,
+            Runnable action
+    ) {
+        Objects.requireNonNull(check, "check must not be null");
+        Objects.requireNonNull(action, "action must not be null");
+
+        if (check.get()) action.run();
     }
 }

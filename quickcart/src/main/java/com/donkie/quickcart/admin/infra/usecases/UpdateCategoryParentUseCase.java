@@ -104,6 +104,6 @@ public class UpdateCategoryParentUseCase {
                 c.getName(),
                 c.getCategoryStatus(),
                 c.getCategoryLevel(),
-                c.getIconUrl());
+                c.getThumbnail().getImageId().toString());
     }
 }

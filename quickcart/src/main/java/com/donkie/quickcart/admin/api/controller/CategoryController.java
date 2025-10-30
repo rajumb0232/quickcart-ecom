@@ -21,6 +21,8 @@ import java.util.UUID;
 @RequestMapping("/api/v1")
 @AllArgsConstructor
 public class CategoryController {
+    public static final String CATEGORY_THUMBNAIL_DIFFERENTIATOR = "category_thumbnail";
+
     private final CategoryService categoryService;
 
     @PostMapping("/categories")
@@ -69,7 +71,7 @@ public class CategoryController {
             @RequestParam("value") CategoryStatus categoryStatus
             ) {
         CategorySummary summary = categoryService.updateCategoryStatus(categoryId, categoryStatus);
-        return ResponseEntity.ok(ApiResponse.success("Category Status Updated", summary));
+        return ResponseEntity.ok(ApiResponse.success("Category Summary Updated", summary));
     }
 
     @PatchMapping("/categories/{categoryId}/parent")

@@ -1,6 +1,5 @@
 package com.donkie.quickcart.admin.application.dto.response;
 
-import com.donkie.quickcart.admin.application.model.CategoryResult;
 import com.donkie.quickcart.admin.domain.model.CategoryStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -12,7 +11,7 @@ public record CategoryDetail(
         @JsonProperty("name") String name,
         @JsonProperty("status") CategoryStatus categoryStatus,
         @JsonProperty("category_level") Integer categoryLevel,
-        @JsonProperty("icon_url") String iconUrl,
+        @JsonProperty("thumbnail_id") String thumbnailId,
         @JsonProperty("child_category") List<CategoryDetail> childCategory
 ) {
 }

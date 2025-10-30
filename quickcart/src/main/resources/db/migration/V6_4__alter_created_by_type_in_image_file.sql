@@ -1,0 +1,2 @@
+ALTER TABLE image_file
+ALTER COLUMN created_by TYPE VARCHAR(255);

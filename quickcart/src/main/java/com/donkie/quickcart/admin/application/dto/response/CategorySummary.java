@@ -10,6 +10,6 @@ public record CategorySummary(
         @JsonProperty("name") String name,
         @JsonProperty("status") CategoryStatus categoryStatus,
         @JsonProperty("category_level") Integer categoryLevel,
-        @JsonProperty("icon_url") String iconUrl
+        @JsonProperty("thumbnail_id") String thumbnailId
 ) {
 }

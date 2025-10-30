@@ -77,7 +77,7 @@ public class GetCategoriesByStatusUseCase {
                 node.getName(),
                 node.getCategoryStatus(),
                 node.getCategoryLevel(),
-                node.getIconUrl(),
+                node.getThumbnail().getImageId().toString(),
                 childDetails);
     }
 }

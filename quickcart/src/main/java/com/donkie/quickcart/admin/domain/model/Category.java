@@ -1,5 +1,6 @@
 package com.donkie.quickcart.admin.domain.model;
 
+import com.donkie.quickcart.uploads.domain.model.ImageFile;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
@@ -52,11 +53,10 @@ public class Category {
     @Column(name = "category_level", nullable = false)
     private Integer categoryLevel = 1;
 
-    /**
-     * Optional icon URL for a category (nullable). Frontend may choose to use it.
-     */
-    @Column(name = "icon_url", length = 512)
-    private String iconUrl;
+    // uni-directional relationship
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "thumbnail")
+    private ImageFile thumbnail;
 
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
