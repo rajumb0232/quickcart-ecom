@@ -11,7 +11,7 @@ public record CategoryDetail(
         @JsonProperty("name") String name,
         @JsonProperty("status") CategoryStatus categoryStatus,
         @JsonProperty("category_level") Integer categoryLevel,
-        @JsonProperty("thumbnail_id") String thumbnailId,
+        @JsonProperty("thumbnail") String thumbnail,
         @JsonProperty("child_category") List<CategoryDetail> childCategory
 ) {
 }

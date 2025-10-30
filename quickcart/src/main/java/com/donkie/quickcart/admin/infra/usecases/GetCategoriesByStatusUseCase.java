@@ -72,12 +72,15 @@ public class GetCategoriesByStatusUseCase {
     }
 
     private static @NotNull CategoryDetail toCategoryDetail(Category node, List<CategoryDetail> childDetails) {
+        var thumbnail = node.getThumbnail() != null
+                ? String.format("/api/v1/public/categories/thumbnail?id=%s", node.getThumbnail().getImageId())
+                : null;
         return new CategoryDetail(
                 node.getCategoryId(),
                 node.getName(),
                 node.getCategoryStatus(),
                 node.getCategoryLevel(),
-                node.getThumbnail().getImageId().toString(),
+                thumbnail,
                 childDetails);
     }
 }

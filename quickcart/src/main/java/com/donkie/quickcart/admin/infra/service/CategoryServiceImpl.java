@@ -145,12 +145,16 @@ public class CategoryServiceImpl implements CategoryService {
     // ==================== HELPER METHODS ======================
 
     private static @NotNull CategorySummary toCategorySummary(Category c) {
+        var thumbnail = c.getThumbnail() != null
+                ? String.format("/api/v1/public/categories/thumbnail?id=%s", c.getThumbnail().getImageId())
+                : null;
         return new CategorySummary(
                 c.getCategoryId(),
                 c.getName(),
                 c.getCategoryStatus(),
                 c.getCategoryLevel(),
-                c.getThumbnail().getImageId().toString());
+                thumbnail
+        );
     }
 
     private Category fetchCategory(UUID categoryId) {
