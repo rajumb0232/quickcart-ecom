@@ -1,4 +1,4 @@
-package com.donkie.quickcart.shared.jpa;
+package com.donkie.quickcart.seller.domain.model;
 
 
 import jakarta.persistence.Column;

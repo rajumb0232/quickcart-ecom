@@ -1,6 +1,5 @@
 package com.donkie.quickcart.seller.domain.model;
 
-import com.donkie.quickcart.shared.jpa.LifecycleAudit;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;

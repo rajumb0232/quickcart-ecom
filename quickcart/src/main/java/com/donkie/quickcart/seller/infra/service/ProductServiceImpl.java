@@ -5,6 +5,7 @@ import com.donkie.quickcart.seller.application.dto.response.ProductResponse;
 import com.donkie.quickcart.seller.application.dto.response.ProductVariantResponse;
 import com.donkie.quickcart.seller.application.events.ProductDeletedEvent;
 import com.donkie.quickcart.seller.application.exception.CategoryDoesNotExistsException;
+import com.donkie.quickcart.seller.application.exception.ProductNotFoundException;
 import com.donkie.quickcart.seller.application.exception.StoreNotFoundException;
 import com.donkie.quickcart.seller.application.service.contracts.ProductService;
 import com.donkie.quickcart.seller.application.service.contracts.ProductVariantService;
@@ -13,6 +14,7 @@ import com.donkie.quickcart.seller.domain.model.Store;
 import com.donkie.quickcart.seller.domain.repository.ProductRepository;
 import com.donkie.quickcart.seller.domain.repository.StoreRepository;
 import com.donkie.quickcart.seller.infra.integration.admin.CategoryClient;
+import com.donkie.quickcart.user.domain.model.UserRole;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEventPublisher;
@@ -23,7 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+import static com.donkie.quickcart.shared.security.util.CurrentUser.doesUserHasRole;
 import static com.donkie.quickcart.shared.security.util.OwnershipEvaluator.ensureOwnership;
+import static com.donkie.quickcart.shared.security.util.OwnershipEvaluator.isOwner;
 
 @Service
 @AllArgsConstructor
@@ -59,9 +63,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Override
     public ProductResponse updateProduct(UUID productId, ProductRequest request) {
-        var product = productRepository.findActiveById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found by Id: " + productId));
-        ensureOwnership(product.getLifecycleAudit().getCreatedBy());
+        var product = getIfValidOwnerAndNotDeleted(productId);
 
         product.setTitle(request.title());
         product.setDescription(request.description());
@@ -73,27 +75,38 @@ public class ProductServiceImpl implements ProductService {
         return toProductResponse(product, variants);
     }
 
+    /**
+     * Get product by ID and ensure it belongs to the current user or is active.
+     */
     @Transactional(readOnly = true)
     @Override
     public ProductResponse getProduct(UUID productId) {
-        var product = productRepository.findById(productId)
-                .filter(p -> p.getLifecycleAudit().isActive())
-                .orElseThrow(() -> new RuntimeException("Product not found by Id: " + productId));
+        Product product = null;
+        var productNotFound = new ProductNotFoundException(HttpStatus.NOT_FOUND, "Product not found by Id: " + productId);
+        if (doesUserHasRole(UserRole.SELLER)) {
+            // If seller return all - exclude deleted
+            product = productRepository.findByIdIfNonDeleted(productId)
+                    .filter(p -> isOwner(p.ownerId()))
+                    .orElseThrow(() -> productNotFound);
+        } else {
+            // If not, seller return all - exclude deleted and inactive
+            product = productRepository.findActiveById(productId).orElseThrow(() -> productNotFound);
+        }
 
-        List<ProductVariantResponse> variants = productVariantService.getVariantsByProduct(productId);
-
-        return toProductResponse(product, variants);
+        if(product != null) {
+            List<ProductVariantResponse> variants = productVariantService.getVariantsByProduct(productId);
+            return toProductResponse(product, variants);
+        } else throw productNotFound;
     }
 
     @Transactional
     @Override
     public void deleteProduct(UUID productId) {
-        var product = productRepository.findActiveById(productId)
-                .orElseThrow(() -> new RuntimeException("Product not found by Id: " + productId));
-        ensureOwnership(product.getLifecycleAudit().getCreatedBy());
+        var product = getIfValidOwnerAndNotDeleted(productId);
 
         product.getLifecycleAudit().setDeleted(true);
         product.getLifecycleAudit().setActive(false);
+
         productRepository.save(product);
         eventPublisher.publishEvent(new ProductDeletedEvent(productId));
     }
@@ -104,7 +117,24 @@ public class ProductServiceImpl implements ProductService {
         return List.of();
     }
 
+    @Transactional
+    @Override
+    public void publishProduct(UUID productId) {
+        var product = getIfValidOwnerAndNotDeleted(productId);
+        product.getLifecycleAudit().setActive(true);
+        product.getVariants().forEach(pv -> pv.getLifecycleAudit().setActive(true));
+        productRepository.save(product);
+        // variant updates are cascaded
+    }
+
     // ===================== Private Helpers =====================
+
+    private @NotNull Product getIfValidOwnerAndNotDeleted(UUID productId) {
+        var product = productRepository.findByIdIfNonDeleted(productId)
+                .orElseThrow(() -> new ProductNotFoundException(HttpStatus.NOT_FOUND, "Product not found by Id: " + productId));
+        ensureOwnership(product.ownerId());
+        return product;
+    }
 
     private static @NotNull ProductResponse toProductResponse(Product product, List<ProductVariantResponse> variants) {
         return new ProductResponse(
@@ -113,9 +143,13 @@ public class ProductServiceImpl implements ProductService {
                 product.getDescription(),
                 product.getBrand(),
                 product.getCategoryPath(),
-                variants,
                 product.getAvgRating(),
-                product.getRatingCount()
+                product.getRatingCount(),
+                product.getLifecycleAudit().getCreatedDate(),
+                product.getLifecycleAudit().getLastModifiedDate(),
+                variants,
+                product.isActive(),
+                product.getLifecycleAudit().isDeleted()
         );
     }
 }

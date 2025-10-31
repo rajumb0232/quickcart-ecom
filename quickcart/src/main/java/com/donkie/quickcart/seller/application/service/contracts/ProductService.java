@@ -18,4 +18,5 @@ public interface ProductService {
 
     List<ProductResponse> searchProducts(String searchQuery, int page, int size);
 
+    void publishProduct(UUID productId);
 }

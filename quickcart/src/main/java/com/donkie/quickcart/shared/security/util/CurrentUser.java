@@ -17,6 +17,11 @@ public class CurrentUser {
         // Class is for utility purpose only
     }
 
+    /**
+     * Resolves currently authenticated user's ID,
+     * If the user ID is not found, or invalid, returns {@code Optional.empty()}
+     * @return optional containing user ID
+     */
     public static Optional<UUID> getCurrentUserId() {
         return getAuthentication().map(auth -> {
             var sub = auth.getName();

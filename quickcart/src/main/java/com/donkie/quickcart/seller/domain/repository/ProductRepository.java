@@ -15,6 +15,7 @@ public interface ProductRepository extends CustomJpaRepository<Product, UUID> {
             UPDATE Product p
             SET p.lifecycleAudit.isOrphan = TRUE,
                 p.lifecycleAudit.isActive = FALSE,
+                p.lifecycleAudit.isDeleted = TRUE,
                 p.lifecycleAudit.lastModifiedDate = CURRENT_TIMESTAMP
             WHERE p.store.storeId = :storeId
              AND (p.lifecycleAudit.isActive = TRUE OR p.lifecycleAudit.isOrphan = FALSE)

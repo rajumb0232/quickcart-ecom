@@ -1,6 +1,5 @@
 package com.donkie.quickcart.seller.domain.model;
 
-import com.donkie.quickcart.shared.jpa.LifecycleAudit;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -71,6 +70,7 @@ public class Product {
         this.categoryId = categoryId;
         this.categoryPath = categoryPath;
         this.store = store;
+        this.lifecycleAudit.setActive(false);
     }
 
     public boolean isActive() {

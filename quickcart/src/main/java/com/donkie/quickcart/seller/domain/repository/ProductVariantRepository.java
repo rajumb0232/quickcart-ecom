@@ -17,6 +17,7 @@ public interface ProductVariantRepository extends CustomJpaRepository<ProductVar
             UPDATE product_variant pv
             SET is_orphan = TRUE,
                 is_active = FALSE,
+                is_deleted = TRUE,
                 last_modified_date = now()
             FROM product p
             WHERE pv.product_id = p.product_id
@@ -30,6 +31,7 @@ public interface ProductVariantRepository extends CustomJpaRepository<ProductVar
             UPDATE product_variant pv
             SET is_orphan = TRUE,
                 is_active = FALSE,
+                is_deleted = TRUE,
                 last_modified_date = now()
             WHERE pv.product_id = :productId
               AND (pv.is_active = TRUE OR pv.is_orphan = FALSE)
@@ -42,6 +44,13 @@ public interface ProductVariantRepository extends CustomJpaRepository<ProductVar
         return findAll((root, q, cb) -> cb.and(
                 cb.equal(root.get("product").get("productId"), productId),
                 cb.isTrue(root.get("lifecycleAudit").get("isActive")),
+                cb.isFalse(root.get("lifecycleAudit").get("isDeleted"))
+        ));
+    }
+
+    default List<ProductVariant> findAllByProductIfNonDeleted(UUID productId) {
+        return findAll((root, q, cb) -> cb.and(
+                cb.equal(root.get("product").get("productId"), productId),
                 cb.isFalse(root.get("lifecycleAudit").get("isDeleted"))
         ));
     }

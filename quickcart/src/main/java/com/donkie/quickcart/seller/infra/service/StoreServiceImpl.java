@@ -8,6 +8,8 @@ import com.donkie.quickcart.seller.application.service.contracts.ProductService;
 import com.donkie.quickcart.seller.application.service.contracts.StoreService;
 import com.donkie.quickcart.seller.domain.model.Store;
 import com.donkie.quickcart.seller.domain.repository.StoreRepository;
+import com.donkie.quickcart.shared.security.util.CurrentUser;
+import com.donkie.quickcart.user.domain.model.UserRole;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEventPublisher;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+import static com.donkie.quickcart.shared.security.util.CurrentUser.doesUserHasRole;
 import static com.donkie.quickcart.shared.security.util.OwnershipEvaluator.ensureOwnership;
 import static com.donkie.quickcart.shared.security.util.OwnershipEvaluator.isOwner;
 
@@ -57,8 +60,7 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public StoreDetails getStoreDetails(UUID storeId) {
         return storeRepository.findById(storeId)
-                .filter(st -> st.getLifecycleAudit().isActive()
-                        || isOwner(st.getLifecycleAudit().getCreatedBy()))
+                .filter(st -> st.isActive() || isOwner(st.ownerId()))
                 .map(this::toStoreDetails)
                 .orElseThrow(() -> new StoreNotFoundException(HttpStatus.NOT_FOUND, "Store not found by ID: " + storeId));
     }

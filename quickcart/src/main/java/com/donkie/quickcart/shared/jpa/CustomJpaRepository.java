@@ -18,8 +18,19 @@ public interface CustomJpaRepository<T, ID> extends JpaRepository<T, ID>, JpaSpe
             var idAttr = identifiable.getId(id.getClass());
             return cb.and(
                     cb.equal(root.get(idAttr.getName()), id),
-                    cb.isTrue(root.get("lifecycleAudit").get("active")),
-                    cb.isFalse(root.get("lifecycleAudit").get("deleted"))
+                    cb.isTrue(root.get("lifecycleAudit").get("isActive")),
+                    cb.isFalse(root.get("lifecycleAudit").get("isDeleted"))
+            );
+        });
+    }
+
+    default Optional<T> findByIdIfNonDeleted(ID id) {
+        return findOne((root, q, cb) -> {
+            var identifiable = (IdentifiableType<T>) root.getModel();
+            var idAttr = identifiable.getId(id.getClass());
+            return cb.and(
+                    cb.equal(root.get(idAttr.getName()), id),
+                    cb.isFalse(root.get("lifecycleAudit").get("isDeleted"))
             );
         });
     }
@@ -28,6 +39,12 @@ public interface CustomJpaRepository<T, ID> extends JpaRepository<T, ID>, JpaSpe
     default List<T> findAllActive() {
         return findAll((root, q, cb) -> cb.and(
                 cb.isTrue(root.get("lifecycleAudit").get("isActive")),
+                cb.isFalse(root.get("lifecycleAudit").get("isDeleted"))
+        ));
+    }
+
+    default List<T> findAllNonDeleted() {
+        return findAll((root, q, cb) -> cb.and(
                 cb.isFalse(root.get("lifecycleAudit").get("isDeleted"))
         ));
     }
