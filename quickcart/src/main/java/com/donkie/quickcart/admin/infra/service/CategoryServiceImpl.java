@@ -3,6 +3,7 @@ package com.donkie.quickcart.admin.infra.service;
 import com.donkie.quickcart.admin.application.dto.request.CategoryCreateRequest;
 import com.donkie.quickcart.admin.application.dto.request.CategoryUpdateRequest;
 import com.donkie.quickcart.admin.application.dto.response.CategoryDetail;
+import com.donkie.quickcart.admin.application.dto.response.CategorySnapshot;
 import com.donkie.quickcart.admin.application.dto.response.CategorySummary;
 import com.donkie.quickcart.admin.application.exception.CategoryLevelOutOfRangeException;
 import com.donkie.quickcart.admin.application.exception.CategoryNotFoundException;
@@ -142,7 +143,24 @@ public class CategoryServiceImpl implements CategoryService {
         return getAllCategoriesByStatus.execute(Arrays.stream(CategoryStatus.values()).toList());
     }
 
+    @Override
+    public CategorySnapshot getCategorySnapshot(UUID categoryId) {
+        String path = deriveCategoryPath(fetchCategory(categoryId));
+        return new CategorySnapshot(path);
+    }
+
     // ==================== HELPER METHODS ======================
+
+    private String deriveCategoryPath(Category category) {
+        if (category == null) return "";
+        Category parent = category.getParent();
+
+        if (parent == null) {
+            return category.getName();
+        }
+
+        return deriveCategoryPath(parent) + "/" + category.getName();
+    }
 
     private static @NotNull CategorySummary toCategorySummary(Category c) {
         var thumbnail = c.getThumbnail() != null

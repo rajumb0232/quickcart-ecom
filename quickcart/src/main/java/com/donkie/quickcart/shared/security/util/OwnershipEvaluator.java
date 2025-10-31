@@ -23,7 +23,6 @@ public final class OwnershipEvaluator {
                 .isPresent();
     }
 
-
     public static void ensureOwnership(String createdBy) {
         if (!isOwner(createdBy)) {
             log.warn("Illegal Access, createdBy does not match the current user.");

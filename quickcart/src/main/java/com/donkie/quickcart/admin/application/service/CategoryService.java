@@ -3,6 +3,7 @@ package com.donkie.quickcart.admin.application.service;
 import com.donkie.quickcart.admin.application.dto.request.CategoryCreateRequest;
 import com.donkie.quickcart.admin.application.dto.request.CategoryUpdateRequest;
 import com.donkie.quickcart.admin.application.dto.response.CategoryDetail;
+import com.donkie.quickcart.admin.application.dto.response.CategorySnapshot;
 import com.donkie.quickcart.admin.application.dto.response.CategorySummary;
 import com.donkie.quickcart.admin.domain.model.CategoryStatus;
 
@@ -63,4 +64,6 @@ public interface CategoryService {
     CategorySummary updateCategoryParent(UUID categoryId, UUID parentId);
 
     List<CategoryDetail> getCategoriesOfAllStatus();
+
+    CategorySnapshot getCategorySnapshot(UUID categoryId);
 }
