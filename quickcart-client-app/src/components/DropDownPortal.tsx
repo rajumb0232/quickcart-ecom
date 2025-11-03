@@ -1,9 +1,16 @@
+// DropdownPortal.tsx
 import React, { useEffect, useRef, useState, type JSX } from "react";
 import { createPortal } from "react-dom";
 
-export type MenuItem = { name: string; icon?: JSX.Element; onClick?: () => void };
+export type MenuItem = {
+  name: string;
+  icon?: JSX.Element;
+  onClick?: () => void;
+  onMouseEnter?: () => void; // <-- optional per-item hover handlers
+  onMouseLeave?: () => void;
+};
 
-const DROPDOWN_MARGIN = 8; // px from viewport edges
+const DROPDOWN_MARGIN = 8;
 
 export interface DropdownPortalProps {
   triggerRect: DOMRect;
@@ -11,13 +18,9 @@ export interface DropdownPortalProps {
   onClose: () => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
-  width?: number; // optional - default 220
+  width?: number;
 }
 
-/**
- * Renders a floating dropdown in a portal positioned relative to triggerRect.
- * Keeps same API as previous inline implementation.
- */
 export default function DropdownPortal({
   triggerRect,
   items,
@@ -41,7 +44,6 @@ export default function DropdownPortal({
     };
   }, []);
 
-  // compute position & flip if needed
   const [style, setStyle] = useState<React.CSSProperties>({});
   useEffect(() => {
     const dropdownW = width;
@@ -96,7 +98,7 @@ export default function DropdownPortal({
       }}
     >
       <div
-        className="bg-white border border-gray-100 rounded-2xl shadow-lg py-2"
+        className="bg-white border border-gray-100 rounded-lg shadow-lg py-2"
         style={{ boxShadow: "0 8px 24px rgba(15,23,42,0.12)" }}
       >
         {items.map((it) => (
@@ -106,6 +108,14 @@ export default function DropdownPortal({
             onClick={() => {
               it.onClick?.();
               onClose();
+            }}
+            onMouseEnter={(e) => {
+              e.stopPropagation();
+              it.onMouseEnter?.();
+            }}
+            onMouseLeave={(e) => {
+              e.stopPropagation();
+              it.onMouseLeave?.();
             }}
           >
             <div className="mr-2 text-[20px] font-semibold mt-1">{it.icon}</div>
