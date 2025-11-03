@@ -98,7 +98,7 @@ export default function DropdownPortal({
       }}
     >
       <div
-        className="bg-white border border-gray-100 rounded-lg shadow-lg py-2"
+        className="bg-white border border-gray-100 rounded-md shadow-lg py-2"
         style={{ boxShadow: "0 8px 24px rgba(15,23,42,0.12)" }}
       >
         {items.map((it) => (
