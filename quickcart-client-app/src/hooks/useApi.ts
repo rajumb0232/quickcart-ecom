@@ -1,12 +1,22 @@
 import type { AxiosRequestConfig } from "axios";
 import { api } from "../api/apiClient";
 import type { ApiAck, ApiResponse, ApiResult } from "../types/apiResponseType";
+import axios from "axios";
 
 async function unwrapResponse<T>(
   promise: Promise<{ data: ApiResponse<T> | ApiResult<T> | ApiAck }>
 ): Promise<ApiResponse<T> | ApiResult<T> | ApiAck> {
-  const response = await promise;
-  return response.data;
+  try {
+    const response = await promise;
+    return response.data;
+  } catch (error) {
+    // If it's an axios error with a response, return the error data
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.data;
+    }
+    // Otherwise, re-throw for network errors
+    throw error;
+  }
 }
 
 export const useAPI = () => {

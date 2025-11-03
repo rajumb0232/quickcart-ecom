@@ -4,9 +4,6 @@ import type {
   InternalAxiosRequestConfig,
 } from "axios";
 import {
-  getRefreshToken,
-  setTokens,
-  isRefreshTokenExpired,
   clearTokens,
 } from "../services/tokenStorage";
 import {
@@ -15,13 +12,9 @@ import {
   selectToken,
 } from "../features/auth/authSelectors";
 import { store } from "../app/store";
-import { loginSuccess, logout } from "../features/auth/authSlice";
-import type { AuthResponsePayload, UserRole } from "../types/auth";
-import { doRefresh, fetchRoles } from "../services/authService";
+import { logout } from "../features/auth/authSlice";
 import { API_BASE, api } from "./apiClient";
-
-// single shared promise used as a mutex
-let refreshPromise: Promise<AuthResponsePayload | null> | null = null;
+import {doRefreshOnce} from "../services/authService"
 
 // Request interceptor (proactive refresh)
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
@@ -98,38 +91,3 @@ api.interceptors.response.use(
   }
 );
 
-// ======================= Helpers =======================
-
-const doRefreshOnce = async (): Promise<AuthResponsePayload | null> => {
-  if (refreshPromise) return refreshPromise;
-
-  if (isRefreshTokenExpired()) throw new Error("Refresh token expired");
-  const refresh = getRefreshToken();
-  if (!refresh) throw new Error("No refresh token");
-
-  refreshPromise = (async () => {
-    try {
-      const payload = await doRefresh(refresh);
-      const { access_token, access_expires_in } = payload;
-      const accessExpiry = new Date(Date.now() + access_expires_in * 1000);
-      setTokens(payload);
-
-      // Uses your pluggable fetchRoles function
-      const roles: UserRole[] = await fetchRoles(access_token);
-      store.dispatch(
-        loginSuccess({
-          token: access_token,
-          roles,
-          expiry: accessExpiry.toISOString(),
-        })
-      );
-      return payload;
-    } catch (err) {
-      throw err;
-    } finally {
-      refreshPromise = null;
-    }
-  })();
-
-  return refreshPromise;
-};

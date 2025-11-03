@@ -1,29 +1,61 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Input from "../../components/form/Input";
 import SensitiveInput from "../../components/form/SensitiveInput";
 import BlackButton from "../../components/form/BlackButton";
 import LinkButton from "../../components/form/LinkButton";
 import { FaOpencart } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLogin, useRegister } from "../../hooks/useAuth";
 
 interface AuthPageProps {
   modal?: boolean;
 }
 
 export default function AuthPage({ modal }: AuthPageProps) {
+  const location = useLocation();
+
   const [mode, setMode] = useState<"login" | "register">("login");
   const navigate = useNavigate();
+  const login = useLogin();
+  const register = useRegister();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    const credentials = {
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+    };
+
+    if (mode === "login") {
+      login.mutate(credentials, {
+        onSuccess: (data) => {
+          if (data.success) {
+            // Redirect to where they came from, or home
+            const from = (location.state as any)?.from?.pathname || "/";
+            navigate(from, { replace: true });
+          }
+        },
+      });
+    } else {
+      register.mutate(credentials, {
+        onSuccess: (data) => {
+          if (data.success) {
+            setMode("login");
+          }
+        },
+      });
+    }
+  };
+
+  const currentMutation = mode === "login" ? login : register;
 
   const image =
     mode === "login"
       ? "https://images.unsplash.com/photo-1759572095317-3a96f9a98e2b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDI2fHx8ZW58MHx8fHx8&auto=format&fit=crop&q=60&w=1200"
       : "https://images.unsplash.com/photo-1716951918731-77d7682b4e63?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&q=60&w=1200";
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Implement login/register logic here
-  };
 
   const closeModal = () => navigate(-1);
 
@@ -68,8 +100,15 @@ export default function AuthPage({ modal }: AuthPageProps) {
             </div>
           )}
           <BlackButton
-            label={mode === "login" ? "Sign in" : "Sign up"}
+            label={
+              currentMutation.isPending
+                ? "Please wait..."
+                : mode === "login"
+                ? "Sign in"
+                : "Sign up"
+            }
             type="submit"
+            disabled={currentMutation.isPending} // ✅ Already prevents multiple clicks
           />
           <div className="text-center text-sm text-gray-600 mt-4">
             {mode === "login" ? (

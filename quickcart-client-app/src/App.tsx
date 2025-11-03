@@ -5,6 +5,7 @@ import SellerDashboard from "./pages/seller/SellerDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import HomePage from "./pages/public/home/Homepage";
 import LoginPage from "./pages/auth/LoginPage";
+import RequireUnAuth from "./routes/RequiresUnAuth";
 
 export default function App() {
   const location = useLocation();
@@ -17,7 +18,13 @@ export default function App() {
       {/* Main route layer — background page stays visible */}
       <Routes location={state?.backgroundLocation || location}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/sign" element={<LoginPage />} />
+        
+        <Route path="/sign" 
+        element={
+          <RequireUnAuth>
+            <LoginPage />
+          </RequireUnAuth>
+        } />
 
         <Route
           path="/customer/*"
