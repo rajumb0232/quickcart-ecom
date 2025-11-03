@@ -69,9 +69,9 @@ export const NavCategories: React.FC = () => {
           <RadixMultiDropdown
             key={lvl1.category_id}
             trigger={
-              <button className="px-3 py-2 text-sm font-medium hover:underline">
-                {lvl1.name}
-              </button>
+              <div className="px-3 py-2 text-sm font-medium hover:underline">
+                {lvl1.name?.toUpperCase()}
+              </div>
             }
             items={items}
             width={240}

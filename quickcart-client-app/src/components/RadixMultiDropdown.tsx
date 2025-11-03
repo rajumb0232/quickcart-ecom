@@ -53,22 +53,33 @@ export default function RadixMultiDropdown({
     <>
       <style>
         {`
-          /* Remove border from dropdown content */
+          /* Ensure all dropdown content containers have light borders */
           .dropdown-content, .dropdown-subcontent {
-            border: none !important;
+            border: 1px solid #e2e8f0 !important; /* slate-100 */
           }
 
-          /* Remove focus outline and box-shadow on items */
-          .dropdown-content *:focus, 
-          .dropdown-subcontent *:focus, 
+          /* Remove focus outlines for buttons and dropdown items */
+          .dropdown-content *:focus,
+          .dropdown-subcontent *:focus,
           button:focus {
             outline: none !important;
             box-shadow: none !important;
             border: none !important;
           }
+
+          /* Cursor pointer for all dropdown items and sub triggers */
+          .dropdown-item,
+          .dropdown-subtrigger-button {
+            cursor: pointer;
+          }
         `}
       </style>
-      <DropdownMenu.Root modal={false} open={rootOpen} onOpenChange={(v) => setRootOpen(v)}>
+
+      <DropdownMenu.Root
+        modal={false}
+        open={rootOpen}
+        onOpenChange={setRootOpen}
+      >
         <DropdownMenu.Trigger
           onMouseEnter={() => {
             clearTimers();
@@ -86,8 +97,10 @@ export default function RadixMultiDropdown({
 
         <DropdownMenu.Portal>
           <DropdownMenu.Content
-            sideOffset={8}
-            className="bg-white rounded-md shadow-lg py-2 dropdown-content"
+            side="bottom"
+            align="start"
+            sideOffset={4}
+            className="bg-white rounded-md shadow-lg py-2 dropdown-content z-9999"
             style={{ width }}
             onMouseEnter={() => {
               clearTimers();
@@ -102,7 +115,8 @@ export default function RadixMultiDropdown({
             }}
           >
             {items.map((it, idx) => {
-              const hasChildren = Array.isArray(it.child) && it.child.length > 0;
+              const hasChildren =
+                Array.isArray(it.child) && it.child.length > 0;
               return (
                 <div key={it.name + idx} className="relative">
                   {hasChildren ? (
@@ -114,21 +128,26 @@ export default function RadixMultiDropdown({
                         asChild
                         onMouseEnter={() => {
                           clearTimers();
-                          enterTimer.current = window.setTimeout(() => setOpenSubIndex(idx), 80);
+                          enterTimer.current = window.setTimeout(
+                            () => setOpenSubIndex(idx),
+                            80
+                          );
                           setRootOpen(true);
                         }}
                         onMouseLeave={() => {
                           clearTimers();
-                          leaveTimer.current = window.setTimeout(() =>
-                            setOpenSubIndex((cur) => (cur === idx ? null : cur)),
-                            150
-                          );
+                          leaveTimer.current = window.setTimeout(() => {
+                            setOpenSubIndex((cur) =>
+                              cur === idx ? null : cur
+                            );
+                          }, 150);
                         }}
                       >
                         <button
-                          className="w-full text-left px-4 py-3 text-sm flex items-center hover:bg-[#faf7f2]"
+                          className="w-full text-left px-4 py-3 text-sm flex items-center hover:bg-[#faf7f2] dropdown-subtrigger-button"
                           onClick={(e) => {
                             e.preventDefault();
+                            it.onClick?.();
                           }}
                         >
                           <div className="mr-2 text-[18px]">{it.icon}</div>
@@ -163,7 +182,7 @@ export default function RadixMultiDropdown({
                           {it.child!.map((c, i) => (
                             <DropdownMenu.Item
                               key={c.name + i}
-                              className="w-full text-left px-4 py-3 text-sm hover:bg-[#faf7f2] flex items-center"
+                              className="w-full text-left px-4 py-3 text-sm hover:bg-[#faf7f2] flex items-center dropdown-item"
                               onSelect={() => {
                                 c.onClick?.();
                                 setRootOpen(false);
@@ -179,7 +198,7 @@ export default function RadixMultiDropdown({
                     </DropdownMenu.Sub>
                   ) : (
                     <DropdownMenu.Item
-                      className="w-full text-left px-4 py-3 text-sm hover:bg-[#faf7f2] flex items-center"
+                      className="w-full text-left px-4 py-3 text-sm hover:bg-[#faf7f2] flex items-center dropdown-item"
                       onSelect={() => {
                         it.onClick?.();
                         setRootOpen(false);

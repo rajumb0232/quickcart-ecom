@@ -19,27 +19,3 @@
   animation: slide-in-from-right 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* html, body {
-  overflow-y: scroll !important;
-}
-
-html {
-  scrollbar-gutter: stable;
-} */
-
-/* Remove focus outline */
-.dropdown-content *:focus {
-  outline: none;
-  box-shadow: none;
-  border: none;
-}
-
-/* Optionally for the DropdownMenu.Content */
-.dropdown-content {
-  border: none !important;
-}
-
-/* Also remove border on SubContent */
-.sub-content {
-  border: none !important;
-}
