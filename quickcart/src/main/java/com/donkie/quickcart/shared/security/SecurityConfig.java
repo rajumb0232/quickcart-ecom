@@ -13,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
@@ -20,11 +21,13 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final TokenRevocationService tokenRevocationService;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     @Order(1)
     public SecurityFilterChain publicRequestFilterChain(HttpSecurity http) throws Exception {
         return http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .securityMatcher("/actuator/health/**", "/actuator/info/**", "/docs/**", "/api/v1/public/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -39,6 +42,7 @@ public class SecurityConfig {
         authConverter.setJwtGrantedAuthoritiesConverter(rolesConverter);
 
         return http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .securityMatcher("/api/v1/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(authConverter)))

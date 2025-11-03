@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Setter
 @Getter
 public class ApplicationProperties {
+    private String[] allowedOrigins;
     private Admin admin;
 
     @Setter
