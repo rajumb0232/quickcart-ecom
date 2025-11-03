@@ -4,12 +4,35 @@ import { FaHeart, FaRegUser, FaShoppingCart } from "react-icons/fa";
 import { SlOptionsVertical } from "react-icons/sl";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { selectIsAuthenticated } from "../../../features/auth/authSelectors";
-import DropdownPortal, { type MenuItem } from "../../../components/DropDownPortal";
+import {
+  selectIsAuthenticated,
+  selectRoles,
+} from "../../../features/auth/authSelectors";
+import DropdownPortal, {
+  type MenuItem,
+} from "../../../components/DropDownPortal";
+import {
+  CiHashtag,
+  CiLogout,
+  CiSettings,
+  CiShop,
+  CiUser,
+} from "react-icons/ci";
+import {
+  PiChatsLight,
+  PiCreditCardLight,
+  PiPackageLight,
+  PiTagLight,
+  PiUserCircleGearLight,
+} from "react-icons/pi";
 
 const HOVER_CLOSE_DELAY = 150; // ms
 
 export const MainMenu: React.FC = () => {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const userRoles = useSelector(selectRoles);
+  const navigate = useNavigate();
+
   const [open, setOpen] = useState<{
     key: string;
     rect: DOMRect;
@@ -49,8 +72,12 @@ export const MainMenu: React.FC = () => {
       if (!open) return;
       const triggerRef = refs[open.key as keyof typeof refs];
       if (triggerRef?.current) {
-        setOpen((prev) =>
-          prev && { ...prev, rect: triggerRef.current!.getBoundingClientRect() }
+        setOpen(
+          (prev) =>
+            prev && {
+              ...prev,
+              rect: triggerRef.current!.getBoundingClientRect(),
+            }
         );
       }
     };
@@ -74,17 +101,33 @@ export const MainMenu: React.FC = () => {
   };
 
   const accountMenu: MenuItem[] = [
-    { name: "My Profile" },
-    { name: "Orders" },
-    { name: "Wishlist" },
-    { name: "Coupons" },
-    { name: "Gift Cards" },
-    { name: "Logout" },
+    { name: "My Profile", icon: <CiUser /> },
+    { name: "Orders", icon: <PiPackageLight /> },
+    { name: "Coupons", icon: <PiTagLight /> },
+    { name: "Gift Cards", icon: <PiCreditCardLight /> },
+    { name: "Logout", icon: <CiLogout /> },
   ];
+
+  if (isAuthenticated) {
+    if (userRoles.includes("seller"))
+      accountMenu.splice(accountMenu.length - 1, 0, {
+        name: "Switch to Seller Profile",
+        onClick: () => navigate("/seller-dashboard"),
+        icon: <CiShop />,
+      });
+      
+    if (userRoles.includes("admin"))
+      accountMenu.splice(accountMenu.length - 1, 0, {
+        name: "Switch to Admin Profile",
+        onClick: () => navigate("/admin-dashboard"),
+        icon: <PiUserCircleGearLight />,
+      });
+  }
+
   const optionsMenu: MenuItem[] = [
-    { name: "Settings" },
-    { name: "Help Center" },
-    { name: "About Us" },
+    { name: "Settings", icon: <CiSettings /> },
+    { name: "Help Center", icon: <PiChatsLight /> },
+    { name: "About Us", icon: <CiHashtag /> },
   ];
 
   return (
@@ -166,7 +209,7 @@ const ItemButton = React.forwardRef<HTMLButtonElement, ItemButtonProps>(
     return (
       <button
         ref={ref}
-        className="relative flex flex-col items-center text-gray-900 hover:text-black hover:scale-105 transition-all ease-in-out duration-200 cursor-pointer mx-2"
+        className="relative flex flex-col items-center text-gray-900 hover:text-black hover:scale-105 transition-all ease-in-out duration-200 cursor-pointer mx-1 md:mx-4"
         title={label}
         onClick={(e) => {
           handleUnAuthorizedClicks();

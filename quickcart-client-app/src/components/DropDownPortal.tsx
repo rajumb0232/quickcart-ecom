@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, type JSX } from "react";
 import { createPortal } from "react-dom";
 
-export type MenuItem = { name: string; onClick?: () => void };
+export type MenuItem = { name: string; icon?: JSX.Element; onClick?: () => void };
 
 const DROPDOWN_MARGIN = 8; // px from viewport edges
 
@@ -102,13 +102,14 @@ export default function DropdownPortal({
         {items.map((it) => (
           <button
             key={it.name}
-            className="w-full text-left px-4 py-3 text-sm hover:bg-[#faf7f2] transition"
+            className="w-full text-left px-4 py-3 text-sm hover:bg-[#faf7f2] transition flex flex-row justify-start items-center"
             onClick={() => {
               it.onClick?.();
               onClose();
             }}
           >
-            {it.name}
+            <div className="mr-2 text-[20px] font-semibold mt-1">{it.icon}</div>
+            <span>{it.name}</span>
           </button>
         ))}
       </div>
