@@ -1,5 +1,6 @@
 package com.donkie.quickcart.seller.api.controller;
 
+import com.donkie.quickcart.seller.application.dto.request.ProductFilters;
 import com.donkie.quickcart.seller.application.dto.request.ProductRequest;
 import com.donkie.quickcart.seller.application.dto.response.ProductResponse;
 import com.donkie.quickcart.seller.application.service.contracts.ProductService;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -57,6 +59,17 @@ public class ProductController {
                 response
         ));
     }
+
+    @GetMapping("/public/products/filter")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsByFilter(
+            @ModelAttribute ProductFilters filters,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+
+        List<ProductResponse> response = productService.getProductsByFilter(filters, page, size);
+        return ResponseEntity.ok(ApiResponse.success("Products Found", response));
+    }
+
 
     @PutMapping("/products/{productId}")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(

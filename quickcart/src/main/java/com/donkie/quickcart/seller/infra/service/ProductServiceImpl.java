@@ -1,5 +1,6 @@
 package com.donkie.quickcart.seller.infra.service;
 
+import com.donkie.quickcart.seller.application.dto.request.ProductFilters;
 import com.donkie.quickcart.seller.application.dto.request.ProductRequest;
 import com.donkie.quickcart.seller.application.dto.response.ProductResponse;
 import com.donkie.quickcart.seller.application.dto.response.ProductVariantResponse;
@@ -9,6 +10,7 @@ import com.donkie.quickcart.seller.application.exception.ProductNotFoundExceptio
 import com.donkie.quickcart.seller.application.exception.StoreNotFoundException;
 import com.donkie.quickcart.seller.application.service.contracts.ProductService;
 import com.donkie.quickcart.seller.application.service.contracts.ProductVariantService;
+import com.donkie.quickcart.seller.application.service.util.ProductSpecifications;
 import com.donkie.quickcart.seller.domain.model.Product;
 import com.donkie.quickcart.seller.domain.model.Store;
 import com.donkie.quickcart.seller.domain.repository.ProductRepository;
@@ -18,6 +20,8 @@ import com.donkie.quickcart.user.domain.model.UserRole;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,6 +129,19 @@ public class ProductServiceImpl implements ProductService {
         product.getVariants().forEach(pv -> pv.getLifecycleAudit().setActive(true));
         productRepository.save(product);
         // variant updates are cascaded
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<ProductResponse> getProductsByFilter(ProductFilters filters, int page, int size) {
+        var spec = ProductSpecifications.byFilters(filters);
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findAll(spec, pageable)
+                .stream()
+                .map(product -> {
+                    var variants = productVariantService.getVariantsByProduct(product.getProductId());
+                    return toProductResponse(product, variants);
+                }).toList();
     }
 
     // ===================== Private Helpers =====================
