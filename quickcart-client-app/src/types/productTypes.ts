@@ -31,6 +31,7 @@ export interface Variant {
     color: string;
     "Care Instruction": string;
   };
+  image_uris: string[];
   is_active: boolean;
   is_deleted: boolean;
 }
