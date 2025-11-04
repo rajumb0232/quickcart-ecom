@@ -1,12 +1,11 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { selectNavHeight } from "../../../features/util/screenSelector";
 import { SideBar } from "./SideBar";
 import { useSearchProduct } from "../../../hooks/useProducts";
 import { isApiResponse } from "../../../types/apiResponseType";
 
-// keep API base outside the component and not exported from inside it
 const RAW_API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8081/api/v1";
 const API_BASE = RAW_API_BASE.replace(/\/$/, "");
 
@@ -20,16 +19,11 @@ interface Result {
   last_modified_date?: string;
   avg_rating: number;
   rating_count: number;
-  attributes: {
-    fit?: string;
-    size?: string;
-    type?: string;
-    color?: string;
-    "Care Instruction"?: string;
-  };
+  attributes: { fit?: string; size?: string; type?: string; color?: string; "Care Instruction"?: string; };
   image_uris: string[];
   is_active?: boolean;
   is_deleted?: boolean;
+  productId?: string; // additional prop to hold product ID
 }
 
 const PLACEHOLDER = (
@@ -39,11 +33,12 @@ const PLACEHOLDER = (
 const ProductSearchResultPage: React.FC = () => {
   const location = useLocation();
   const navHeight = useSelector(selectNavHeight);
+  const navigate = useNavigate();
 
   const { data, isLoading, isError } = useSearchProduct(location.search);
   const products = data && isApiResponse(data) ? data.data : [];
 
-  // Flatten product -> variants and prefix image URIs with API_BASE if needed
+  // Flatten variants and attach productId
   const variants: Result[] = React.useMemo(() => {
     const out: Result[] = [];
     products.forEach((product: any) => {
@@ -58,6 +53,7 @@ const ProductSearchResultPage: React.FC = () => {
           title: `${product.title || ""} - ${v.title || ""}`,
           avg_rating: product.avg_rating ?? v.avg_rating ?? 0,
           rating_count: product.rating_count ?? v.rating_count ?? 0,
+          productId: product.product_id, // attach productId for navigation
         });
       });
     });
@@ -79,19 +75,32 @@ const ProductSearchResultPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {variants.map((variant) => (
                 <article
-                  className="bg-white rounded-lg shadow-sm hover:shadow-lg transition duration-150 border border-gray-200 flex flex-col overflow-hidden"
                   key={variant.variant_id}
+                  className="bg-white rounded-lg shadow-sm hover:shadow-lg transition duration-150 border border-gray-200 flex flex-col overflow-hidden cursor-pointer"
+                  onClick={() => {
+                    if (variant.productId) {
+                      console.log("navigating to: ", variant.productId);
+                      navigate(`/product/${variant.productId}`);
+                    } else {
+                      console.warn("productId is missing for variant", variant.variant_id);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      if (variant.productId) navigate(`/product/${variant.productId}`);
+                    }
+                  }}
                 >
                   <div className="h-56 w-full bg-gray-100 rounded-t-lg flex items-center justify-center overflow-hidden">
-                    {variant.image_uris && variant.image_uris.length > 0 && variant.image_uris[0] ? (
+                    {variant.image_uris?.length && variant.image_uris[0] ? (
                       <img
                         src={variant.image_uris[0]}
                         alt={variant.title}
                         className="object-contain h-full w-full"
                         onError={(e) => {
-                          // fallback to placeholder on error
-                          const target = e.currentTarget as HTMLImageElement;
-                          target.style.display = "none";
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
                         }}
                       />
                     ) : (

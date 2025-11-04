@@ -24,6 +24,16 @@ const DummySubscribeFooter: React.FC = () => (
     </div>
 
     {/* Footer Info Grid */}
+    <Footer />
+  </section>
+);
+
+export default DummySubscribeFooter;
+
+
+export const Footer: React.FC = () => {
+
+  return (
     <footer className="w-full bg-[#faf7f2] mt-10 py-12">
       <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 text-sm text-gray-900">
         <div>
@@ -78,7 +88,5 @@ const DummySubscribeFooter: React.FC = () => (
         <span>© 1996-2025, donkie.com, Inc. or its affiliates</span>
       </div>
     </footer>
-  </section>
-);
-
-export default DummySubscribeFooter;
+  )
+}

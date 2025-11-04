@@ -5,4 +5,7 @@ export const productService = {
     search: (api: ReturnType< typeof useAPI>, params: URLSearchParams) => {
         return api.get<Product[]>("/public/products/filter", params);
     },
+    fetchProduct: (api: ReturnType<typeof useAPI>, productId: string | undefined) => {
+        return api.get<Product>(`/public/products/${productId}`)
+    }
 }

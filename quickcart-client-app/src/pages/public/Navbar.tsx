@@ -1,15 +1,17 @@
 import React, { useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setNavHeight } from "../../features/util/screenSlice";
 import { NavCategories } from "./navbar/NavCategories";
 import { SetLocation } from "./navbar/SetLocation";
 import { MainMenu } from "./navbar/MainMenu";
 import { NavLogo } from "./navbar/NavLogo";
 import { SearchBar } from "./navbar/SearchBar";
+import { selectShowCategories } from "../../features/util/screenSelector";
 
 const Navbar: React.FC = () => {
   const dispatch = useDispatch();
   const navRef = useRef<HTMLElement>(null);
+  const showCategories = useSelector(selectShowCategories);
 
   // Measure navbar height and save it globally on mount and resize
   useEffect(() => {
@@ -54,7 +56,7 @@ const Navbar: React.FC = () => {
       <SetLocation />
 
       {/* Render all Top Categories */}
-      <NavCategories />
+      {showCategories && (<NavCategories/>)}
 
       {/* Hide scrollbar style */}
       <style>

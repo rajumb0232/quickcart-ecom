@@ -15,3 +15,15 @@ export const useSearchProduct = (query: string) => {
     staleTime: 10 * 60 * 1000,
   });
 };
+
+
+export const useGetProductById = (id: string | undefined) => {
+  const api = useAPI();
+
+  return useQuery<ApiResult<Product>, Error>({
+    queryKey: ["product", id],
+    queryFn: () => productService.fetchProduct(api, id),
+    retry: 2,
+    staleTime: 24 * 60 * 60 * 1000,
+  })
+}

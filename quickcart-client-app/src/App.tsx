@@ -8,27 +8,50 @@ import LoginPage from "./pages/auth/LoginPage";
 import RequireUnAuth from "./routes/RequiresUnAuth";
 import ProductSearchResultPage from "./pages/public/product/ProductSearchResultPage";
 import Navbar from "./pages/public/Navbar";
+import { ProductDetail } from "./pages/public/product/ProductDetail";
+import { useDispatch } from "react-redux";
+import { setScreenHeight } from "./features/util/screenSlice";
+import { useEffect } from "react";
 
 export default function App() {
   const location = useLocation();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    function handleResize() {
+      dispatch(setScreenHeight(window.innerHeight));
+    }
+    // Set initial height
+    handleResize();
+    // Add resize event listener
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [dispatch]);
 
   // 👇 Save the previous location when navigating to /sign
   const state = location.state as { backgroundLocation?: Location };
 
   return (
     <>
-    <Navbar />
+      <Navbar />
       {/* Main route layer — background page stays visible */}
       <Routes location={state?.backgroundLocation || location}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/search" element={<ProductSearchResultPage />}/>
-        
-        <Route path="/sign" 
-        element={
-          <RequireUnAuth>
-            <LoginPage />
-          </RequireUnAuth>
-        } />
+        <Route path="/search" element={<ProductSearchResultPage />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
+
+        <Route
+          path="/sign"
+          element={
+            <RequireUnAuth>
+              <LoginPage />
+            </RequireUnAuth>
+          }
+        />
 
         <Route
           path="/customer/*"
