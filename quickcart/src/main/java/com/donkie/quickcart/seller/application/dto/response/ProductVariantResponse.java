@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public record ProductVariantResponse(
@@ -15,6 +16,7 @@ public record ProductVariantResponse(
         @JsonProperty("created_date") Instant createdDate,
         @JsonProperty("last_modified_date") Instant lastModifiedDate,
         @JsonProperty("attributes") Map<String, String> attributes,
+        @JsonProperty("image_uris") Set<String> imageURIs,
         @JsonProperty("is_active") boolean isActive,
         @JsonProperty("is_deleted") boolean isDeleted
 ) {

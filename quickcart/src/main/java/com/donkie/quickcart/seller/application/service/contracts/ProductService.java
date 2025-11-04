@@ -3,6 +3,7 @@ package com.donkie.quickcart.seller.application.service.contracts;
 import com.donkie.quickcart.seller.application.dto.request.ProductFilters;
 import com.donkie.quickcart.seller.application.dto.request.ProductRequest;
 import com.donkie.quickcart.seller.application.dto.response.ProductResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;

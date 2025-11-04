@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.donkie.quickcart.shared.security.util.OwnershipEvaluator.ensureOwnership;
 
@@ -97,7 +99,11 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         }
 
         return variants.stream()
-                .map(this::toResponse)
+                .map(v -> {
+                    var imageURIs = v.getImages().stream().map(img -> "/public/products/variants/images/" + img.getImageId())
+                            .collect(Collectors.toSet());
+                    return toResponse(v, imageURIs);
+                })
                 .toList();
     }
 
@@ -107,6 +113,8 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         return productVariantRepository.findById(variantId)
                 .map(v -> {
                     var product = v.getProduct();
+                    var imageURIs = v.getImages().stream().map(img -> "/public/products/variants/images/" + img.getImageId())
+                            .collect(Collectors.toSet());
                     return new ProductByVariantResponse(
                             product.getProductId(),
                             product.getTitle(),
@@ -117,7 +125,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
                             product.getRatingCount(),
                             product.getLifecycleAudit().getCreatedDate(),
                             product.getLifecycleAudit().getLastModifiedDate(),
-                            toResponse(v),
+                            toResponse(v, imageURIs),
                             product.isActive(),
                             product.getLifecycleAudit().isDeleted()
                     );
@@ -136,7 +144,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         return variant;
     }
 
-    private ProductVariantResponse toResponse(ProductVariant v) {
+    private ProductVariantResponse toResponse(ProductVariant v, Set<String> imageURIs) {
         return new ProductVariantResponse(
                 v.getVariantId(),
                 v.getTitle(),
@@ -146,6 +154,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
                 v.getLifecycleAudit().getCreatedDate(),
                 v.getLifecycleAudit().getLastModifiedDate(),
                 v.getAttributes(),
+                imageURIs,
                 v.isActive(),
                 v.getLifecycleAudit().isDeleted()
         );
