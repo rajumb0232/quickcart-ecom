@@ -61,8 +61,8 @@ public final class ProductSpecifications {
         }
 
         // price range — join variants and also filter their lifecycle (nullable Doubles)
-        Double min = filters.minPrize();
-        Double max = filters.maxPrize();
+        Double min = filters.minPrice();
+        Double max = filters.maxPrice();
         boolean hasMin = Objects.nonNull(min);
         boolean hasMax = Objects.nonNull(max);
 

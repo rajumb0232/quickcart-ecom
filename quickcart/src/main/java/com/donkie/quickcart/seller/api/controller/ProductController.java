@@ -8,14 +8,17 @@ import com.donkie.quickcart.shared.dto.ApiAck;
 import com.donkie.quickcart.shared.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 @AllArgsConstructor
@@ -65,6 +68,9 @@ public class ProductController {
             @ModelAttribute ProductFilters filters,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "25") int size) {
+
+        log.debug("Searching products by filters: brand: {} categories: {} rating: {} minPrice: {} maxPrice: {}",
+                filters.brand(), Arrays.toString(filters.categories()), filters.rating(), filters.minPrice(), filters.maxPrice());
 
         List<ProductResponse> response = productService.getProductsByFilter(filters, page, size);
         return ResponseEntity.ok(ApiResponse.success("Products Found", response));
