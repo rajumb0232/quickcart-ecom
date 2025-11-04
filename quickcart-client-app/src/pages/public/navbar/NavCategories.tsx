@@ -2,21 +2,9 @@
 import React from "react";
 import RadixMultiDropdown, { type MenuItem as RadixMenuItem } from "../../../components/RadixMultiDropdown";
 import { useCategories } from "../../../hooks/useCategories";
+import { normalizeCategories } from "../../../services/categoryService";
 import type { Category } from "../../../types/productTypes";
 import { isApiResponse } from "../../../types/apiResponseType";
-
-function normalizeCategories(raw?: Category[] | null): Category[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.map((c) => ({
-    ...c,
-    child_category: Array.isArray(c.child_category)
-      ? c.child_category.map((cc) => ({
-          ...cc,
-          child_category: Array.isArray(cc.child_category) ? cc.child_category : [],
-        }))
-      : [],
-  }));
-}
 
 function toMenuItems(level2: Category[] | undefined | null): RadixMenuItem[] {
   if (!Array.isArray(level2)) return [];

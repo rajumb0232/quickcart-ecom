@@ -6,6 +6,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import HomePage from "./pages/public/home/Homepage";
 import LoginPage from "./pages/auth/LoginPage";
 import RequireUnAuth from "./routes/RequiresUnAuth";
+import ProductSearchResultPage from "./pages/public/product/ProductSearchResultPage";
+import Navbar from "./pages/public/Navbar";
 
 export default function App() {
   const location = useLocation();
@@ -15,9 +17,11 @@ export default function App() {
 
   return (
     <>
+    <Navbar />
       {/* Main route layer — background page stays visible */}
       <Routes location={state?.backgroundLocation || location}>
         <Route path="/" element={<HomePage />} />
+        <Route path="/search" element={<ProductSearchResultPage />}/>
         
         <Route path="/sign" 
         element={

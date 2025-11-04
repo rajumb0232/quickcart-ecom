@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../Navbar";
 import HeroOverlay from "./HeroOverlay";
 import { heroCards, productByCategory } from "./homePageData";
 import TopCategories from "./TopCategories";
@@ -31,7 +30,6 @@ const Homepage: React.FC = () => {
 
   return (
     <div style={{ marginTop: `${navHeight}px` }}>
-      <Navbar />
 
       {/* Hero Section - Responsive padding and overflow */}
       <div className="relative w-full h-full overflow-hidden px-4 sm:px-5 md:px-6 lg:px-7 pt-3 sm:pt-4 md:pt-5">
