@@ -119,11 +119,11 @@ const ProductSearchResultPage: React.FC = () => {
                         <span className="text-xs text-gray-500 ml-1">{variant.rating_count} reviews</span>
                       </div>
 
-                      {/* <div className="flex flex-wrap text-xs text-gray-600 gap-x-4">
+                      <div className="flex flex-wrap text-xs text-gray-600 gap-x-4">
                         {variant.attributes?.size && <span>Size: {variant.attributes.size}</span>}
                         {variant.attributes?.color && <span>Color: {variant.attributes.color}</span>}
                         {variant.attributes?.fit && <span>Fit: {variant.attributes.fit}</span>}
-                      </div> */}
+                      </div>
                     </div>
                   </div>
                 </article>
