@@ -41,7 +41,7 @@ export const BrandFilter: React.FC<BrandFilterProps> = ({
           className="absolute right-2 top-2 text-gray-600"
           aria-label="Toggle brand list"
         >
-          ▾
+          <span className="text-gray-600">{isBrandOpen ? "▴" : "▾"}</span>
         </button>
       </div>
 

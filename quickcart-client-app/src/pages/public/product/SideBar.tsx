@@ -55,7 +55,6 @@ export const SideBar: React.FC = () => {
     if (fp) {
       setFilters(fp);
     }
-
   }, [location.search]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,7 +100,7 @@ export const SideBar: React.FC = () => {
           onToggle={() => setCategoryOpen((s) => !s)}
           onConfirm={(names) => {
             setFilters((p) => ({ ...p, categories: names }));
-            setCategoryOpen(false);
+            // setCategoryOpen(false);
           }}
           onClear={() => setFilters((p) => ({ ...p, categories: [] }))}
         />
@@ -148,8 +147,8 @@ export const SideBar: React.FC = () => {
           <label className="block text-gray-700 text-xs mb-2">
             Select Rating
           </label>
-          <div className="flex gap-2">
-            {[1, 2, 3, 4, 5].map((n) => (
+          <div className="flex flex-col gap-2">
+            {[5, 4, 3, 2, 1].map((n) => (
               <button
                 key={n}
                 onClick={() =>
@@ -158,13 +157,21 @@ export const SideBar: React.FC = () => {
                     rating: prev.rating === String(n) ? "" : String(n),
                   }))
                 }
-                className={`px-2 py-1 rounded border transition-colors ${
+                className={`px-2 py-1 rounded border flex items-center gap-2 transition-colors ${
                   filters.rating === String(n)
                     ? "bg-yellow-100 border-yellow-400"
                     : "border-gray-300 hover:bg-gray-50"
                 }`}
               >
-                {n} ⭐
+                {/* Render stars for the given count */}
+                <span>
+                  {[...Array(n)].map((_, i) => (
+                    <span key={i} className="text-yellow-500">
+                      ★
+                    </span>
+                  ))}
+                </span>
+                <span className="ml-2 text-xs text-gray-700">{n}</span>
               </button>
             ))}
           </div>

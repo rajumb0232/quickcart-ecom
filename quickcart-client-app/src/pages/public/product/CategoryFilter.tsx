@@ -9,25 +9,20 @@ import { isApiResponse } from "../../../types/apiResponseType";
 import { normalizeCategories } from "../../../services/categoryService";
 import { sanitizeCategorySelection } from "../../../services/categoryGroupSanitizer";
 import { useLocation } from "react-router-dom";
+import { IoCaretBackOutline, IoCaretForward } from "react-icons/io5";
+import { MdDelete } from "react-icons/md";
 
 export interface CategoryFilterProps {
   isOpen: boolean;
   onToggle: () => void;
   onConfirm: (selectedNames: string[]) => void;
   onClear?: () => void;
-  onCancel?: () => void;
 }
 
 export const CategoryFilter: React.FC<CategoryFilterProps> = (
   props: CategoryFilterProps
 ) => {
-  const {
-    isOpen,
-    onToggle,
-    onConfirm,
-    onClear,
-    onCancel,
-  } = props;
+  const { isOpen, onToggle, onConfirm, onClear } = props;
 
   const { data, isLoading, isError } = useCategories();
   const fetched = data && isApiResponse(data) ? data.data ?? [] : [];
@@ -39,6 +34,22 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = (
   const [selL1, setSelL1] = useState<Category | null>(null);
   const [selL2, setSelL2] = useState<Category | null>(null);
   const [selL3, setSelL3] = useState<Category | null>(null);
+  const [path, setPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPath(
+      [selL1?.name, selL2?.name, selL3?.name].filter(Boolean).join("/") ||
+        "Select Category"
+    );
+    confirmNames();
+  }, [selL1, selL2, selL3]);
+
+  const confirmNames = () => {
+    const names = [selL1?.name, selL2?.name, selL3?.name].filter(
+      Boolean
+    ) as string[];
+    onConfirm(names);
+  };
 
   useEffect(() => {
     const fp = parseProductFiltersFromURL(location?.search);
@@ -53,12 +64,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = (
     setSelL1(pre.level1);
     setSelL2(pre.level2);
     setSelL3(pre.level3);
-
   };
-
-  const pathLabel =
-    [selL1?.name, selL2?.name, selL3?.name].filter(Boolean).join("/") ||
-    "Select Category";
 
   function resetAll() {
     setSelL1(null);
@@ -81,33 +87,19 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = (
         setLevel(3);
       } else if (selL1 != null && selL2 != null) {
         setSelL3(item);
-        const names = [selL1?.name, selL2?.name, item.name].filter(
-          Boolean
-        ) as string[];
-        onConfirm(names);
         onToggle();
       }
     }
   }
 
-  function backToLevel1() {
-    setLevel(1);
-    setSelL2(null);
-    setSelL3(null);
-  }
-
-  function backToLevel2() {
-    setLevel(2);
-    setSelL3(null);
-  }
-
   function goBack() {
-    if (level === 3) backToLevel2();
-    else if (level === 2) backToLevel1();
-    else {
-      onCancel?.();
-      onToggle();
-    }
+    if (level === 3) setLevel(2);
+    if (level === 2) setLevel(1);
+  }
+
+  function goForward() {
+    if (level === 1) setLevel(2);
+    if (level === 2) setLevel(3);
   }
 
   const currentList =
@@ -124,7 +116,9 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = (
       : "Select in " + selL2?.name;
 
   return (
-    <div className="mb-4">
+    <div className="mb-4 relative">
+      {" "}
+      {/* <- Add relative positioning to parent */}
       <label className="block text-gray-700 text-xs mb-2">Category</label>
       <div>
         <button
@@ -133,33 +127,38 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = (
             if (!isOpen) setLevel(1);
             onToggle();
           }}
-          className="w-full text-left border border-gray-300 rounded-md px-3 py-2 flex items-center justify-between"
+          className="w-full text-left border border-gray-300 rounded-md px-3 py-2 flex items-center justify-between bg-white"
           disabled={isLoading}
+          style={{
+            zIndex: 10, // Ensures button is positioned above rest of background
+          }}
         >
-          <span className="text-sm">
-            {isLoading ? "Loading..." : pathLabel}
-          </span>
+          <span className="text-sm">{isLoading ? "Loading..." : path}</span>
           <span className="text-gray-600">{isOpen ? "▴" : "▾"}</span>
         </button>
 
         {isOpen && (
-          <div className="mt-2 w-full bg-white border border-gray-200 rounded-md shadow-sm p-3">
+          <div className="absolute left-0 w-full bg-white border border-gray-200 rounded-md shadow-sm p-3 mt-1 z-20">
             <div className="flex items-center justify-between mb-2">
               <div className="text-sm font-medium">{currentTitle}</div>
               <div className="flex gap-2">
-                {level > 1 && (
-                  <button
-                    onClick={goBack}
-                    className="text-sm px-2 py-1 border rounded text-gray-700"
-                  >
-                    Back
-                  </button>
-                )}
+                <button
+                  onClick={goBack}
+                  className="text-sm px-2 py-1 border rounded text-gray-700"
+                >
+                  <IoCaretBackOutline />
+                </button>
+                <button
+                  onClick={goForward}
+                  className="text-sm px-2 py-1 border rounded text-gray-700"
+                >
+                  <IoCaretForward />
+                </button>
                 <button
                   onClick={resetAll}
                   className="text-sm px-2 py-1 border rounded text-gray-500"
                 >
-                  Clear
+                  <MdDelete />
                 </button>
               </div>
             </div>
