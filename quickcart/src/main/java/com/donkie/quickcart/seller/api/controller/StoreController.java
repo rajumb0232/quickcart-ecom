@@ -9,9 +9,11 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -28,6 +30,16 @@ public class StoreController {
                 .status(HttpStatus.CREATED)
                 .location(URI.create("/api/v1/public/stores/" + id))
                 .body(ApiAck.success("Store Created."));
+    }
+
+    @GetMapping("/stores")
+    @PreAuthorize("hasAuthority('seller')")
+    public ResponseEntity<ApiResponse<List<StoreDetails>>> getAllStores() {
+        List<StoreDetails> storeDetails = storeService.getAllStores();
+        return ResponseEntity.ok(ApiResponse.success(
+                "Stores Found",
+                storeDetails
+        ));
     }
 
     @GetMapping("/public/stores/{storeId}")

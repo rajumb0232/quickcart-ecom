@@ -3,6 +3,7 @@ package com.donkie.quickcart.seller.application.service.contracts;
 import com.donkie.quickcart.seller.application.dto.request.StoreWrite;
 import com.donkie.quickcart.seller.application.dto.response.StoreDetails;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface StoreService {
@@ -14,4 +15,6 @@ public interface StoreService {
     StoreDetails getStoreDetails(UUID storeId);
 
     void deleteStore(UUID storeId);
+
+    List<StoreDetails> getAllStores();
 }

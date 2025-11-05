@@ -8,8 +8,6 @@ import com.donkie.quickcart.seller.application.service.contracts.ProductService;
 import com.donkie.quickcart.seller.application.service.contracts.StoreService;
 import com.donkie.quickcart.seller.domain.model.Store;
 import com.donkie.quickcart.seller.domain.repository.StoreRepository;
-import com.donkie.quickcart.shared.security.util.CurrentUser;
-import com.donkie.quickcart.user.domain.model.UserRole;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEventPublisher;
@@ -17,9 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
-import static com.donkie.quickcart.shared.security.util.CurrentUser.doesUserHasRole;
+import static com.donkie.quickcart.shared.security.util.CurrentUser.getCurrentUserId;
 import static com.donkie.quickcart.shared.security.util.OwnershipEvaluator.ensureOwnership;
 import static com.donkie.quickcart.shared.security.util.OwnershipEvaluator.isOwner;
 
@@ -76,6 +75,16 @@ public class StoreServiceImpl implements StoreService {
         storeRepository.save(store);
         // Event orphans all products related to store (isOrphan = true).
         eventPublisher.publishEvent(new StoreDeletedEvent(store.getStoreId()));
+    }
+
+    @Override
+    public List<StoreDetails> getAllStores() {
+        return getCurrentUserId().map(userId -> {
+            List<Store> stores = storeRepository.findByLifecycleAudit_CreatedBy(userId.toString());
+            return stores.stream()
+                    .map(this::toStoreDetails)
+                    .toList();
+        }).orElseThrow(() -> new StoreNotFoundException(HttpStatus.NOT_FOUND, "No user found to retrieve stores"));
     }
 
     private @NotNull Store getStoreIfOwner(UUID storeId) {
