@@ -1,20 +1,27 @@
 import type React from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { selectSelectStores } from "../../../features/product/sellerStoreSelectors";
 import { setViewStore } from "../../../features/product/sellerStoreSlice";
+import { Pencil } from "lucide-react"; // Lucide icon
 
 const Store: React.FC = () => {
   const sellerStores = useSelector(selectSelectStores);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleSetAsCurrentView = (storeId: string) => {
     const selectedStore = sellerStores.find((s) => s.store_id === storeId);
     if (selectedStore) dispatch(setViewStore(selectedStore));
   };
 
+  const handleEditStore = (storeId: string) => {
+    navigate(`/store/${storeId}`);
+  };
+
   return (
-    <div className="max-w-10/12 w-full mx-auto py-8 px-2">
-      <h2 className="text-3xl font-bold mb-8 text-center">All Stores</h2>
+    <div className="max-w-6xl w-full mx-auto py-8 px-2">
+      {/* <h2 className="text-3xl font-bold mb-8 text-center">All Stores</h2> */}
       <div className="flex flex-col gap-6 w-full">
         {sellerStores && sellerStores.length > 0 ? (
           sellerStores.map((store) => (
@@ -36,10 +43,7 @@ const Store: React.FC = () => {
                 </div>
               </div>
               <p 
-                className="
-                  text-sm text-gray-600 mb-4 
-                  line-clamp-3
-                "
+                className="text-sm text-gray-600 mb-4 line-clamp-3"
                 style={{
                   display: '-webkit-box',
                   WebkitLineClamp: 3,
@@ -58,18 +62,26 @@ const Store: React.FC = () => {
                     <span className="font-medium">Last Modified:</span> {new Date(store.last_modified_date).toLocaleDateString()}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="
-                    bg-black text-white px-5 py-2 rounded-lg 
-                    hover:bg-gray-900 focus:outline-none text-sm 
-                    transition-all font-medium
-                  "
-                  onClick={() => handleSetAsCurrentView(store.store_id)}
-                  style={{ maxWidth: "max-content" }}
-                >
-                  Set as Current View
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    className="bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-900 focus:outline-none text-sm transition-all font-medium"
+                    onClick={() => handleSetAsCurrentView(store.store_id)}
+                    style={{ maxWidth: "max-content" }}
+                  >
+                    Set as Current View
+                  </button>
+                  <button
+                    type="button"
+                    className="flex items-center px-3 py-2 bg-transparent rounded-lg border border-gray-300 hover:bg-gray-200 text-gray-700 transition-all"
+                    onClick={() => handleEditStore(store.store_id)}
+                    style={{ maxWidth: "max-content" }}
+                    aria-label="Edit Store"
+                  >
+                    <Pencil size={18} className="mr-1" />
+                    Edit
+                  </button>
+                </div>
               </div>
             </div>
           ))

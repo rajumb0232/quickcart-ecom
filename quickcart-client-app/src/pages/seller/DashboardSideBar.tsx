@@ -11,6 +11,7 @@ import {
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectNavHeight, selectScreenHeight } from "../../features/util/screenSelector";
+import { selectViewStore } from "../../features/product/sellerStoreSelectors";
 
 // A mapping from nav label to route param path
 const labelToPathMap: Record<string, string> = {
@@ -27,6 +28,7 @@ const DashboardSideBar: React.FC = () => {
   const navHeight = useSelector(selectNavHeight);
   const screenHeight = useSelector(selectScreenHeight);
   const sidebarHeight = screenHeight - navHeight;
+  const viewingStore = useSelector(selectViewStore);
 
   return (
     <div
@@ -34,7 +36,7 @@ const DashboardSideBar: React.FC = () => {
       style={{ height: sidebarHeight }}
     >
       <div className="p-6 border-b border-gray-100 shrink-0">
-        <h1 className="text-xl font-bold text-gray-900">Store</h1>
+        <h1 className="text-xl font-bold text-gray-900">{viewingStore ? viewingStore.name : "Store"}</h1>
       </div>
 
       <nav

@@ -39,7 +39,7 @@ const SellerDashboard: React.FC = () => {
 
   useEffect(() => {
     // only update state if not already loaded
-    if (sellerStores.length === 0 && data && isApiResponse(data)) {
+    if (data && isApiResponse(data)) {
       const storeDetails = data.data || [];
       dispatch(setSellerStores(storeDetails));
       if (storeDetails.length > 0) {
