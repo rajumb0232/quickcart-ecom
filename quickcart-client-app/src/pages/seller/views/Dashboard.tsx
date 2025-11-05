@@ -8,7 +8,6 @@ import {
   Search,
   MoreVertical,
   ArrowUpRight,
-  ArrowDownRight
 } from 'lucide-react';
 
 // Dummy Data
@@ -86,7 +85,7 @@ const Dashboard: React.FC = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Balance Card */}
-        <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-3xl p-6 shadow-sm">
+        <div className="bg-linear-to-br from-green-100 to-green-200 rounded-3xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <DollarSign size={18} className="text-green-700" />
@@ -110,7 +109,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Sales Card */}
-        <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-3xl p-6 shadow-sm">
+        <div className="bg-linear-to-br from-yellow-100 to-yellow-200 rounded-3xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp size={18} className="text-yellow-700" />
@@ -134,7 +133,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Stores Card */}
-        <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl p-6 shadow-sm">
+        <div className="bg-linear-to-br from-blue-100 to-blue-200 rounded-3xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Store size={18} className="text-blue-700" />
             <span className="text-sm font-medium text-blue-700">Total Stores</span>
@@ -145,7 +144,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Products Card */}
-        <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl p-6 shadow-sm">
+        <div className="bg-linear-to-br from-purple-100 to-purple-200 rounded-3xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Package size={18} className="text-purple-700" />
             <span className="text-sm font-medium text-purple-700">Total Products</span>
