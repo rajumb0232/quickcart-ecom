@@ -36,40 +36,42 @@ export const MainMenu: React.FC = () => {
     {
       name: "My Profile",
       icon: <CiUser />,
-      onClick: () => navigate("/profile"),
+      onClick: () => secureNavigate("/profile"),
     },
     {
       name: "Orders",
       icon: <PiPackageLight />,
-      onClick: () => navigate("/orders"),
+      onClick: () => secureNavigate("/orders"),
     },
     {
       name: "Coupons",
       icon: <PiTagLight />,
-      onClick: () => navigate("/coupons"),
+      onClick: () => secureNavigate("/coupons"),
     },
     {
       name: "Gift Cards",
       icon: <PiCreditCardLight />,
-      onClick: () => navigate("/gift-cards"),
+      onClick: () => secureNavigate("/gift-cards"),
     },
   ];
 
-  if(!isAuthenticated) {
+  if (!isAuthenticated) {
     accountMenu.splice(0, 0, {
       name: "Login",
       icon: <CiLogin />,
       onClick: () => {
-       navigate("/sign", { state: { backgroundLocation: location } });
-      }});
+        navigate("/sign", { state: { backgroundLocation: location } });
+      },
+    });
   }
   if (isAuthenticated) {
     accountMenu.push({
       name: "Logout",
       icon: <CiLogout />,
       onClick: () => {
-       navigate("/logout", { state: { backgroundLocation: location } });
-      }});
+        navigate("/logout", { state: { backgroundLocation: location } });
+      },
+    });
 
     if (userRoles.includes("seller")) {
       accountMenu.splice(accountMenu.length - 1, 0, {
@@ -108,6 +110,11 @@ export const MainMenu: React.FC = () => {
   const buttonClass =
     "relative flex flex-col items-center text-gray-900 hover:text-black hover:scale-105 transition-all ease-in-out duration-200 cursor-pointer mx-1 md:mx-4";
 
+  const secureNavigate = (link: string) => {
+    if (!isAuthenticated)
+      navigate("/sign", { state: { backgroundLocation: location } });
+    else navigate(link);
+  };
   const handleUnAuthorizedClicks = () => {
     if (!isAuthenticated) {
       navigate("/sign", { state: { backgroundLocation: location } });
@@ -119,18 +126,13 @@ export const MainMenu: React.FC = () => {
   return (
     <div className="flex items-center gap-2 overflow-visible">
       {" "}
-      
       {/* Account dropdown menu */}
       <RadixMultiDropdown
         trigger={
           <button
             className={buttonClass}
             title="Account"
-            onClick={() => {
-              if (!handleUnAuthorizedClicks()) {
-                /* dropdown open handled by Radix */
-              }
-            }}
+            onClick={() => secureNavigate("/profile")}
             type="button"
           >
             <span className="text-lg mx-1.5 md:mx-0 sm:text-lg md:text-xl mb-0 sm:mb-1">
@@ -143,7 +145,6 @@ export const MainMenu: React.FC = () => {
         width={240}
         sideWidth={260}
       />
-
       {/* Wishlist Button */}
       <button
         className={buttonClass}

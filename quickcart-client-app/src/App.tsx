@@ -103,7 +103,6 @@ export default function App() {
         </Routes>
       )}
       {/* Show the Logout modal only if location changes to /logout */}
-      // Modal route for /logout
       {state?.backgroundLocation && (
         <LogoutConfirmModal
           open={location.pathname === "/logout"}
