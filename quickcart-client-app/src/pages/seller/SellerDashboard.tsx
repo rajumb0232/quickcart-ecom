@@ -74,7 +74,7 @@ const SellerDashboard: React.FC = () => {
   return (
     <div style={{ marginTop: `${navHeight - 36}px` }} className="flex">
       <DashboardSideBar />
-      <main className="w-full">{renderView()}</main>
+      <main className="w-full overflow-y-scroll ">{renderView()}</main>
     </div>
   );
 };

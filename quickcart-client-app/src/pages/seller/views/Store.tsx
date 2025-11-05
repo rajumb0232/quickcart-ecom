@@ -3,7 +3,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectSelectStores } from "../../../features/product/sellerStoreSelectors";
 import { setViewStore } from "../../../features/product/sellerStoreSlice";
-import { Pencil } from "lucide-react"; // Lucide icon
+import { 
+  Store as StoreIcon, 
+  MapPin, 
+  Phone, 
+  Mail, 
+  Calendar,
+  Clock,
+  Edit3,
+  Eye,
+  TrendingUp,
+  Package
+} from "lucide-react";
 
 const Store: React.FC = () => {
   const sellerStores = useSelector(selectSelectStores);
@@ -19,74 +30,155 @@ const Store: React.FC = () => {
     navigate(`/store/${storeId}`);
   };
 
+  // Generate random stats for demonstration
+  const getRandomStats = () => ({
+    products: Math.floor(Math.random() * 200) + 50,
+    sales: Math.floor(Math.random() * 1000) + 100,
+    revenue: Math.floor(Math.random() * 50000) + 10000
+  });
+
   return (
-    <div className="max-w-6xl w-full mx-auto py-8 px-2">
-      {/* <h2 className="text-3xl font-bold mb-8 text-center">All Stores</h2> */}
-      <div className="flex flex-col gap-6 w-full">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Stores</h1>
+          <p className="text-gray-600">Manage and monitor your store locations</p>
+        </div>
+
+        {/* Stores Grid */}
         {sellerStores && sellerStores.length > 0 ? (
-          sellerStores.map((store) => (
-            <div
-              key={store.store_id}
-              className="w-full bg-white rounded-xl p-6 flex flex-col border border-gray-200 hover:bg-gray-100"
-              style={{ minHeight: 320 }}
-            >
-              <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-1">{store.name}</h3>
-                <p className="text-base text-gray-600 mb-3">{store.location}</p>
-              </div>
-              <div className="mb-2">
-                <div className="text-xs text-gray-700 mb-1">
-                  <span className="font-medium">Contact:</span> {store.contact_number}
-                </div>
-                <div className="text-xs text-gray-700 mb-1">
-                  <span className="font-medium">Email:</span> {store.email}
-                </div>
-              </div>
-              <p 
-                className="text-sm text-gray-600 mb-4 line-clamp-3"
-                style={{
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                }}
-              >
-                {store.about}
-              </p>
-              <div className="flex justify-between items-end mt-auto pt-2">
-                <div>
-                  <div className="text-xs text-gray-400">
-                    <span className="font-medium">Created:</span> {new Date(store.created_date).toLocaleDateString()}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {sellerStores.map((store) => {
+              const stats = getRandomStats();
+              return (
+                <div
+                  key={store.store_id}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300"
+                >
+                  {/* Header Section with Gradient */}
+                  <div className="bg-teal-600 p-6 text-white">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                          <StoreIcon size={24} className="text-white" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold">{store.name}</h2>
+                          <div className="flex items-center gap-2 mt-1 text-white/95">
+                            <MapPin size={14} />
+                            <span className="text-sm">{store.location}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-3 gap-3 mt-4">
+                      <div className="bg-white/15 backdrop-blur-sm rounded-lg p-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Package size={16} />
+                          <span className="text-xs font-medium">Products</span>
+                        </div>
+                        <p className="text-xl font-bold">{stats.products}</p>
+                      </div>
+                      <div className="bg-white/15 backdrop-blur-sm rounded-lg p-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <TrendingUp size={16} />
+                          <span className="text-xs font-medium">Sales</span>
+                        </div>
+                        <p className="text-xl font-bold">{stats.sales}</p>
+                      </div>
+                      <div className="bg-white/15 backdrop-blur-sm rounded-lg p-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <TrendingUp size={16} />
+                          <span className="text-xs font-medium">Revenue</span>
+                        </div>
+                        <p className="text-lg font-bold">${(stats.revenue / 1000).toFixed(1)}k</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-400">
-                    <span className="font-medium">Last Modified:</span> {new Date(store.last_modified_date).toLocaleDateString()}
+
+                  {/* Content Section */}
+                  <div className="p-6">
+                    {/* Contact Information */}
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center gap-3 text-gray-700">
+                        <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                          <Phone size={16} className="text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Contact Number</p>
+                          <p className="text-sm font-medium">{store.contact_number}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 text-gray-700">
+                        <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                          <Mail size={16} className="text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Email Address</p>
+                          <p className="text-sm font-medium">{store.email}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* About Section */}
+                    <div className="mb-4">
+                      <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">About</h3>
+                      <p className="text-sm text-gray-600 line-clamp-3">
+                        {store.about}
+                      </p>
+                    </div>
+
+                    {/* Timeline */}
+                    <div className="flex items-center gap-4 mb-6 text-xs text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Calendar size={14} />
+                        <span>Created: {new Date(store.created_date).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock size={14} />
+                        <span>Updated: {new Date(store.last_modified_date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        className="flex-1 bg-amber-400 text-white px-4 py-3 rounded-xl hover:bg-amber-500 focus:outline-none font-medium transition-all flex items-center justify-center gap-2 shadow-sm"
+                        onClick={() => handleSetAsCurrentView(store.store_id)}
+                      >
+                        <Eye size={18} />
+                        <span>Set as Current View</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="px-4 py-3 bg-gray-100 rounded-xl border border-gray-200 hover:bg-gray-200 text-gray-700 transition-all flex items-center justify-center gap-2"
+                        onClick={() => handleEditStore(store.store_id)}
+                        aria-label="Edit Store"
+                      >
+                        <Edit3 size={18} />
+                        <span className="font-medium">Edit</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    className="bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-900 focus:outline-none text-sm transition-all font-medium"
-                    onClick={() => handleSetAsCurrentView(store.store_id)}
-                    style={{ maxWidth: "max-content" }}
-                  >
-                    Set as Current View
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center px-3 py-2 bg-transparent rounded-lg border border-gray-300 hover:bg-gray-200 text-gray-700 transition-all"
-                    onClick={() => handleEditStore(store.store_id)}
-                    style={{ maxWidth: "max-content" }}
-                    aria-label="Edit Store"
-                  >
-                    <Pencil size={18} className="mr-1" />
-                    Edit
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))
+              );
+            })}
+          </div>
         ) : (
-          <p className="text-center text-gray-500">No stores found.</p>
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <StoreIcon size={40} className="text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Stores Found</h3>
+            <p className="text-gray-500 text-center max-w-md">
+              You haven't created any stores yet. Create your first store to start selling your products.
+            </p>
+          </div>
         )}
       </div>
     </div>

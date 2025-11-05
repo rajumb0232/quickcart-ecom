@@ -9,11 +9,10 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { selectNavHeight, selectScreenHeight } from "../../features/util/screenSelector";
 import { selectViewStore } from "../../features/product/sellerStoreSelectors";
 
-// A mapping from nav label to route param path
 const labelToPathMap: Record<string, string> = {
   Dashboard: "/seller/dashboard",
   Store: "/seller/store",
@@ -24,15 +23,16 @@ const labelToPathMap: Record<string, string> = {
   Settings: "/seller/settings",
 };
 
+// A mapping from nav label to route param path
 const DashboardSideBar: React.FC = () => {
   const navHeight = useSelector(selectNavHeight);
   const screenHeight = useSelector(selectScreenHeight);
   const sidebarHeight = screenHeight - navHeight;
   const viewingStore = useSelector(selectViewStore);
+  const location = useLocation();
 
   return (
-    <div
-      className="bg-white w-64 border-r border-gray-200 flex flex-col"
+    <div className="bg-white w-64 border-r border-gray-200 flex flex-col"
       style={{ height: sidebarHeight }}
     >
       <div className="p-6 border-b border-gray-100 shrink-0">
@@ -43,22 +43,18 @@ const DashboardSideBar: React.FC = () => {
         className="flex-1 py-4 overflow-y-auto"
         style={{ scrollbarWidth: "none" /* Firefox */ }}
       >
-        <div
-          className="px-3"
-          style={{
-            height: sidebarHeight - 6 * 24, // approx padding and header height in px
-          }}
-        >
-          <NavItem icon={<PieChart size={20} />} label="Dashboard" />
-          <NavItem icon={<Store size={20} />} label="Store" />
-          <NavItem icon={<ShoppingBag size={20} />} label="List Product" />
-          <NavItem icon={<Grid3x3 size={20} />} label="Manage Products" />
-          <NavItem icon={<TrendingUp size={20} />} label="Reports" />
-          <NavItem icon={<Users size={20} />} label="Profile" />
-          <NavItem icon={<Settings size={20} />} label="Settings" />
+        <div className="px-3" style={{
+          height: sidebarHeight - 6 * 24,
+        }}>
+          {Object.entries(labelToPathMap).map(([label, path]) => (
+            <NavItem
+              key={label}
+              icon={getIcon(label)}
+              label={label}
+              active={location.pathname.startsWith(path)} // highlight based on URL
+            />
+          ))}
         </div>
-
-        {/* Hide scrollbar for Webkit browsers */}
         <style>{`
           nav::-webkit-scrollbar {
             width: 0px;
@@ -69,6 +65,28 @@ const DashboardSideBar: React.FC = () => {
     </div>
   );
 };
+
+// Helper to return appropriate icon per label
+function getIcon(label: string) {
+  switch (label) {
+    case "Dashboard":
+      return <PieChart size={20} />;
+    case "Store":
+      return <Store size={20} />;
+    case "List Product":
+      return <ShoppingBag size={20} />;
+    case "Manage Products":
+      return <Grid3x3 size={20} />;
+    case "Reports":
+      return <TrendingUp size={20} />;
+    case "Profile":
+      return <Users size={20} />;
+    case "Settings":
+      return <Settings size={20} />;
+    default:
+      return null;
+  }
+}
 
 interface NavItemProps {
   icon: React.ReactNode;
