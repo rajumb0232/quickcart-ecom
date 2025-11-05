@@ -59,7 +59,6 @@ export const useAPI = () => {
   };
 
   const get = <T>(url: string, params?: object, config?: AxiosRequestConfig) => {
-    console.log("api in use: ", api);
     return unwrapResponse(api.get<ApiResult< T>>(url, { params, ...config }));
   }
 

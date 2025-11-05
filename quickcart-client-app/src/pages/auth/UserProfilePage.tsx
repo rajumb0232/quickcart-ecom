@@ -5,7 +5,11 @@ import { selectNavHeight } from "../../features/util/screenSelector";
 import { useGetUserProfile } from "../../hooks/useAuth";
 import { isApiResponse } from "../../types/apiResponseType";
 
-const UserProfilePage: React.FC = () => {
+export interface UserProfilePageProps {
+  modal: boolean;
+}
+
+const UserProfilePage: React.FC<UserProfilePageProps> = ({modal}) => {
   const roles = useSelector(selectRoles);
   const navHeight = useSelector(selectNavHeight);
   const { data, isLoading, isError } = useGetUserProfile();
@@ -46,7 +50,7 @@ const UserProfilePage: React.FC = () => {
 
   return (
     <div
-      style={{ marginTop: `${navHeight}px` }}
+      style={{ marginTop: `${modal ? 0 : navHeight}px` }}
       className="w-full max-w-7xl mx-auto bg-white rounded-3xl p-6 sm:p-12 flex flex-col sm:flex-row gap-8 px-4 sm:px-8 lg:px-12 xl:px-20"
     >
       {/* Left Avatar Section */}

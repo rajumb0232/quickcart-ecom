@@ -12,12 +12,13 @@ import { ProductDetail } from "./pages/public/product/ProductDetail";
 import { useDispatch } from "react-redux";
 import { setScreenHeight } from "./features/util/screenSlice";
 import { useEffect } from "react";
-import UserProfile from "./pages/auth/UserProfilePage";
 import "./api/interceptors";
 import { Footer } from "./pages/public/home/DummySubscribeFooter";
 import LogoutConfirmModal from "./pages/auth/LogoutConfirmModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import UserProfilePage from "./pages/auth/UserProfilePage";
+import ListProduct from "./pages/seller/views/ListProduct";
 
 export default function App() {
   const location = useLocation();
@@ -55,7 +56,7 @@ export default function App() {
           path="/profile"
           element={
             <RequireAuth allowedRoles={["customer", "admin", "seller"]}>
-              <UserProfile />
+              <UserProfilePage modal={false} />
             </RequireAuth>
           }
         />
@@ -79,12 +80,21 @@ export default function App() {
         />
 
         <Route
-          path="/seller/*"
+          path="/seller/:view"
           element={
             <RequireAuth allowedRoles={["seller", "admin"]}>
               <SellerDashboard />
             </RequireAuth>
           }
+        />
+
+        <Route 
+        path="/list-product"
+        element={
+          <RequireAuth allowedRoles={["seller"]}>
+            <ListProduct />
+          </RequireAuth>
+        }
         />
 
         <Route

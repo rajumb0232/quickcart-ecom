@@ -77,7 +77,7 @@ export const MainMenu: React.FC = () => {
       accountMenu.splice(accountMenu.length - 1, 0, {
         name: "Switch to Seller Profile",
         icon: <CiShop />,
-        onClick: () => navigate("/seller-dashboard"),
+        onClick: () => navigate("/seller/dashboard"),
       });
     }
     if (userRoles.includes("admin")) {
