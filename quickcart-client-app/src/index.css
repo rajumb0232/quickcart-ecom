@@ -5,6 +5,13 @@
   animation: slide-in-from-right 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.dropdown-content, .dropdown-subcontent {
+  max-width: 90vw;
+  box-sizing: border-box;
+  position: absolute; /* or fixed if you want it pinned to viewport */
+  right: auto; /* avoid forcing off-screen positioning */
+}
+
 body {
   font-family: 'Montserrat', sans-serif;
 }
