@@ -1,4 +1,4 @@
-package com.donkie.quickcart.seller.application.service;
+package com.donkie.quickcart.seller.application.service.contracts;
 
 import com.donkie.quickcart.uploads.api.dto.ContentType;
 import com.donkie.quickcart.uploads.api.dto.DownloadFile;

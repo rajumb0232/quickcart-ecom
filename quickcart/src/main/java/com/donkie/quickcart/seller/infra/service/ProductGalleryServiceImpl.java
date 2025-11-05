@@ -1,7 +1,7 @@
 package com.donkie.quickcart.seller.infra.service;
 
 import com.donkie.quickcart.seller.application.exception.ProductVariantNotFoundException;
-import com.donkie.quickcart.seller.application.service.ProductGalleryService;
+import com.donkie.quickcart.seller.application.service.contracts.ProductGalleryService;
 import com.donkie.quickcart.seller.domain.repository.ProductRepository;
 import com.donkie.quickcart.seller.domain.repository.ProductVariantRepository;
 import com.donkie.quickcart.shared.exception.QuickcartBaseException;

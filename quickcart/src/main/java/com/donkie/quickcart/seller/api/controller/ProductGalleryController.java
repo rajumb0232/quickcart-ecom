@@ -1,6 +1,6 @@
 package com.donkie.quickcart.seller.api.controller;
 
-import com.donkie.quickcart.seller.application.service.ProductGalleryService;
+import com.donkie.quickcart.seller.application.service.contracts.ProductGalleryService;
 import com.donkie.quickcart.shared.dto.ApiAck;
 import com.donkie.quickcart.shared.dto.ApiResponse;
 import com.donkie.quickcart.uploads.api.dto.ContentType;

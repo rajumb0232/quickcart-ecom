@@ -2,81 +2,71 @@ package com.donkie.quickcart.seller.application.service.util;
 
 import com.donkie.quickcart.seller.domain.model.Product;
 import com.donkie.quickcart.seller.domain.model.ProductVariant;
-import com.donkie.quickcart.seller.application.dto.request.ProductFilters;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.UUID;
 
 public final class ProductSpecifications {
 
     private ProductSpecifications() {}
 
-    public static Specification<Product> byFilters(ProductFilters filters) {
+    public static Specification<Product> byFilters(ProductSpecs productSpecs) {
         Specification<Product> spec = Specification.unrestricted();
 
-        // Always require active and not deleted products
+        // Active and not deleted filter
         spec = spec.and((root, query, cb) -> cb.and(
                 cb.isTrue(root.get("lifecycleAudit").get("isActive")),
                 cb.isFalse(root.get("lifecycleAudit").get("isDeleted"))
         ));
 
-        if (filters == null) {
+        if (productSpecs == null) {
             return spec;
         }
 
-        // brand (null/empty safe)
-        if (StringUtils.hasText(filters.brand())) {
-            String brand = filters.brand().trim().toLowerCase();
+        if (StringUtils.hasText(productSpecs.brand())) {
+            String brand = productSpecs.brand().trim().toLowerCase();
             spec = spec.and((root, query, cb) ->
                     cb.like(cb.lower(root.get("brand")), "%" + escapeLike(brand) + "%"));
         }
 
-        // categories -> match against categoryPath (null/empty safe)
-        if (filters.categories() != null && filters.categories().length > 0) {
-            String[] cats = Arrays.stream(filters.categories())
-                    .filter(StringUtils::hasText)
-                    .map(String::trim)
-                    .toArray(String[]::new);
-
-            if (cats.length > 0) {
-                spec = spec.and((root, query, cb) -> {
-                    query.distinct(true);
-                    var predicates = Arrays.stream(cats)
-                            .map(cat -> cb.like(cb.lower(root.get("categoryPath")), "%" + cat.toLowerCase() + "%"))
-                            .toArray(jakarta.persistence.criteria.Predicate[]::new);
-                    return cb.or(predicates);
-                });
-            }
+        if (productSpecs.categoryIds() != null && !productSpecs.categoryIds().isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                assert query != null;
+                query.distinct(true);
+                CriteriaBuilder.In<UUID> inClause = cb.in(root.get("categoryId"));
+                for (UUID categoryId : productSpecs.categoryIds()) {
+                    inClause.value(categoryId);
+                }
+                return inClause;
+            });
         }
 
-        // rating (nullable Double)
-        if (Objects.nonNull(filters.rating())) {
-            Double rating = filters.rating();
+        if (productSpecs.rating() != null) {
             spec = spec.and((root, query, cb) ->
-                    cb.greaterThanOrEqualTo(root.get("avgRating"), rating));
+                    cb.greaterThanOrEqualTo(root.get("avgRating"), productSpecs.rating()));
         }
 
-        // price range — join variants and also filter their lifecycle (nullable Doubles)
-        Double min = filters.minPrice();
-        Double max = filters.maxPrice();
-        boolean hasMin = Objects.nonNull(min);
-        boolean hasMax = Objects.nonNull(max);
+        Double min = productSpecs.minPrice();
+        Double max = productSpecs.maxPrice();
+        boolean hasMin = min != null;
+        boolean hasMax = max != null;
 
         if (hasMin || hasMax) {
             spec = spec.and((root, query, cb) -> {
                 Join<Product, ProductVariant> variants = root.join("variants", JoinType.INNER);
+                assert query != null;
                 query.distinct(true);
 
-                // variant lifecycle constraints
-                var variantActive = cb.isTrue(variants.get("lifecycleAudit").get("isActive"));
-                var variantNotDeleted = cb.isFalse(variants.get("lifecycleAudit").get("isDeleted"));
-                jakarta.persistence.criteria.Predicate lifecyclePred = cb.and(variantActive, variantNotDeleted);
+                Predicate variantActive = cb.isTrue(variants.get("lifecycleAudit").get("isActive"));
+                Predicate variantNotDeleted = cb.isFalse(variants.get("lifecycleAudit").get("isDeleted"));
+                Predicate lifecyclePred = cb.and(variantActive, variantNotDeleted);
 
-                jakarta.persistence.criteria.Predicate pricePred;
+                Predicate pricePred;
                 if (hasMin && hasMax) {
                     pricePred = cb.between(variants.get("price"), min, max);
                 } else if (hasMin) {
@@ -91,6 +81,7 @@ public final class ProductSpecifications {
 
         return spec;
     }
+
 
     private static String escapeLike(String input) {
         return input.replace("\\", "\\\\").replace("_", "\\_").replace("%", "\\%");

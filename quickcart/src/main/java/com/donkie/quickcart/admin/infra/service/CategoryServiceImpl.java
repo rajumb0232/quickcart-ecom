@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -149,6 +150,13 @@ public class CategoryServiceImpl implements CategoryService {
         return new CategorySnapshot(path);
     }
 
+    @Override
+    public List<CategorySummary> getCategorySummaryByName(List<String> names) {
+       names = names.stream().filter(Objects::nonNull).map(String::toLowerCase).toList();
+       var cats = categoryRepo.findActiveCategoriesByNamesLowerCase(names);
+       return cats.stream().map(this::toCategorySummary).toList();
+    }
+
     // ==================== HELPER METHODS ======================
 
     private String deriveCategoryPath(Category category) {
@@ -162,7 +170,7 @@ public class CategoryServiceImpl implements CategoryService {
         return deriveCategoryPath(parent) + "/" + category.getName();
     }
 
-    private static @NotNull CategorySummary toCategorySummary(Category c) {
+    private @NotNull CategorySummary toCategorySummary(Category c) {
         var thumbnail = c.getThumbnail() != null
                 ? String.format("/api/v1/public/categories/thumbnail?id=%s", c.getThumbnail().getImageId())
                 : null;

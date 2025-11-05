@@ -11,11 +11,13 @@ import com.donkie.quickcart.seller.application.exception.StoreNotFoundException;
 import com.donkie.quickcart.seller.application.service.contracts.ProductService;
 import com.donkie.quickcart.seller.application.service.contracts.ProductVariantService;
 import com.donkie.quickcart.seller.application.service.util.ProductSpecifications;
+import com.donkie.quickcart.seller.application.service.util.ProductSpecs;
 import com.donkie.quickcart.seller.domain.model.Product;
 import com.donkie.quickcart.seller.domain.model.Store;
 import com.donkie.quickcart.seller.domain.repository.ProductRepository;
 import com.donkie.quickcart.seller.domain.repository.StoreRepository;
 import com.donkie.quickcart.seller.infra.integration.admin.CategoryClient;
+import com.donkie.quickcart.seller.infra.integration.admin.CategorySummary;
 import com.donkie.quickcart.user.domain.model.UserRole;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static com.donkie.quickcart.shared.security.util.CurrentUser.doesUserHasRole;
 import static com.donkie.quickcart.shared.security.util.OwnershipEvaluator.ensureOwnership;
@@ -97,7 +98,7 @@ public class ProductServiceImpl implements ProductService {
             product = productRepository.findActiveById(productId).orElseThrow(() -> productNotFound);
         }
 
-        if(product != null) {
+        if (product != null) {
             List<ProductVariantResponse> variants = productVariantService.getVariantsByProduct(productId);
             return toProductResponse(product, variants);
         } else throw productNotFound;
@@ -134,15 +135,31 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     @Override
     public List<ProductResponse> getProductsByFilter(ProductFilters filters, int page, int size) {
-        var spec = ProductSpecifications.byFilters(filters);
+        List<String> categories = (filters.categories() != null && filters.categories().length > 0)
+                ? Arrays.asList(filters.categories())
+                : Collections.emptyList();
+
+        List<UUID> categoryIds = resolveCategoryIds(filters, categories);
+
+        ProductSpecs productSpecs = new ProductSpecs(
+                filters.brand(),
+                categoryIds,
+                filters.rating(),
+                filters.minPrice(),
+                filters.maxPrice()
+        );
+
+        var spec = ProductSpecifications.byFilters(productSpecs);
         Pageable pageable = PageRequest.of(page, size);
-        return productRepository.findAll(spec, pageable)
-                .stream()
+
+        return productRepository.findAll(spec, pageable).stream()
                 .map(product -> {
                     var variants = productVariantService.getVariantsByProduct(product.getProductId());
                     return toProductResponse(product, variants);
-                }).toList();
+                })
+                .toList();
     }
+
 
     // ===================== Private Helpers =====================
 
@@ -152,6 +169,47 @@ public class ProductServiceImpl implements ProductService {
         ensureOwnership(product.ownerId());
         return product;
     }
+
+    private List<UUID> resolveCategoryIds(ProductFilters filters, List<String> categories) {
+        if (categories.isEmpty()) {
+            return List.of();
+        } else {
+            // ensure to convert to lower case for comparison
+            categories = categories.stream()
+                    .map(String::toLowerCase)
+                    .toList();
+        }
+
+        List<CategorySummary> summaries = categoryClient.getCategorySummaryByName(categories);
+
+        // Find child-most categories by priority: level 3 > 2 > 1
+        List<CategorySummary> childMostCategories = findChildMostCategories(summaries);
+
+        // Map category names to their IDs
+        return Arrays.stream(filters.categories())
+                .map(catName -> childMostCategories.stream()
+                        .filter(summary -> summary.name().equalsIgnoreCase(catName))
+                        .findFirst()
+                        .orElse(null)
+                )
+                .filter(Objects::nonNull)
+                .map(CategorySummary::categoryId)
+                .toList();
+    }
+
+    private List<CategorySummary> findChildMostCategories(List<CategorySummary> summaries) {
+        List<Integer> levels = List.of(3, 2, 1);
+        for (int level : levels) {
+            List<CategorySummary> filtered = summaries.stream()
+                    .filter(s -> s.categoryLevel() == level)
+                    .toList();
+            if (!filtered.isEmpty()) {
+                return filtered;
+            }
+        }
+        return List.of();
+    }
+
 
     private static @NotNull ProductResponse toProductResponse(Product product, List<ProductVariantResponse> variants) {
         return new ProductResponse(

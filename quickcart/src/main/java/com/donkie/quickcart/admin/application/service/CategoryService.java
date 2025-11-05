@@ -66,4 +66,6 @@ public interface CategoryService {
     List<CategoryDetail> getCategoriesOfAllStatus();
 
     CategorySnapshot getCategorySnapshot(UUID categoryId);
+
+    List<CategorySummary> getCategorySummaryByName(List<String> names);
 }
