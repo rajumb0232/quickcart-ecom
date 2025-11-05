@@ -40,8 +40,9 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
         // allow to 401 -> response interceptor will handle
       }
     } else {
-      if (access_token && config.headers)
+      if (access_token && config.headers) {
         config.headers.Authorization = `Bearer ${access_token}`;
+      }
     }
   } catch {
     // fail silently

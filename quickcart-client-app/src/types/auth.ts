@@ -8,3 +8,20 @@ export interface AuthResponsePayload {
   refresh_expires_in: number;
   token_type: string;
 }
+
+export interface UserRoleProfile {
+  role: "customer" | "seller" | "admin";
+  bio?: string;
+  selling_since?: string;
+}
+
+export interface UserProfile {
+  user_id: string;
+  first_name?: string;
+  last_name?: string;
+  email: string;
+  phone?: string;
+  created_at: string;
+  updated_at: string;
+  profiles: UserRoleProfile[];
+}

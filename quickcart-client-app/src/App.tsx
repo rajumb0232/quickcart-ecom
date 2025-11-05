@@ -12,7 +12,8 @@ import { ProductDetail } from "./pages/public/product/ProductDetail";
 import { useDispatch } from "react-redux";
 import { setScreenHeight } from "./features/util/screenSlice";
 import { useEffect } from "react";
-
+import UserProfile from "./pages/auth/UserProfilePage";
+import "./api/interceptors";
 export default function App() {
   const location = useLocation();
   const dispatch = useDispatch();
@@ -43,6 +44,14 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<ProductSearchResultPage />} />
         <Route path="/product/:id" element={<ProductDetail />} />
+        <Route
+          path="/profile"
+          element={
+            <RequireAuth allowedRoles={["customer", "admin", "seller"]}>
+              <UserProfile />
+            </RequireAuth>
+          }
+        />
 
         <Route
           path="/sign"

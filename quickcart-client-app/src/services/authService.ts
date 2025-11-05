@@ -1,5 +1,5 @@
 import type { ApiResponse } from './../types/apiResponseType';
-import type { AuthResponsePayload, UserRole } from "../types/auth";
+import type { UserProfile, AuthResponsePayload, UserRole } from "../types/auth";
 import { api } from "../api/apiClient"; // plain axios wrapper instance
 import { selectRoles } from "../features/auth/authSelectors";
 import { store } from "../app/store";
@@ -122,5 +122,9 @@ export const authService = {
 
   fetchRoles: (api: ReturnType< typeof useAPI>) => {
     return api.get<UserRole[]>("/users/roles");
+  },
+
+  fetchProfileInfo: (api: ReturnType< typeof useAPI>) => {
+    return api.get<UserProfile>("/users/profile");
   }
 }
