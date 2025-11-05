@@ -22,9 +22,6 @@ const DummySubscribeFooter: React.FC = () => (
         />
       </div>
     </div>
-
-    {/* Footer Info Grid */}
-    <Footer />
   </section>
 );
 

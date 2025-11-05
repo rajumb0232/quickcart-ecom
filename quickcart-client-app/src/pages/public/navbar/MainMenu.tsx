@@ -12,6 +12,7 @@ import RadixMultiDropdown, {
 } from "../../../components/RadixMultiDropdown";
 import {
   CiHashtag,
+  CiLogin,
   CiLogout,
   CiSettings,
   CiShop,
@@ -52,16 +53,24 @@ export const MainMenu: React.FC = () => {
       icon: <PiCreditCardLight />,
       onClick: () => navigate("/gift-cards"),
     },
-    {
+  ];
+
+  if(!isAuthenticated) {
+    accountMenu.splice(0, 0, {
+      name: "Login",
+      icon: <CiLogin />,
+      onClick: () => {
+       navigate("/sign", { state: { backgroundLocation: location } });
+      }});
+  }
+  if (isAuthenticated) {
+    accountMenu.push({
       name: "Logout",
       icon: <CiLogout />,
       onClick: () => {
-        /* TODO: logout logic */
-      },
-    },
-  ];
+       navigate("/logout", { state: { backgroundLocation: location } });
+      }});
 
-  if (isAuthenticated) {
     if (userRoles.includes("seller")) {
       accountMenu.splice(accountMenu.length - 1, 0, {
         name: "Switch to Seller Profile",

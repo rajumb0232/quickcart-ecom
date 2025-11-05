@@ -4,6 +4,7 @@ import { selectRoles } from "../../features/auth/authSelectors";
 import { selectNavHeight } from "../../features/util/screenSelector";
 import { useGetUserProfile } from "../../hooks/useAuth";
 import { isApiResponse } from "../../types/apiResponseType";
+import { Footer } from "../public/home/DummySubscribeFooter";
 
 const UserProfilePage: React.FC = () => {
   const roles = useSelector(selectRoles);

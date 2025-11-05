@@ -7,6 +7,7 @@ import LinkButton from "../../components/form/LinkButton";
 import { FaOpencart } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLogin, useRegister } from "../../hooks/useAuth";
+import { toast } from "react-toastify";
 
 interface AuthPageProps {
   modal?: boolean;
@@ -36,6 +37,7 @@ export default function AuthPage({ modal }: AuthPageProps) {
             // Redirect to where they came from, or home
             const from = (location.state as any)?.from?.pathname || "/";
             navigate(from, { replace: true });
+            toast.success("Logged in successfully!");
           }
         },
       });
@@ -44,6 +46,7 @@ export default function AuthPage({ modal }: AuthPageProps) {
         onSuccess: (data) => {
           if (data.success) {
             setMode("login");
+            toast.success("Registered successfully!");
           }
         },
       });

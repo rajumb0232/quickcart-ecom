@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import RequireAuth from "./routes/RequireAuth";
 import CustomerDashboard from "./pages/customer/CustomerDashboad";
 import SellerDashboard from "./pages/seller/SellerDashboard";
@@ -14,9 +14,15 @@ import { setScreenHeight } from "./features/util/screenSlice";
 import { useEffect } from "react";
 import UserProfile from "./pages/auth/UserProfilePage";
 import "./api/interceptors";
+import { Footer } from "./pages/public/home/DummySubscribeFooter";
+import LogoutConfirmModal from "./pages/auth/LogoutConfirmModal";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export default function App() {
   const location = useLocation();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     function handleResize() {
@@ -38,6 +44,7 @@ export default function App() {
 
   return (
     <>
+    <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
       {/* Main route layer — background page stays visible */}
       <Routes location={state?.backgroundLocation || location}>
@@ -89,13 +96,25 @@ export default function App() {
           }
         />
       </Routes>
-
       {/* Modal route layer — rendered *over* the background page */}
       {state?.backgroundLocation && (
         <Routes>
           <Route path="/sign" element={<LoginPage modal />} />
         </Routes>
       )}
+      {/* Show the Logout modal only if location changes to /logout */}
+      // Modal route for /logout
+      {state?.backgroundLocation && (
+        <LogoutConfirmModal
+          open={location.pathname === "/logout"}
+          onClose={() => navigate(-1)}
+          onConfirm={() => {
+            // handle logout logic
+            navigate(-1);
+          }}
+        />
+      )}
+      <Footer />
     </>
   );
 }
