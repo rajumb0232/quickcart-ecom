@@ -51,6 +51,14 @@ export interface Product {
   is_deleted: boolean;
 }
 
+export interface CreateProduct {
+  store_id: string,
+  category_id: string,
+  title: string,
+  brand: string,
+  description: string
+}
+
 export interface ProductFilters {
   brand: string;
   categories: string[];

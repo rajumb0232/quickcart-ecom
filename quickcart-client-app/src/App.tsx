@@ -18,7 +18,8 @@ import LogoutConfirmModal from "./pages/auth/LogoutConfirmModal";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import UserProfilePage from "./pages/auth/UserProfilePage";
-import ListProduct from "./pages/seller/views/ListProduct";
+import ListProduct from "./pages/seller/product/ListProduct";
+import StoreForm from "./pages/seller/store/StoreForm";
 
 export default function App() {
   const location = useLocation();
@@ -45,7 +46,7 @@ export default function App() {
 
   return (
     <>
-    <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
       {/* Main route layer — background page stays visible */}
       <Routes location={state?.backgroundLocation || location}>
@@ -88,13 +89,22 @@ export default function App() {
           }
         />
 
-        <Route 
-        path="/list-product"
-        element={
-          <RequireAuth allowedRoles={["seller"]}>
-            <ListProduct />
-          </RequireAuth>
-        }
+        <Route
+          path="/list-product"
+          element={
+            <RequireAuth allowedRoles={["seller"]}>
+              <ListProduct />
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/store/:storeId?" // The "?" makes storeId optional
+          element={
+            <RequireAuth allowedRoles={["seller"]}>
+              <StoreForm />
+            </RequireAuth>
+          }
         />
 
         <Route

@@ -2,12 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../features/auth/authSlice"
 import screenReducer from "../features/util/screenSlice";
 import productResultReducer from "../features/product/productResultSlice"
+import sellerStoreReducer from "../features/product/sellerStoreSlice"
 
 export const store = configureStore({
     reducer: {
         auth: authReducer,
         screen: screenReducer,
-        productResult: productResultReducer
+        productResult: productResultReducer,
+        sellerStore: sellerStoreReducer,
     },
 });
 
