@@ -8,3 +8,21 @@
 body {
   font-family: 'Montserrat', sans-serif;
 }
+
+.persistent-border-black {
+  border-style: solid !important;
+  border-width: 2px !important;
+  /* border-color: black !important; */
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.persistent-border-black:focus,
+.persistent-border-black:active,
+.persistent-border:focus-visible {
+  border-style: solid !important;
+  border-width: 2px !important;
+  border-color: black !important;
+  outline: none !important;
+  box-shadow: none !important;
+}

@@ -10,8 +10,7 @@ const UserProfilePage: React.FC = () => {
   const navHeight = useSelector(selectNavHeight);
   const { data, isLoading, isError } = useGetUserProfile();
 
-  const userData =
-    data && isApiResponse(data) ? data.data : null;
+  const userData = data && isApiResponse(data) ? data.data : null;
 
   // Tag logic unchanged
   const getDisplayTag = () => {
@@ -48,7 +47,7 @@ const UserProfilePage: React.FC = () => {
   return (
     <div
       style={{ marginTop: `${navHeight}px` }}
-      className="w-full max-w-4xl mx-auto bg-white rounded-3xl shadow-sm p-12 flex flex-col sm:flex-row gap-12"
+      className="w-full max-w-7xl mx-auto bg-white rounded-3xl p-6 sm:p-12 flex flex-col sm:flex-row gap-8 px-4 sm:px-8 lg:px-12 xl:px-20"
     >
       {/* Left Avatar Section */}
       <div className="flex flex-col items-center w-full sm:w-auto">
@@ -106,23 +105,25 @@ const UserProfilePage: React.FC = () => {
             </svg>
             <span className="text-xs">LOGO</span>
           </button>
-          <button className="flex-1 border-2 border-dashed border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-400 hover:border-yellow-400 hover:text-yellow-600 transition flex flex-col items-center gap-1">
-            <svg
-              width="20"
-              height="20"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-              />
-            </svg>
-            <span className="text-xs">VENDOR DOCS</span>
-          </button>
+          {displayTag && (
+            <button className="flex-1 border-2 border-dashed border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-400 hover:border-yellow-400 hover:text-yellow-600 transition flex flex-col items-center gap-1">
+              <svg
+                width="20"
+                height="20"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+              <span className="text-xs">VENDOR DOCS</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -139,7 +140,11 @@ const UserProfilePage: React.FC = () => {
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide
                   ${displayTag === "admin" ? "bg-black text-yellow-400" : ""}
-                  ${displayTag === "seller" ? "bg-yellow-100 text-yellow-700" : ""}
+                  ${
+                    displayTag === "seller"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : ""
+                  }
                 `}
                 >
                   {displayTag}
@@ -190,7 +195,7 @@ const UserProfilePage: React.FC = () => {
         </div>
 
         {/* Edit Profile Button */}
-        <button className="mt-8 w-full sm:w-auto px-8 py-3 rounded-lg border-2 border-black text-black hover:text-white font-medium hover:bg-slate-950 transition-colors flex items-center justify-center gap-2">
+        <button className="mt-8 w-fit px-8 py-3 rounded-lg border-2 border-black text-black hover:text-white hover:bg-slate-950 font-medium transition-colors flex items-center justify-center gap-2 persistent-border-black">
           <svg
             width="18"
             height="18"
@@ -198,6 +203,7 @@ const UserProfilePage: React.FC = () => {
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth="2"
+            className="mr-2"
           >
             <path
               strokeLinecap="round"
