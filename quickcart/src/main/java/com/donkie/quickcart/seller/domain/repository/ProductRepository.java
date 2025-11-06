@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ProductRepository extends CustomJpaRepository<Product, UUID>, JpaSpecificationExecutor<Product> {
@@ -22,4 +23,7 @@ public interface ProductRepository extends CustomJpaRepository<Product, UUID>, J
              AND (p.lifecycleAudit.isActive = TRUE OR p.lifecycleAudit.isOrphan = FALSE)
             """)
     int markInactiveAndOrphanByStore(@Param("storeId") UUID storeId);
+
+    @Query("SELECT DISTINCT p.brand FROM Product p")
+    List<String> findDistinctBrands();
 }

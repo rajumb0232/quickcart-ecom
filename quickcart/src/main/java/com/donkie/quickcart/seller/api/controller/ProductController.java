@@ -6,6 +6,8 @@ import com.donkie.quickcart.seller.application.dto.response.ProductResponse;
 import com.donkie.quickcart.seller.application.service.contracts.ProductService;
 import com.donkie.quickcart.shared.dto.ApiAck;
 import com.donkie.quickcart.shared.dto.ApiResponse;
+import com.donkie.quickcart.shared.dto.PageContainer;
+import com.donkie.quickcart.shared.dto.PageResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,5 +96,20 @@ public class ProductController {
         productService.deleteProduct(productId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .body(ApiAck.success("Product Deleted."));
+    }
+
+    @GetMapping("/public/brands")
+    public ResponseEntity<ApiResponse<List<String>>> getBrands() {
+        return ResponseEntity.ok(ApiResponse.success("Brands Found", productService.getBrands()));
+    }
+
+    @GetMapping("/stores/{storeId}/products")
+    public ResponseEntity<PageResponse<ProductResponse>> getProductsByStore(
+            @PathVariable UUID storeId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "25") int size) {
+        log.debug("Fetching products by store: {}", storeId);
+        PageContainer<ProductResponse> response = productService.getProductsByStore(storeId, page, size);
+        return ResponseEntity.ok(PageResponse.create("Products Found", response));
     }
 }

@@ -3,6 +3,7 @@ package com.donkie.quickcart.seller.application.service.contracts;
 import com.donkie.quickcart.seller.application.dto.request.ProductFilters;
 import com.donkie.quickcart.seller.application.dto.request.ProductRequest;
 import com.donkie.quickcart.seller.application.dto.response.ProductResponse;
+import com.donkie.quickcart.shared.dto.PageContainer;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -23,4 +24,8 @@ public interface ProductService {
     void publishProduct(UUID productId);
 
     List<ProductResponse> getProductsByFilter(ProductFilters filters, int page, int size);
+
+    List<String> getBrands();
+
+    PageContainer<ProductResponse> getProductsByStore(UUID storeId, int page, int size);
 }

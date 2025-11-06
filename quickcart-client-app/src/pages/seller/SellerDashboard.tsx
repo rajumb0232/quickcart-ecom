@@ -22,7 +22,7 @@ import Store from "./views/Store";
 type ViewParam =
   | "dashboard"
   | "store"
-  | "manageProducts"
+  | "manage-products"
   | "reports"
   | "profile"
   | "settings";
@@ -58,7 +58,7 @@ const SellerDashboard: React.FC = () => {
         return <Dashboard />;
       case "store":
         return <Store />;
-      case "manageProducts":
+      case "manage-products":
         return <ManageProducts />;
       case "reports":
         return <Reports />;

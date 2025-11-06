@@ -18,6 +18,7 @@ import com.donkie.quickcart.seller.domain.repository.ProductRepository;
 import com.donkie.quickcart.seller.domain.repository.StoreRepository;
 import com.donkie.quickcart.seller.infra.integration.admin.CategoryClient;
 import com.donkie.quickcart.seller.infra.integration.admin.CategorySummary;
+import com.donkie.quickcart.shared.dto.PageContainer;
 import com.donkie.quickcart.user.domain.model.UserRole;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -158,6 +159,16 @@ public class ProductServiceImpl implements ProductService {
                     return toProductResponse(product, variants);
                 })
                 .toList();
+    }
+
+    @Override
+    public List<String> getBrands() {
+        return productRepository.findDistinctBrands();
+    }
+
+    @Override
+    public PageContainer<ProductResponse> getProductsByStore(UUID storeId, int page, int size) {
+        return null;
     }
 
 
