@@ -3,17 +3,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { selectSelectStores } from "../../../features/product/sellerStoreSelectors";
 import { setViewStore } from "../../../features/product/sellerStoreSlice";
-import { 
-  Store as StoreIcon, 
-  MapPin, 
-  Phone, 
-  Mail, 
+import {
+  Store as StoreIcon,
+  MapPin,
+  Phone,
+  Mail,
   Calendar,
   Clock,
   Edit3,
   Eye,
   TrendingUp,
-  Package
+  Package,
 } from "lucide-react";
 
 const Store: React.FC = () => {
@@ -34,16 +34,25 @@ const Store: React.FC = () => {
   const getRandomStats = () => ({
     products: Math.floor(Math.random() * 200) + 50,
     sales: Math.floor(Math.random() * 1000) + 100,
-    revenue: Math.floor(Math.random() * 50000) + 10000
+    revenue: Math.floor(Math.random() * 50000) + 10000,
   });
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Stores</h1>
-          <p className="text-gray-600">Manage and monitor your store locations</p>
+        <div className="mb-8 px-3 flex items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Stores</h1>
+            <p className="text-gray-600">
+              Manage and monitor your store locations
+            </p>
+          </div>
+          <button className="ml-auto px-6 py-2 my-1 border-[1.5px] rounded-lg hover:bg-gray-900 hover:text-gray-100 transform transition duration-75 cursor-pointer"
+          onClick={() => navigate("/store")}
+          >
+            Create Store
+          </button>
         </div>
 
         {/* Stores Grid */}
@@ -94,7 +103,9 @@ const Store: React.FC = () => {
                           <TrendingUp size={16} />
                           <span className="text-xs font-medium">Revenue</span>
                         </div>
-                        <p className="text-lg font-bold">${(stats.revenue / 1000).toFixed(1)}k</p>
+                        <p className="text-lg font-bold">
+                          ${(stats.revenue / 1000).toFixed(1)}k
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -108,11 +119,15 @@ const Store: React.FC = () => {
                           <Phone size={16} className="text-orange-600" />
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500">Contact Number</p>
-                          <p className="text-sm font-medium">{store.contact_number}</p>
+                          <p className="text-xs text-gray-500">
+                            Contact Number
+                          </p>
+                          <p className="text-sm font-medium">
+                            {store.contact_number}
+                          </p>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-3 text-gray-700">
                         <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
                           <Mail size={16} className="text-amber-600" />
@@ -126,7 +141,9 @@ const Store: React.FC = () => {
 
                     {/* About Section */}
                     <div className="mb-4">
-                      <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">About</h3>
+                      <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">
+                        About
+                      </h3>
                       <p className="text-sm text-gray-600 line-clamp-3">
                         {store.about}
                       </p>
@@ -136,11 +153,19 @@ const Store: React.FC = () => {
                     <div className="flex items-center gap-4 mb-6 text-xs text-gray-500">
                       <div className="flex items-center gap-1">
                         <Calendar size={14} />
-                        <span>Created: {new Date(store.created_date).toLocaleDateString()}</span>
+                        <span>
+                          Created:{" "}
+                          {new Date(store.created_date).toLocaleDateString()}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock size={14} />
-                        <span>Updated: {new Date(store.last_modified_date).toLocaleDateString()}</span>
+                        <span>
+                          Updated:{" "}
+                          {new Date(
+                            store.last_modified_date
+                          ).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
 
@@ -174,9 +199,12 @@ const Store: React.FC = () => {
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <StoreIcon size={40} className="text-gray-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Stores Found</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No Stores Found
+            </h3>
             <p className="text-gray-500 text-center max-w-md">
-              You haven't created any stores yet. Create your first store to start selling your products.
+              You haven't created any stores yet. Create your first store to
+              start selling your products.
             </p>
           </div>
         )}
