@@ -81,11 +81,7 @@ const PreviewProduct: React.FC = () => {
   return (
     <div className="w-full flex flex-col items-center justify-start">
       <div className="w-full mx-auto">
-        <section className="bg-white rounded-xl overflow-hidden">
-          <h2 className="text-3xl text-center my-4 mt-8 font-bold text-gray-900 mb-8 tracking-tight">
-            Product Preview
-          </h2>
-          <hr className="border-[0.7px] border-gray-100"/>
+        <section className=" rounded-xl overflow-hidden">
           <div className="p-6 md:p-10 space-y-6">
             {/* Category Row */}
             <div className="flex items-start justify-between">
@@ -164,7 +160,7 @@ const PreviewProduct: React.FC = () => {
                 <div className="text-xs uppercase font-semibold text-gray-500 mb-2">
                   Description
                 </div>
-                <div className="text-gray-700 bg-gray-50 border border-gray-200 rounded-md p-4 text-sm leading-relaxed whitespace-pre-wrap">
+                <div className="text-gray-700 bg-gray-50 rounded-md text-sm leading-relaxed whitespace-pre-wrap">
                   {product.description || "—"}
                 </div>
               </div>

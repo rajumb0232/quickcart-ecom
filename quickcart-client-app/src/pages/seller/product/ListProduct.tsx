@@ -105,11 +105,21 @@ const ListProduct: React.FC = () => {
         minHeight: `${imageContainerHeight + 90}px`,
       }}
     >
-      <div className="w-full md:min-h-[500px] md:w-9/12 p-8 border shadow-lg border-gray-100 border-t-8 border-t-amber-400 rounded-lg mt-10">
-        <button className="text-gray-400 rounded-full p-2 hover:bg-red-100 hover:text-red-400" onClick={() => navigate("/seller/dashboard")}>
-          <SquareX />
-        </button>
-        <div>{RenderComponent}</div>
+      <div className="w-full md:min-h-[500px] md:w-9/12 border shadow-lg bg-gray-50 border-gray-100 border-t-8 border-t-amber-400 rounded-lg">
+        <div className={`border-b bg-white border-b-gray-200 p-2`}>
+          <button
+            className={`text-gray-400 rounded-full p-1 hover:bg-red-200 shadow-2xl hover:text-red-4}00`}
+            onClick={() => navigate("/seller/dashboard")}
+          >
+            <SquareX />
+          </button>
+          <h2 className="text-2xl text-center font-semibold text-gray-700 pb-4">
+            {currentStageRaw !== "stage5" ? "CREATE PRODUCT" : "PRODUCT PREVIEW"}
+          </h2>
+        </div>
+        <div className="p-10 bg-gray-50 w-full h-full">
+          <div>{RenderComponent}</div>
+        </div>
       </div>
     </div>
   );

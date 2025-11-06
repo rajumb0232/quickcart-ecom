@@ -56,7 +56,7 @@ const Categorize: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col justify-center items-center p-6">
+    <div className="w-full flex flex-col justify-center items-center">
       <div className="w-full">
         {/* Category Selector */}
         <h1 className="text-xl mb-6 font-semibold">Select the product category</h1>
