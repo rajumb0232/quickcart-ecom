@@ -14,6 +14,8 @@ import {
 } from "../../../features/product/productBuilderSelectors";
 import PreviewProduct from "./Preview";
 import { setShowCategories } from "../../../features/util/screenSlice";
+import { SquareX } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const stageComponents: Record<string, JSX.Element> = {
   select_category: <Categorize />,
@@ -63,10 +65,11 @@ const ListProduct: React.FC = () => {
   const currentStageRaw = useSelector(selectProductReqBuildStage);
   const productReq = useSelector(selectProductReq);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(setShowCategories(false));
-  }, [])
+  }, []);
 
   useEffect(() => {
     console.log("🧩 Product Request Updated:", productReq);
@@ -87,23 +90,27 @@ const ListProduct: React.FC = () => {
   const RESERVED_VERTICAL = 120;
   const imageContainerHeight = Math.max(420, viewHeight - RESERVED_VERTICAL);
 
-  const RenderComponent =
-    stageComponents[currentStage] ?? (
-      <div className="text-center text-gray-500 py-10">
-        Invalid stage:{" "}
-        <span className="font-semibold">{String(currentStageRaw)}</span>
-      </div>
-    );
+  const RenderComponent = stageComponents[currentStage] ?? (
+    <div className="text-center text-gray-500 py-10">
+      Invalid stage:{" "}
+      <span className="font-semibold">{String(currentStageRaw)}</span>
+    </div>
+  );
 
   return (
     <div
-      className="w-full flex flex-col items-center justify-start bg-white"
+      className="w-full flex flex-col items-center justify-center bg-white"
       style={{
         marginTop: `${navHeight - 36}px`,
         minHeight: `${imageContainerHeight + 90}px`,
       }}
     >
-      <div className="w-full md:min-h-[500px] md:w-9/12 p-8 border border-gray-300 rounded-lg mt-10">{RenderComponent}</div>
+      <div className="w-full md:min-h-[500px] md:w-9/12 p-8 border shadow-lg border-gray-100 border-t-8 border-t-amber-400 rounded-lg mt-10">
+        <button className="text-gray-400 rounded-full p-2 hover:bg-red-100 hover:text-red-400" onClick={() => navigate("/seller/dashboard")}>
+          <SquareX />
+        </button>
+        <div>{RenderComponent}</div>
+      </div>
     </div>
   );
 };
