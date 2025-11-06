@@ -79,9 +79,9 @@ const PreviewProduct: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-start px-2 py-8 md:px-8">
-      <div className="w-full max-w-3xl mx-auto">
-        <section className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+    <div className="w-full flex flex-col items-center justify-start">
+      <div className="w-full mx-auto">
+        <section className="bg-white rounded-xl overflow-hidden">
           <h2 className="text-3xl text-center my-4 mt-8 font-bold text-gray-900 mb-8 tracking-tight">
             Product Preview
           </h2>
