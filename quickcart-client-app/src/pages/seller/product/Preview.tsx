@@ -98,7 +98,7 @@ const PreviewProduct: React.FC = () => {
                     categoryPath.map((c, idx) => (
                       <span
                         key={idx}
-                        className="text-xs px-3 py-1 rounded-full bg-amber-300 text-yellow-950 border border-amber-300"
+                        className="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 border-[1.5px] border-emerald-300"
                       >
                         {c}
                       </span>
