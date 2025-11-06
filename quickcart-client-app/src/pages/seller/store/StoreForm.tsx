@@ -6,7 +6,11 @@ import { selectNavHeight } from "../../../features/util/screenSelector";
 import { setShowCategories } from "../../../features/util/screenSlice";
 import type { StoreRequest } from "../../../types/storeTypes";
 import { isApiResponse } from "../../../types/apiResponseType";
-import { useCreateStore, useEditStore, useGetStoreById } from "../../../hooks/useStore";
+import {
+  useCreateStore,
+  useEditStore,
+  useGetStoreById,
+} from "../../../hooks/useStore";
 import { toast } from "react-toastify";
 
 const StoreForm: React.FC = () => {
@@ -79,7 +83,7 @@ const StoreForm: React.FC = () => {
           navigate(-1);
         },
         onError: (error) => {
-          alert("Failed to update: " + (error as Error).message);
+          toast.error("Failed to update: " + (error as Error).message);
         },
       });
     } else {
@@ -98,10 +102,9 @@ const StoreForm: React.FC = () => {
   if (isLoading) return <p>Loading store data...</p>;
   if (isError) return <p>Failed to load store data.</p>;
 
-  const isSubmitting =
-    shouldFetchStore
-      ? editStoreMutation.isPending
-      : createStoreMutation.isPending;
+  const isSubmitting = shouldFetchStore
+    ? editStoreMutation.isPending
+    : createStoreMutation.isPending;
 
   return (
     <div

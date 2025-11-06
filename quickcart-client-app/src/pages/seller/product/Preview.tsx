@@ -70,11 +70,11 @@ const PreviewProduct: React.FC = () => {
 
     try {
       await createProductMutation.mutateAsync(product);
-      toast.success("✅ Product created successfully!");
+      toast.success("Product created successfully!");
       console.log("Product Created:", product);
       // You can add navigation/reset here if desired
     } catch (err: any) {
-      console.error("❌ Product creation failed:", err);
+      console.error("Product creation failed:", err);
       toast.error(err.message || "Failed to create product");
     }
   };

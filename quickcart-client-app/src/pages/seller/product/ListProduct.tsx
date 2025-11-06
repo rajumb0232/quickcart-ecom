@@ -16,6 +16,8 @@ import PreviewProduct from "./Preview";
 import { setShowCategories } from "../../../features/util/screenSlice";
 import { SquareX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { selectViewStore } from "../../../features/product/sellerStoreSelectors";
+import { toast } from "react-toastify";
 
 const stageComponents: Record<string, JSX.Element> = {
   select_category: <Categorize />,
@@ -64,12 +66,17 @@ const ListProduct: React.FC = () => {
   const screenHeight = useSelector(selectScreenHeight);
   const currentStageRaw = useSelector(selectProductReqBuildStage);
   const productReq = useSelector(selectProductReq);
+  const currentStore = useSelector(selectViewStore);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(setShowCategories(false));
   }, []);
+
+  useEffect(() => {
+    if(currentStore) toast.info("Listing product to " + currentStore?.name);
+  }, [currentStore])
 
   useEffect(() => {
     console.log("🧩 Product Request Updated:", productReq);

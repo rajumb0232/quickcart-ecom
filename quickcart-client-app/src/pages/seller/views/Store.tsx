@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Package,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 const Store: React.FC = () => {
   const sellerStores = useSelector(selectSelectStores);
@@ -23,7 +24,10 @@ const Store: React.FC = () => {
 
   const handleSetAsCurrentView = (storeId: string) => {
     const selectedStore = sellerStores.find((s) => s.store_id === storeId);
-    if (selectedStore) dispatch(setViewStore(selectedStore));
+    if (selectedStore) {
+      dispatch(setViewStore(selectedStore));
+      toast.success("Currently Viewing " + selectedStore.name);
+    }
   };
 
   const handleEditStore = (storeId: string) => {
@@ -48,8 +52,9 @@ const Store: React.FC = () => {
               Manage and monitor your store locations
             </p>
           </div>
-          <button className="ml-auto px-6 py-2 my-1 border-[1.5px] rounded-lg hover:bg-gray-900 hover:text-gray-100 transform transition duration-75 cursor-pointer"
-          onClick={() => navigate("/store")}
+          <button
+            className="ml-auto px-6 py-2 my-1 border-[1.5px] rounded-lg hover:bg-gray-900 hover:text-gray-100 transform transition duration-75 cursor-pointer"
+            onClick={() => navigate("/store")}
           >
             Create Store
           </button>
