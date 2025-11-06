@@ -16,5 +16,8 @@ export const productService = {
             description: body.description
         }
         return api.post<ApiAck>(`/stores/${storeId}/categories/${categoryId}/products`, req);
+    },
+    getBrands: (api: ReturnType< typeof useAPI>) => {
+        return api.get<string[]>("/public/brands");
     }
 }

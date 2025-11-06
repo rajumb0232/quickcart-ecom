@@ -40,3 +40,14 @@ export const useCreateProduct = (storeId: string, categoryId: string) => {
           },
   });
 };
+
+export const useGetBrands = () => {
+  const api = useAPI();
+
+  return useQuery<ApiResult<string[]>, Error>({
+    queryKey: ["brands"],
+    queryFn: () => productService.getBrands(api),
+    retry: 2,
+    staleTime: 30 * 60 * 1000, // 30 mins
+  });
+};

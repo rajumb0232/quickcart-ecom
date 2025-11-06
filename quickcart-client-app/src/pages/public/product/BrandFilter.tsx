@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { parseProductFiltersFromURL } from "../../../types/productTypes";
+import { useGetBrands } from "../../../hooks/useProducts";
+import { isApiResponse } from "../../../types/apiResponseType";
 
 export interface BrandFilterProps {
   selectedBrand?: string;
@@ -8,23 +10,13 @@ export interface BrandFilterProps {
   placeholder?: string;
 }
 
-// gonna replace these with real time brand list
-const DUMMY_BRANDS = [
-  "Levis",
-  "Nike",
-  "Adidas",
-  "H&M",
-  "Zara",
-  "Pantaloons",
-  "Turtle",
-  "Red Taper",
-];
-
 export const BrandFilter: React.FC<BrandFilterProps> = ({
   selectedBrand,
   onSelect,
   placeholder = "Select Brand",
 }) => {
+  const { data } = useGetBrands();
+  const brands = data && isApiResponse(data) ? data.data : null;
   const [query, setQuery] = useState<string>("");
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const location = useLocation();
@@ -33,22 +25,22 @@ export const BrandFilter: React.FC<BrandFilterProps> = ({
   // set the pre selected brand as query while mounting
   useEffect(() => {
     selectedBrand && setQuery(selectedBrand);
-  }, [])
+  }, []);
 
   useEffect(() => {
-    setFilteredBrands(DUMMY_BRANDS.filter(b => b.match(query)))
-  }, [query])
+    if (brands) setFilteredBrands(brands.filter((b) => b.match(query)));
+  }, [query]);
 
   useEffect(() => {
     const fp = parseProductFiltersFromURL(location?.search);
-    if(fp && fp.brand) setQuery(fp.brand);
-  }, [location.search])
+    if (fp && fp.brand) setQuery(fp.brand);
+  }, [location.search]);
 
   const handleSelect = (brand: string) => {
     setQuery(brand);
     onSelect(brand);
     setDropdownOpen(false);
-  }
+  };
 
   return (
     <div className="mb-4">
@@ -73,7 +65,7 @@ export const BrandFilter: React.FC<BrandFilterProps> = ({
       </div>
 
       {/* Inline brand list - in-flow so it pushes other items down */}
-      {dropdownOpen && filteredBrands.length > 0 && (
+      {dropdownOpen && (
         <div className="mt-2 w-full bg-white border border-gray-200 rounded shadow-sm max-h-40 overflow-auto">
           <ul>
             {filteredBrands.map((b) => (
@@ -85,6 +77,15 @@ export const BrandFilter: React.FC<BrandFilterProps> = ({
                 {b}
               </li>
             ))}
+            {filteredBrands.length == 0 && query && (
+              <li
+                key={query}
+                onClick={() => handleSelect(query)}
+                className="px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm"
+              >
+                <span className="text-gray-400">Select New Brand:</span> {query}
+              </li>
+            )}
           </ul>
         </div>
       )}
