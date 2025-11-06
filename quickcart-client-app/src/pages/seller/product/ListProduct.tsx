@@ -1,5 +1,5 @@
 import React, { useEffect, useState, type JSX } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   selectNavHeight,
   selectScreenHeight,
@@ -13,6 +13,7 @@ import {
   selectProductReqBuildStage,
 } from "../../../features/product/productBuilderSelectors";
 import PreviewProduct from "./Preview";
+import { setShowCategories } from "../../../features/util/screenSlice";
 
 const stageComponents: Record<string, JSX.Element> = {
   select_category: <Categorize />,
@@ -61,6 +62,11 @@ const ListProduct: React.FC = () => {
   const screenHeight = useSelector(selectScreenHeight);
   const currentStageRaw = useSelector(selectProductReqBuildStage);
   const productReq = useSelector(selectProductReq);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(setShowCategories(false));
+  }, [])
 
   useEffect(() => {
     console.log("🧩 Product Request Updated:", productReq);
@@ -91,10 +97,10 @@ const ListProduct: React.FC = () => {
 
   return (
     <div
-      className="w-full flex flex-col items-center justify-start bg-gray-50"
+      className="w-full flex flex-col items-center justify-start bg-white"
       style={{
-        marginTop: `${navHeight}px`,
-        minHeight: `${imageContainerHeight + 55}px`,
+        marginTop: `${navHeight - 36}px`,
+        minHeight: `${imageContainerHeight + 90}px`,
       }}
     >
       <div className="w-full md:w-8/12 lg:w-7/12 mt-10">{RenderComponent}</div>

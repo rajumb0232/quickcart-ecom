@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -13,7 +13,14 @@ import BlackButton from "../../../components/form/BlackButton";
 const EnterBrand: React.FC = () => {
   const dispatch = useDispatch();
   const savedBrand = useSelector(selectBrandInProductReq);
-  const [brand, setBrand] = useState(savedBrand ?? "");
+  const [brand, setBrand] = useState<string>(savedBrand ?? "");
+
+  // Hydrate local state from Redux when savedBrand becomes available or changes
+  useEffect(() => {
+    if (typeof savedBrand === "string") {
+      setBrand(savedBrand);
+    }
+  }, [savedBrand]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBrand(e.target.value);
@@ -24,8 +31,9 @@ const EnterBrand: React.FC = () => {
   };
 
   const handleNext = () => {
-    if (!brand.trim()) return;
-    dispatch(setBrandToProductRequest(brand.trim()));
+    const trimmed = brand.trim();
+    if (!trimmed) return;
+    dispatch(setBrandToProductRequest(trimmed));
     dispatch(updateBuildStage("next")); // proceed to stage4 (write_description)
   };
 
