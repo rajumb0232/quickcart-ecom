@@ -22,6 +22,7 @@ import ListProduct from "./pages/seller/product/ListProduct";
 import StoreForm from "./pages/seller/store/StoreForm";
 import { rehydrateViewStore } from "./features/product/sellerStoreSlice";
 import { useGetSellerStores } from "./hooks/useStore";
+import { isApiResponse } from "./types/apiResponseType";
 
 export default function App() {
   const location = useLocation();
@@ -39,15 +40,20 @@ export default function App() {
   }, [dispatch]);
 
   // ✅ Fetch seller stores
-  const { data: sellerStores, isSuccess } = useGetSellerStores();
+  const { data, isSuccess } = useGetSellerStores();
 
   // ✅ Rehydrate view store once stores are loaded
   useEffect(() => {
-    if (isSuccess && Array.isArray(sellerStores)) {
-      console.log("🔄 Rehydrating viewStore with:", sellerStores);
-      dispatch(rehydrateViewStore(sellerStores));
+    if (isSuccess) {
+      if(data && isApiResponse(data)) {
+        const stores = data.data;
+        console.log("🔄 Rehydrating viewStore with:", stores);
+
+        dispatch(rehydrateViewStore(stores));
+      }
+      
     }
-  }, [isSuccess, sellerStores, dispatch]);
+  }, [isSuccess, data, dispatch]);
 
   // 👇 Save background location for modal routing
   const state = location.state as { backgroundLocation?: Location };

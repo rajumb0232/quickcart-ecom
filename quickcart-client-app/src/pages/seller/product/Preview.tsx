@@ -30,6 +30,7 @@ const PreviewProduct: React.FC = () => {
   // Ensure store_id is set from viewStore when this component mounts
   useEffect(() => {
     if (storeViewing) {
+      console.log(storeViewing);
       dispatch(setStoreIdToProductRequest(storeViewing.store_id));
     }
   }, [dispatch, storeViewing]);
@@ -83,6 +84,14 @@ const PreviewProduct: React.FC = () => {
       <div className="w-full mx-auto">
         <section className=" rounded-xl overflow-hidden">
           <div className="p-6 md:p-10 space-y-6">
+            <div>
+              <span className="text-xs, text-gray-500">Listing the product under:</span>
+              <h3 className="text-xl text-amber-700">
+                {storeViewing && storeViewing.name
+                  ? storeViewing.name.toUpperCase()
+                  : "Couldn't identify store"}
+              </h3>
+            </div>
             {/* Category Row */}
             <div className="flex items-start justify-between">
               <div>
