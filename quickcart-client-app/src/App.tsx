@@ -20,35 +20,44 @@ import "react-toastify/dist/ReactToastify.css";
 import UserProfilePage from "./pages/auth/UserProfilePage";
 import ListProduct from "./pages/seller/product/ListProduct";
 import StoreForm from "./pages/seller/store/StoreForm";
+import { rehydrateViewStore } from "./features/product/sellerStoreSlice";
+import { useGetSellerStores } from "./hooks/useStore";
 
 export default function App() {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // ✅ Dynamically set screen height
   useEffect(() => {
     function handleResize() {
       dispatch(setScreenHeight(window.innerHeight));
     }
-    // Set initial height
     handleResize();
-    // Add resize event listener
     window.addEventListener("resize", handleResize);
-
-    // Cleanup on unmount
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, [dispatch]);
 
-  // 👇 Save the previous location when navigating to /sign
+  // ✅ Fetch seller stores
+  const { data: sellerStores, isSuccess } = useGetSellerStores();
+
+  // ✅ Rehydrate view store once stores are loaded
+  useEffect(() => {
+    if (isSuccess && Array.isArray(sellerStores)) {
+      console.log("🔄 Rehydrating viewStore with:", sellerStores);
+      dispatch(rehydrateViewStore(sellerStores));
+    }
+  }, [isSuccess, sellerStores, dispatch]);
+
+  // 👇 Save background location for modal routing
   const state = location.state as { backgroundLocation?: Location };
 
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
-      {/* Main route layer — background page stays visible */}
+
+      {/* Main route layer */}
       <Routes location={state?.backgroundLocation || location}>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<ProductSearchResultPage />} />
@@ -61,7 +70,6 @@ export default function App() {
             </RequireAuth>
           }
         />
-
         <Route
           path="/sign"
           element={
@@ -70,7 +78,6 @@ export default function App() {
             </RequireUnAuth>
           }
         />
-
         <Route
           path="/customer/*"
           element={
@@ -79,7 +86,6 @@ export default function App() {
             </RequireAuth>
           }
         />
-
         <Route
           path="/seller/:view"
           element={
@@ -88,7 +94,6 @@ export default function App() {
             </RequireAuth>
           }
         />
-
         <Route
           path="/list-product"
           element={
@@ -97,16 +102,14 @@ export default function App() {
             </RequireAuth>
           }
         />
-
         <Route
-          path="/store/:storeId?" // The "?" makes storeId optional
+          path="/store/:storeId?"
           element={
             <RequireAuth allowedRoles={["seller"]}>
               <StoreForm />
             </RequireAuth>
           }
         />
-
         <Route
           path="/admin/*"
           element={
@@ -116,23 +119,23 @@ export default function App() {
           }
         />
       </Routes>
-      {/* Modal route layer — rendered *over* the background page */}
+
+      {/* Modal routes */}
       {state?.backgroundLocation && (
         <Routes>
           <Route path="/sign" element={<LoginPage modal />} />
         </Routes>
       )}
-      {/* Show the Logout modal only if location changes to /logout */}
+
+      {/* Logout confirmation modal */}
       {state?.backgroundLocation && (
         <LogoutConfirmModal
           open={location.pathname === "/logout"}
           onClose={() => navigate(-1)}
-          onConfirm={() => {
-            // handle logout logic
-            navigate(-1);
-          }}
+          onConfirm={() => navigate(-1)}
         />
       )}
+
       <Footer />
     </>
   );

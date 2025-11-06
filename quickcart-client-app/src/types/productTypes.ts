@@ -51,7 +51,7 @@ export interface Product {
   is_deleted: boolean;
 }
 
-export interface CreateProduct {
+export interface productRequest {
   store_id: string,
   category_id: string,
   title: string,
