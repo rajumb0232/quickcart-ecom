@@ -6,10 +6,7 @@ import { SideBar } from "./SideBar";
 import { useSearchProduct } from "../../../hooks/useProducts";
 import { isApiResponse } from "../../../types/apiResponseType";
 import { setShowCategories } from "../../../features/util/screenSlice";
-
-const RAW_API_BASE =
-  import.meta.env.VITE_API_BASE || "http://localhost:8081/api/v1";
-const API_BASE = RAW_API_BASE.replace(/\/$/, "");
+import { API_BASE } from "../../../api/apiClient";
 
 interface Result {
   variant_id: string;
@@ -94,11 +91,11 @@ const ProductSearchResultPage: React.FC = () => {
           ) : (
             <div className="">
               <h2 className="text-center mb-6 text-gray-400">Search Result</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {variants.map((variant) => (
                   <article
                     key={variant.variant_id}
-                    className="bg-white rounded-sm shadow-sm hover:shadow-lg transition duration-150 border border-gray-300 flex flex-col overflow-hidden cursor-pointer"
+                    className="bg-white hover:shadow-lg transition duration-150 border border-gray-300 flex flex-col overflow-hidden cursor-pointer"
                     onClick={() => {
                       if (variant.productId) {
                         console.log("navigating to: ", variant.productId);
@@ -119,7 +116,7 @@ const ProductSearchResultPage: React.FC = () => {
                       }
                     }}
                   >
-                    <div className="h-56 w-full p-1 border-b border-gray-300 bg-white rounded-t-lg flex items-center justify-center overflow-hidden">
+                    <div className="h-56 w-full p-1 border-b border-gray-200 bg-white rounded-t-lg flex items-center justify-center overflow-hidden">
                       {variant.image_uris?.length && variant.image_uris[0] ? (
                         <img
                           src={variant.image_uris[0]}
