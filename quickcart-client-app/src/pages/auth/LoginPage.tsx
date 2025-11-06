@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Input from "../../components/form/Input";
 import SensitiveInput from "../../components/form/SensitiveInput";
@@ -8,13 +8,20 @@ import { FaOpencart } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLogin, useRegister } from "../../hooks/useAuth";
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { setShowCategories } from "../../features/util/screenSlice";
 
 interface AuthPageProps {
   modal?: boolean;
 }
 
-export default function AuthPage({ modal }: AuthPageProps) {
+export default function AuthPage({ modal = true }: AuthPageProps) {
   const location = useLocation();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(setShowCategories(false))
+  },[])
 
   const [mode, setMode] = useState<"login" | "register">("login");
   const navigate = useNavigate();
@@ -60,7 +67,7 @@ export default function AuthPage({ modal }: AuthPageProps) {
       ? "https://images.unsplash.com/photo-1759572095317-3a96f9a98e2b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDI2fHx8ZW58MHx8fHx8&auto=format&fit=crop&q=60&w=1200"
       : "https://images.unsplash.com/photo-1716951918731-77d7682b4e63?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&q=60&w=1200";
 
-  const closeModal = () => navigate(-1);
+  const closeModal = () => navigate("/");
 
   const FormSection = (
     <div className="flex flex-col justify-center items-center w-full md:w-1/2 p-6 md:p-16 bg-white relative">
