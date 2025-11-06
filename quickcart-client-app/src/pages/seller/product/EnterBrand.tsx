@@ -6,7 +6,6 @@ import {
   updateBuildStage,
 } from "../../../features/product/productBuilderSlice";
 import { selectBrandInProductReq, selectForcedBackStage } from "../../../features/product/productBuilderSelectors";
-import Input from "../../../components/form/Input";
 import LinkButton from "../../../components/form/LinkButton";
 import BlackButton from "../../../components/form/BlackButton";
 import BrandFilter from "../../public/product/BrandFilter";
@@ -23,10 +22,6 @@ const EnterBrand: React.FC = () => {
       setBrand(savedBrand);
     }
   }, [savedBrand]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBrand(e.target.value);
-  };
 
   const handleBack = () => {
     dispatch(updateBuildStage(forcedBackStage ? forcedBackStage : "stage2")); // go back to title entry
