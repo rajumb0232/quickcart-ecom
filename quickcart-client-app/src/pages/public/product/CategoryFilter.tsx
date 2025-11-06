@@ -128,7 +128,6 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
 
   return (
     <div className="mb-4 relative w-full">
-      <label className="block text-gray-700 text-xs mb-2">Category</label>
 
       {/* Select button: always full width of its parent */}
       <div>

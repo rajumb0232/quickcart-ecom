@@ -5,7 +5,7 @@ import {
   setBrandToProductRequest,
   updateBuildStage,
 } from "../../../features/product/productBuilderSlice";
-import { selectBrandInProductReq } from "../../../features/product/productBuilderSelectors";
+import { selectBrandInProductReq, selectForcedBackStage } from "../../../features/product/productBuilderSelectors";
 import Input from "../../../components/form/Input";
 import LinkButton from "../../../components/form/LinkButton";
 import BlackButton from "../../../components/form/BlackButton";
@@ -13,6 +13,7 @@ import BlackButton from "../../../components/form/BlackButton";
 const EnterBrand: React.FC = () => {
   const dispatch = useDispatch();
   const savedBrand = useSelector(selectBrandInProductReq);
+  const forcedBackStage = useSelector(selectForcedBackStage);
   const [brand, setBrand] = useState<string>(savedBrand ?? "");
 
   // Hydrate local state from Redux when savedBrand becomes available or changes
@@ -27,14 +28,14 @@ const EnterBrand: React.FC = () => {
   };
 
   const handleBack = () => {
-    dispatch(updateBuildStage("stage2")); // go back to title entry
+    dispatch(updateBuildStage(forcedBackStage ? forcedBackStage : "stage2")); // go back to title entry
   };
 
   const handleNext = () => {
     const trimmed = brand.trim();
     if (!trimmed) return;
     dispatch(setBrandToProductRequest(trimmed));
-    dispatch(updateBuildStage("next")); // proceed to stage4 (write_description)
+    dispatch(updateBuildStage(forcedBackStage ? forcedBackStage : "next"));
   };
 
   return (

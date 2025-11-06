@@ -1,58 +1,80 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { parseProductFiltersFromURL } from "../../../types/productTypes";
 
 export interface BrandFilterProps {
-  selectedBrand: string;
-  onChange: (value: string) => void;
+  selectedBrand?: string;
   onSelect: (brand: string) => void;
-  isBrandOpen: boolean;
-  onToggle?: () => void;
-  brandList: string[];
   placeholder?: string;
 }
 
+// gonna replace these with real time brand list
+const DUMMY_BRANDS = [
+  "Levis",
+  "Nike",
+  "Adidas",
+  "H&M",
+  "Zara",
+  "Pantaloons",
+  "Turtle",
+  "Red Taper",
+];
+
 export const BrandFilter: React.FC<BrandFilterProps> = ({
   selectedBrand,
-  onChange,
   onSelect,
-  isBrandOpen,
-  onToggle,
-  brandList,
   placeholder = "Select Brand",
 }) => {
-  // local filter: use the selectedBrand string as the query (controlled component)
-  const query = selectedBrand ?? "";
+  const [query, setQuery] = useState<string>("");
+  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
+  const location = useLocation();
+
+  // set the pre selected brand as query while mounting
+  useEffect(() => {
+    selectedBrand && setQuery(selectedBrand);
+  }, [])
+
+  useEffect(() => {
+    const fp = parseProductFiltersFromURL(location?.search);
+    if(fp && fp.brand) setQuery(fp.brand);
+  }, [location.search])
+
+  const handleSelect = (brand: string) => {
+    setQuery(brand);
+    onSelect(brand);
+    setDropdownOpen(false);
+  }
 
   return (
     <div className="mb-4">
-      <label className="block text-gray-700 text-xs mb-2">Brand</label>
       <div className="relative">
         <input
           name="brand"
           value={query}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => onToggle?.()}
+          onChange={(e) => setQuery(e.target?.value)}
+          onFocus={() => setDropdownOpen(!dropdownOpen)}
           className="border border-gray-300 rounded-md w-full px-3 py-2 text-sm"
           placeholder={placeholder}
           autoComplete="off"
         />
         <button
           type="button"
-          onClick={() => onToggle?.()}
+          onClick={() => setDropdownOpen(!dropdownOpen)}
           className="absolute right-2 top-2 text-gray-600"
           aria-label="Toggle brand list"
         >
-          <span className="text-gray-600">{isBrandOpen ? "▴" : "▾"}</span>
+          <span className="text-gray-600">{dropdownOpen ? "▴" : "▾"}</span>
         </button>
       </div>
 
       {/* Inline brand list - in-flow so it pushes other items down */}
-      {isBrandOpen && (
+      {dropdownOpen && (
         <div className="mt-2 w-full bg-white border border-gray-200 rounded shadow max-h-40 overflow-auto">
           <ul>
-            {brandList.map((b) => (
+            {DUMMY_BRANDS.map((b) => (
               <li
                 key={b}
-                onClick={() => onSelect(b)}
+                onClick={() => handleSelect(b)}
                 className="px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm"
               >
                 {b}

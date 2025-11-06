@@ -10,3 +10,5 @@ export const selectProductReqBuildStage = (state: RootState) => state.productReq
 export const selectCategoryPathInProductReq = (state: RootState) => state.productRequest.product_category_path;
 
 export const selectProductReq = (state: RootState) => state.productRequest.product_request;
+
+export const selectForcedBackStage = (state: RootState) => state.productRequest.forced_back_stage;

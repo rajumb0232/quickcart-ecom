@@ -5,7 +5,7 @@ import {
   setTitleToProductRequest,
   updateBuildStage,
 } from "../../../features/product/productBuilderSlice";
-import { selectTitleInProductReq } from "../../../features/product/productBuilderSelectors";
+import { selectForcedBackStage, selectTitleInProductReq } from "../../../features/product/productBuilderSelectors";
 import Input from "../../../components/form/Input";
 import LinkButton from "../../../components/form/LinkButton";
 import BlackButton from "../../../components/form/BlackButton";
@@ -13,6 +13,7 @@ import BlackButton from "../../../components/form/BlackButton";
 const EnterTitle: React.FC = () => {
   const dispatch = useDispatch();
   const savedTitle = useSelector(selectTitleInProductReq);
+  const forcedBackStage = useSelector(selectForcedBackStage);
   const [title, setTitle] = useState(savedTitle ?? "");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,13 +22,13 @@ const EnterTitle: React.FC = () => {
 
   // 👇 Use the correct key name the slice expects
   const handleBack = () => {
-    dispatch(updateBuildStage("stage1")); // goes back to "select_category"
+    dispatch(updateBuildStage(forcedBackStage ? forcedBackStage : "stage1")); // goes back to "select_category"
   };
 
   const handleNext = () => {
     if (!title.trim()) return;
     dispatch(setTitleToProductRequest(title.trim()));
-    dispatch(updateBuildStage("next")); // advances to stage3 ("enter_brand")
+    dispatch(updateBuildStage(forcedBackStage ? forcedBackStage : "next")); // advances to stage3 ("enter_brand")
   };
 
   return (

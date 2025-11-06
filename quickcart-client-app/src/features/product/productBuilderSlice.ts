@@ -12,6 +12,7 @@ export interface productReqState {
     stage5: "preview_product";
   };
   current_stage: keyof productReqState["build_stages"];
+  forced_back_stage: keyof productReqState["build_stages"] | undefined;
 }
 
 const initialState: productReqState = {
@@ -31,6 +32,7 @@ const initialState: productReqState = {
     stage5: "preview_product",
   },
   current_stage: "stage1",
+  forced_back_stage: undefined,
 };
 
 const productBuilderSlice = createSlice({
@@ -54,6 +56,9 @@ const productBuilderSlice = createSlice({
     },
     setCategoryPathOfProductRequest: (state, action: PayloadAction<string[]>) => {
       state.product_category_path = action.payload;
+    },
+    forceBackStage: (state, action: PayloadAction<undefined | keyof productReqState["build_stages"]>) => {
+      state.forced_back_stage = action.payload;
     },
 
     /**
@@ -92,7 +97,8 @@ export const {
   setBrandToProductRequest,
   setDescriptionToProductRequest,
   updateBuildStage,
-  setCategoryPathOfProductRequest
+  setCategoryPathOfProductRequest,
+  forceBackStage
 } = productBuilderSlice.actions;
 
 export default productBuilderSlice.reducer;

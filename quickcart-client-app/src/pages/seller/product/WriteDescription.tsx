@@ -5,13 +5,14 @@ import {
   setDescriptionToProductRequest,
   updateBuildStage,
 } from "../../../features/product/productBuilderSlice";
-import { selectDescriptionInProductReq } from "../../../features/product/productBuilderSelectors";
+import { selectDescriptionInProductReq, selectForcedBackStage } from "../../../features/product/productBuilderSelectors";
 import LinkButton from "../../../components/form/LinkButton";
 import BlackButton from "../../../components/form/BlackButton";
 
 const WriteDescription: React.FC = () => {
   const dispatch = useDispatch();
   const savedDescription = useSelector(selectDescriptionInProductReq);
+  const forcedBackStage = useSelector(selectForcedBackStage);
   const [description, setDescription] = useState(savedDescription ?? "");
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -19,14 +20,13 @@ const WriteDescription: React.FC = () => {
   };
 
   const handleBack = () => {
-    dispatch(updateBuildStage("stage3")); // go back to brand entry
+    dispatch(updateBuildStage(forcedBackStage ? forcedBackStage : "stage3")); // go back to brand entry
   };
 
   const handleSubmit = () => {
     if (!description.trim()) return;
     dispatch(setDescriptionToProductRequest(description.trim()));
-    dispatch(updateBuildStage("next")); // move to next step (if any) or finish
-    console.log("✅ Product Description Saved:", description.trim());
+    dispatch(updateBuildStage(forcedBackStage ? forcedBackStage : "next")); // move to next step (if any) or finish
   };
 
   return (

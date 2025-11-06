@@ -6,18 +6,7 @@ import {
 } from "../../../types/productTypes";
 import BrandFilter from "./BrandFilter";
 import CategoryFilter from "./CategoryFilter";
-
-const DUMMY_BRANDS = [
-  "Levis",
-  "Nike",
-  "Adidas",
-  "H&M",
-  "Zara",
-  "Pantaloons",
-  "Turtle",
-  "Red Taper",
-];
-/* -------------------------------------------------------- */
+import { Funnel, Search } from "lucide-react";
 
 export const SideBar: React.FC = () => {
   const navigate = useNavigate();
@@ -34,20 +23,9 @@ export const SideBar: React.FC = () => {
   // category picker state
   const [categoryOpen, setCategoryOpen] = useState(false);
 
-  // brand suggestions
-  const [brandOpen, setBrandOpen] = useState(false);
-
   // handler when user picks a brand from list
   const handleBrandPick = (b: string) => {
     setFilters((p) => ({ ...p, brand: b })); // selected canonical brand
-    setBrandOpen(false);
-  };
-
-  // handler when user types in input
-  const handleBrandChange = () => {
-    // don't mark as selected until user clicks a list item
-    setFilters((p) => ({ ...p, brand: "" }));
-    setBrandOpen(true);
   };
 
   useEffect(() => {
@@ -76,25 +54,28 @@ export const SideBar: React.FC = () => {
 
   return (
     // sidebar becomes a column flex so we can pin the search button to the bottom
-    <aside className="w-72 bg-white border-r border-gray-200 p-5 flex flex-col h-screen">
-      <h3 className="font-semibold text-gray-900 mb-4 text-lg">
-        Apply Filters
-      </h3>
+    <aside className="w-72 bg-white border-r border-gray-200 px-5 py-2 flex flex-col h-screen">
+      <div className="flex justify-start items-start">
+        <span className="mt-1 mr-2">
+          <Funnel />
+        </span>
+        <h3 className="font-semibold text-gray-900 mb-4 text-lg">
+          Apply Filters
+        </h3>
+      </div>
 
       {/* scrollable area that will push the search button to the bottom */}
-      <div className="flex-1 overflow-auto [&::-webkit-scrollbar]:hidden pr-1">
+      <div className="pr-1 border-b border-gray-300 mb-8 pb-4">
+        <h5 className="mb-1 text-gray-700 text-sm px-1">Brand</h5>
         {/* Brand input */}
         <BrandFilter
-          brandList={DUMMY_BRANDS}
-          isBrandOpen={brandOpen}
           selectedBrand={filters.brand}
-          onChange={handleBrandChange} // receives a string
           onSelect={handleBrandPick} // receives the selected brand string
-          onToggle={() => setBrandOpen((s) => !s)}
         />
 
         {/* Category single-column stepper rendered inline */}
 
+        <h5 className="mb-1 text-gray-700 text-sm px-1">Category</h5>
         <CategoryFilter
           isOpen={categoryOpen}
           onToggle={() => setCategoryOpen((s) => !s)}
@@ -107,7 +88,7 @@ export const SideBar: React.FC = () => {
 
         {/* Price */}
         <div className="mb-4">
-          <label className="block text-gray-700 text-xs mb-2">
+          <label className="block text-gray-700 text-sm mb-2">
             Set Price Range
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -144,7 +125,7 @@ export const SideBar: React.FC = () => {
 
         {/* Rating */}
         <div className="mb-4">
-          <label className="block text-gray-700 text-xs mb-2">
+          <label className="block text-gray-700 text-sm mb-2">
             Select Rating
           </label>
           <div className="flex flex-col gap-2">
@@ -181,15 +162,15 @@ export const SideBar: React.FC = () => {
       </div>
 
       {/* Search - fixed at the bottom of the sidebar */}
-      <div className="mt-4">
-        <button
-          onClick={handleSearch}
-          className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 px-4 py-2 rounded font-semibold flex items-center justify-center gap-2"
-        >
-          <span>🔍</span>
-          <span>Search</span>
-        </button>
-      </div>
+      <button
+        onClick={handleSearch}
+        className="w-max ml-auto bg-yellow-400 hover:bg-yellow-500 text-gray-800 px-3 py-1 rounded font-semibold flex items-center justify-center relative"
+      >
+        <span>
+          <Search />
+        </span>
+        <span>Search</span>
+      </button>
     </aside>
   );
 };
