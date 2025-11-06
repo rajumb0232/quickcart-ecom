@@ -1,10 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  selectNavHeight,
-  selectShowCategories,
-} from "../../../features/util/screenSelector";
+import { selectNavHeight } from "../../../features/util/screenSelector";
 import { SideBar } from "./SideBar";
 import { useSearchProduct } from "../../../hooks/useProducts";
 import { isApiResponse } from "../../../types/apiResponseType";
