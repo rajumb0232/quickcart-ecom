@@ -3,6 +3,7 @@ import type { productRequest } from "../../types/productTypes";
 
 export interface productReqState {
   product_request: productRequest;
+  product_category_path: string[];
   build_stages: {
     stage1: "select_category";
     stage2: "enter_title";
@@ -21,6 +22,7 @@ const initialState: productReqState = {
     brand: "",
     description: "",
   },
+  product_category_path: [],
   build_stages: {
     stage1: "select_category",
     stage2: "enter_title",
@@ -49,6 +51,9 @@ const productBuilderSlice = createSlice({
     },
     setDescriptionToProductRequest: (state, action: PayloadAction<string>) => {
       state.product_request.description = action.payload;
+    },
+    setCategoryPathOfProductRequest: (state, action: PayloadAction<string[]>) => {
+      state.product_category_path = action.payload;
     },
 
     /**
@@ -87,6 +92,7 @@ export const {
   setBrandToProductRequest,
   setDescriptionToProductRequest,
   updateBuildStage,
+  setCategoryPathOfProductRequest
 } = productBuilderSlice.actions;
 
 export default productBuilderSlice.reducer;

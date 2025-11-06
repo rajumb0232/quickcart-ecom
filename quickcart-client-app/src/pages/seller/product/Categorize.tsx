@@ -1,10 +1,20 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import CategoryFilter from "../../public/product/CategoryFilter";
-import { setCategoryIdToProductRequest, updateBuildStage } from "../../../features/product/productBuilderSlice";
+import {
+  setCategoryIdToProductRequest,
+  setCategoryPathOfProductRequest,
+  updateBuildStage,
+} from "../../../features/product/productBuilderSlice";
+import {
+  selectCategoryIdInProductReq,
+  selectCategoryPathInProductReq,
+} from "../../../features/product/productBuilderSelectors";
 
 const Categorize: React.FC = () => {
   const dispatch = useDispatch();
+  const categoriesIfSelected = useSelector(selectCategoryPathInProductReq);
+  const categoryIdIfSelected = useSelector(selectCategoryIdInProductReq);
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNames, setSelectedNames] = useState<string[]>([]);
@@ -18,11 +28,20 @@ const Categorize: React.FC = () => {
   const confirmCategoryIdToStore = () => {
     if (selectedLevel3Id !== null) {
       dispatch(setCategoryIdToProductRequest(selectedLevel3Id));
+      dispatch(setCategoryPathOfProductRequest(selectedNames));
       dispatch(updateBuildStage("next"));
       console.log("Confirmed Level 3 Category ID:", selectedLevel3Id);
       setIsOpen(false);
     }
   };
+
+  useEffect(() => {
+    if (categoryIdIfSelected) {
+      if (categoriesIfSelected && categoriesIfSelected.length > 0) handleConfirmNames(categoriesIfSelected);
+
+      handleSetChildMostId(categoryIdIfSelected);
+    }
+  }, []);
 
   return (
     <div className="w-full flex flex-col justify-center items-center">
@@ -35,6 +54,7 @@ const Categorize: React.FC = () => {
             onToggle={handleToggle}
             onConfirm={handleConfirmNames}
             setChildMostId={handleSetChildMostId}
+            priorSelCat={categoriesIfSelected}
           />
         </div>
 
@@ -43,7 +63,9 @@ const Categorize: React.FC = () => {
           <button
             type="button"
             onClick={confirmCategoryIdToStore}
-            disabled={selectedNames.length < 3 || selectedLevel3Id === null}
+            disabled={
+              selectedNames.length < 3 || selectedLevel3Id === null
+            }
             className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
           >
             Confirm Selection

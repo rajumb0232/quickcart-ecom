@@ -7,4 +7,6 @@ export const selectBrandInProductReq = (state: RootState) => state.productReques
 export const selectDescriptionInProductReq = (state: RootState) => state.productRequest.product_request.description;
 export const selectProductReqBuildStage = (state: RootState) => state.productRequest.current_stage;
 
+export const selectCategoryPathInProductReq = (state: RootState) => state.productRequest.product_category_path;
+
 export const selectProductReq = (state: RootState) => state.productRequest.product_request;
