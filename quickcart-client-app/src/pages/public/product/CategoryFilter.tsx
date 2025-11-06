@@ -127,10 +127,10 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
       : "Select in " + selL2?.name;
 
   return (
-    <div className="mb-4 relative w-full">
+    <div className="mb-4">
 
       {/* Select button: always full width of its parent */}
-      <div>
+      <div className="relative">
         <button
           type="button"
           onClick={() => {
@@ -147,8 +147,8 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
 
         {/* Dropdown aligned to the same width as the parent (left:0 right:0) */}
         {isOpen && (
-          <div className="absolute left-0 right-0 bg-white border border-gray-200 rounded-md shadow-sm p-3 mt-1 z-20">
-            <div className="flex items-center justify-between mb-2">
+          <div className="mt-2 w-full bg-white border border-gray-200 rounded shadow-sm max-h-40 overflow-auto">
+            <div className="flex items-center justify-between mb-2 p-2">
               <div className="text-sm font-medium">{currentTitle}</div>
               <div className="flex gap-2">
                 <button

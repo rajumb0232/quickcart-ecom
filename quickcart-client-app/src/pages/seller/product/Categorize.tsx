@@ -56,10 +56,10 @@ const Categorize: React.FC = () => {
   };
 
   return (
-    <div className="w-full flex flex-col justify-center items-center">
+    <div className="w-full flex flex-col justify-center items-center p-6">
       <div className="w-full">
         {/* Category Selector */}
-        <h1 className="text-xl mb-6">Select the product category</h1>
+        <h1 className="text-xl mb-6 font-semibold">Select the product category</h1>
         <div>
           <CategoryFilter
             isOpen={isOpen}
@@ -76,7 +76,7 @@ const Categorize: React.FC = () => {
             <LinkButton label="← Go Back" onClick={handleBack} />
           )}
 
-          <div className="w-40">
+          <div className="w-40 ml-auto mb-auto">
             <BlackButton
               label="Continue"
               onClick={confirmCategoryIdToStore}

@@ -103,7 +103,7 @@ const ListProduct: React.FC = () => {
         minHeight: `${imageContainerHeight + 90}px`,
       }}
     >
-      <div className="w-full md:w-8/12 lg:w-7/12 mt-10">{RenderComponent}</div>
+      <div className="w-full md:min-h-[500px] md:w-9/12 p-8 border border-gray-300 rounded-lg mt-10">{RenderComponent}</div>
     </div>
   );
 };

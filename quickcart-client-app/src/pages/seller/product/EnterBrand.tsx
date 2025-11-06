@@ -9,6 +9,7 @@ import { selectBrandInProductReq, selectForcedBackStage } from "../../../feature
 import Input from "../../../components/form/Input";
 import LinkButton from "../../../components/form/LinkButton";
 import BlackButton from "../../../components/form/BlackButton";
+import BrandFilter from "../../public/product/BrandFilter";
 
 const EnterBrand: React.FC = () => {
   const dispatch = useDispatch();
@@ -45,14 +46,9 @@ const EnterBrand: React.FC = () => {
           Enter Brand Name
         </h2>
 
-        <Input
-          label="Brand Name"
-          type="text"
-          name="brandName"
-          placeholder="Enter or create a new brand name"
-          value={brand}
-          onChange={handleChange}
-          required
+        <BrandFilter
+          onSelect={(b) => setBrand(b)}
+          selectedBrand={savedBrand}
         />
 
         <div className="flex justify-between items-center mt-6">

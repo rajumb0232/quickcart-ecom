@@ -28,11 +28,16 @@ export const BrandFilter: React.FC<BrandFilterProps> = ({
   const [query, setQuery] = useState<string>("");
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const location = useLocation();
+  const [filteredBrands, setFilteredBrands] = useState<string[]>([]);
 
   // set the pre selected brand as query while mounting
   useEffect(() => {
     selectedBrand && setQuery(selectedBrand);
   }, [])
+
+  useEffect(() => {
+    setFilteredBrands(DUMMY_BRANDS.filter(b => b.match(query)))
+  }, [query])
 
   useEffect(() => {
     const fp = parseProductFiltersFromURL(location?.search);
@@ -52,10 +57,10 @@ export const BrandFilter: React.FC<BrandFilterProps> = ({
           name="brand"
           value={query}
           onChange={(e) => setQuery(e.target?.value)}
-          onFocus={() => setDropdownOpen(!dropdownOpen)}
-          className="border border-gray-300 rounded-md w-full px-3 py-2 text-sm"
+          className="border-[1.5px] border-gray-300 rounded-md w-full px-3 py-[0.6rem] text-sm"
           placeholder={placeholder}
           autoComplete="off"
+          onClick={() => setDropdownOpen(!dropdownOpen)}
         />
         <button
           type="button"
@@ -68,10 +73,10 @@ export const BrandFilter: React.FC<BrandFilterProps> = ({
       </div>
 
       {/* Inline brand list - in-flow so it pushes other items down */}
-      {dropdownOpen && (
-        <div className="mt-2 w-full bg-white border border-gray-200 rounded shadow max-h-40 overflow-auto">
+      {dropdownOpen && filteredBrands.length > 0 && (
+        <div className="mt-2 w-full bg-white border border-gray-200 rounded shadow-sm max-h-40 overflow-auto">
           <ul>
-            {DUMMY_BRANDS.map((b) => (
+            {filteredBrands.map((b) => (
               <li
                 key={b}
                 onClick={() => handleSelect(b)}
