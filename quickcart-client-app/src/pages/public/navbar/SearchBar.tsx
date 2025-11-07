@@ -68,7 +68,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ isMobile = false }) => {
           type="text"
           value={searchQuery}
           onChange={handleInputChange}
-          className="w-full border border-gray-300 rounded-full px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-700 text-sm"
+          className="w-full border border-gray-300 hover:border-gray-500 focus:border-amber-600 rounded-full px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-amber-200 text-gray-700 text-sm"
           placeholder="Search"
         />
         <FaSearch className="absolute left-3 top-3 text-gray-400 text-sm" />

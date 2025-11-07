@@ -1,7 +1,7 @@
 import type React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { selectSelectStores } from "../../../features/product/sellerStoreSelectors";
+import { selectSelectStores, selectViewStore } from "../../../features/product/sellerStoreSelectors";
 import { setViewStore } from "../../../features/product/sellerStoreSlice";
 import {
   Store as StoreIcon,
@@ -14,13 +14,19 @@ import {
   Eye,
   TrendingUp,
   Package,
+  CheckCircle,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
 const Store: React.FC = () => {
   const sellerStores = useSelector(selectSelectStores);
+  const currentViewStore = useSelector(selectViewStore);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Get the currently viewing store
+  // You'll need to add a selector for the currently viewed store in your Redux store
+  // For now, this assumes you track it or we can use the first store as default
 
   const handleSetAsCurrentView = (storeId: string) => {
     const selectedStore = sellerStores.find((s) => s.store_id === storeId);
@@ -49,39 +55,81 @@ const Store: React.FC = () => {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Stores</h1>
             <p className="text-gray-600">
-              Manage and monitor your store locations
+              Monitor and Manage Your Stores
             </p>
           </div>
           <button
-            className="ml-auto px-6 py-2 my-1 border-[1.5px] rounded-lg hover:bg-gray-900 hover:text-gray-100 transform transition duration-75 cursor-pointer"
+            className="ml-auto px-6 py-2 my-1 text-white border-2 border-gray-700 hover:border-gray-900 rounded-lg bg-gray-700 hover:bg-gray-900 transform transition duration-75 cursor-pointer"
             onClick={() => navigate("/store")}
           >
-            Create Store
+            Create New Store
           </button>
         </div>
 
+        {/* Currently Viewing Store Card */}
+        {currentViewStore && (
+          <div className="mb-6 bg-linear-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200 p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-emerald-400 rounded-2xl flex items-center justify-center shadow-md">
+                  <StoreIcon size={32} className="text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {currentViewStore.name}
+                    </h3>
+                    <CheckCircle size={20} className="text-emerald-600" />
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <MapPin size={16} />
+                    <span className="text-sm line-clamp-1">{currentViewStore.location}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-600 mb-1">You are currently in</p>
+                <div className="flex items-center gap-2 bg-emerald-100 px-4 py-2 rounded-lg">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-semibold text-emerald-700">{currentViewStore.name}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Stores Grid */}
         {sellerStores && sellerStores.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {sellerStores.map((store) => {
               const stats = getRandomStats();
+              const isCurrentView = currentViewStore?.store_id === store.store_id;
+              
               return (
                 <div
                   key={store.store_id}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300"
+                  className={`bg-white rounded-2xl shadow-sm border-2 overflow-hidden hover:shadow-md transition-all duration-300 ${
+                    isCurrentView ? 'border-emerald-300 ring-2 ring-emerald-100' : 'border-gray-200'
+                  }`}
                 >
                   {/* Header Section with Gradient */}
-                  <div className="bg-teal-600 p-6 text-white">
+                  <div className="bg-teal-600 p-6 text-white relative">
+                    {isCurrentView && (
+                      <div className="absolute top-3 right-3 bg-emerald-400 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                        <Eye size={12} />
+                        Viewing
+                      </div>
+                    )}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                           <StoreIcon size={24} className="text-white" />
                         </div>
                         <div>
-                          <h2 className="text-2xl font-bold">{store.name}</h2>
+                          <h2 className="text-xl font-bold">{store.name}</h2>
                           <div className="flex items-center gap-2 mt-1 text-white/95">
                             <MapPin size={14} />
-                            <span className="text-sm">{store.location}</span>
+                            <span className="text-sm line-clamp-1">{store.location}</span>
                           </div>
                         </div>
                       </div>
@@ -178,11 +226,16 @@ const Store: React.FC = () => {
                     <div className="flex gap-3">
                       <button
                         type="button"
-                        className="flex-1 bg-amber-400 text-white px-4 py-3 rounded-xl hover:bg-amber-500 focus:outline-none font-medium transition-all flex items-center justify-center gap-2 shadow-sm"
-                        onClick={() => handleSetAsCurrentView(store.store_id)}
+                        className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 shadow-sm ${
+                          isCurrentView
+                            ? 'bg-emerald-100 text-emerald-700 cursor-not-allowed'
+                            : 'bg-amber-400 text-white hover:bg-amber-500'
+                        }`}
+                        onClick={() => !isCurrentView && handleSetAsCurrentView(store.store_id)}
+                        disabled={isCurrentView}
                       >
-                        <Eye size={18} />
-                        <span>Set as Current View</span>
+                        <CheckCircle size={18} />
+                        <span>{isCurrentView ? 'Checked In' : 'Check In'}</span>
                       </button>
                       <button
                         type="button"

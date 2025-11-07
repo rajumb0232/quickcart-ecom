@@ -127,7 +127,7 @@ export default function RadixMultiDropdown({
               onMouseLeave={() => handleSubTriggerMouseLeave(idx)}
             >
               <button
-                className="w-full text-left px-4 py-3 text-sm flex items-center hover:bg-[#faf7f2] cursor-pointer outline-none border-none"
+                className="w-full text-left px-4 py-3 text-sm flex items-center hover:bg-emerald-50 hover:text-emerald-500 cursor-pointer outline-none border-none"
                 onClick={(e) => {
                   e.preventDefault();
                   item.onClick?.();
@@ -162,7 +162,7 @@ export default function RadixMultiDropdown({
                 {item.child!.map((child, i) => (
                   <DropdownMenu.Item
                     key={`${child.name}-${i}`}
-                    className="w-full text-left px-4 py-3 text-sm hover:bg-[#faf7f2] flex items-center cursor-pointer outline-none border-none"
+                    className="w-full text-left px-4 py-3 text-sm hover:bg-amber-50 hover:text-orange-500 flex items-center cursor-pointer outline-none border-none"
                     onSelect={() => {
                       child.onClick?.();
                       closeAll();
@@ -186,7 +186,7 @@ export default function RadixMultiDropdown({
     return (
       <DropdownMenu.Item
         key={`${item.name}-${idx}`}
-        className="w-full text-left px-4 py-3 text-sm hover:bg-[#faf7f2] flex items-center cursor-pointer outline-none border-none"
+        className="w-full text-left px-4 py-3 text-sm hover:bg-amber-50 hover:text-orange-500 flex items-center cursor-pointer outline-none border-none"
         onSelect={() => {
           item.onClick?.();
           closeAll();

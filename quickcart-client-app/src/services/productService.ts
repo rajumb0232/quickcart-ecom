@@ -1,5 +1,5 @@
 import type { useAPI } from "../hooks/useApi";
-import type { ApiAck } from "../types/apiResponseType";
+import type { ApiAck, PaginatedRequest } from "../types/apiResponseType";
 import type { Product, productRequest } from "../types/productTypes";
 
 export const productService = {
@@ -19,5 +19,13 @@ export const productService = {
     },
     getBrands: (api: ReturnType< typeof useAPI>) => {
         return api.get<string[]>("/public/brands");
+    },
+    fetchProductByStore: (api: ReturnType<typeof useAPI>, storeId: string | undefined, pageInfo: PaginatedRequest) => {
+        if(!storeId) {
+            throw Error("Invalid store ID");
+        }
+        const pageNo = pageInfo.page ? pageInfo.page : 0;
+        const size = pageInfo.size ? pageInfo.size : 15;
+        return api.get<Product>(`/stores/${storeId}/products?page=${pageNo}&size=${size}`)
     }
 }

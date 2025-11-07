@@ -54,10 +54,16 @@ const productBuilderSlice = createSlice({
     setDescriptionToProductRequest: (state, action: PayloadAction<string>) => {
       state.product_request.description = action.payload;
     },
-    setCategoryPathOfProductRequest: (state, action: PayloadAction<string[]>) => {
+    setCategoryPathOfProductRequest: (
+      state,
+      action: PayloadAction<string[]>
+    ) => {
       state.product_category_path = action.payload;
     },
-    forceBackStage: (state, action: PayloadAction<undefined | keyof productReqState["build_stages"]>) => {
+    forceBackStage: (
+      state,
+      action: PayloadAction<undefined | keyof productReqState["build_stages"]>
+    ) => {
       state.forced_back_stage = action.payload;
     },
 
@@ -87,6 +93,19 @@ const productBuilderSlice = createSlice({
         }
       }
     },
+
+    clearProductBuilderData: (state) => {
+      state.current_stage = "stage1";
+      state.forced_back_stage = undefined;
+      state.product_category_path = [];
+      state.product_request = {
+        store_id: "",
+        category_id: "",
+        title: "",
+        brand: "",
+        description: "",
+      };
+    },
   },
 });
 
@@ -98,7 +117,8 @@ export const {
   setDescriptionToProductRequest,
   updateBuildStage,
   setCategoryPathOfProductRequest,
-  forceBackStage
+  forceBackStage,
+  clearProductBuilderData,
 } = productBuilderSlice.actions;
 
 export default productBuilderSlice.reducer;

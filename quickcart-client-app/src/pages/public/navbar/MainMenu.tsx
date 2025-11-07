@@ -25,6 +25,12 @@ import {
   PiTagLight,
   PiUserCircleGearLight,
 } from "react-icons/pi";
+import {
+  CircleUser,
+  EllipsisVertical,
+  Heart,
+  ShoppingCart,
+} from "lucide-react";
 
 export const MainMenu: React.FC = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -124,7 +130,7 @@ export const MainMenu: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center gap-2 overflow-visible">
+    <div className="flex items-center gap-2 overflow-visible text-gray-700">
       {" "}
       {/* Account dropdown menu */}
       <RadixMultiDropdown
@@ -135,10 +141,14 @@ export const MainMenu: React.FC = () => {
             onClick={() => secureNavigate("/profile")}
             type="button"
           >
-            <span className="text-lg mx-1.5 md:mx-0 sm:text-lg md:text-xl mb-0 sm:mb-1">
-              <FaRegUser />
-            </span>
-            <span className="hidden lg:block text-xs font-medium">Account</span>
+            <div className="flex gap-2 hover:text-orange-500 font-normal text-gray-700">
+              <span className="text-lg mx-1.5 md:mx-0 sm:text-lg md:text-xl mb-0 sm:mb-1">
+                <CircleUser />
+              </span>
+              <span className="hidden lg:block text-gray-700">
+                Account
+              </span>
+            </div>
           </button>
         }
         items={accountMenu}
@@ -156,10 +166,12 @@ export const MainMenu: React.FC = () => {
         }}
         type="button"
       >
-        <span className="text-lg mx-1.5 md:mx-0 sm:text-lg md:text-xl mb-0 sm:mb-1">
-          <FaHeart />
-        </span>
-        <span className="hidden lg:block text-xs font-medium">Wishlist</span>
+        <div className="flex gap-2 hover:text-orange-500 font-normal text-gray-700">
+          <span className="text-lg mx-1.5 md:mx-0 sm:text-lg md:text-xl mb-0 sm:mb-1">
+            <Heart />
+          </span>
+          <span className="hidden lg:block text-gray-700">Wishlist</span>
+        </div>
       </button>
       {/* Cart Button */}
       <button
@@ -172,10 +184,12 @@ export const MainMenu: React.FC = () => {
         }}
         type="button"
       >
-        <span className="text-lg mx-1.5 md:mx-0 sm:text-lg md:text-xl mb-0 sm:mb-1">
-          <FaShoppingCart />
-        </span>
-        <span className="hidden lg:block text-xs font-medium">Cart</span>
+        <div className="flex gap-2 hover:text-orange-500 font-normal text-gray-700">
+          <span className="text-lg mx-1.5 md:mx-0 mb-0 sm:mb-1">
+            <ShoppingCart />
+          </span>
+          <span className="hidden lg:block text-gray-700">Cart</span>
+        </div>
       </button>
       {/* Options dropdown menu */}
       <RadixMultiDropdown
@@ -190,8 +204,8 @@ export const MainMenu: React.FC = () => {
             }}
             type="button"
           >
-            <span className="text-lg mx-1.5 md:mx-0 sm:text-lg md:text-xl mb-0 sm:mb-1">
-              <SlOptionsVertical />
+            <span className="flex gap-2 hover:text-orange-500 font-normal text-gray-700">
+              <EllipsisVertical />
             </span>
           </button>
         }

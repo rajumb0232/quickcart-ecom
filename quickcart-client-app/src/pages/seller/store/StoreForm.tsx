@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Input from "../../../components/form/Input";
 import { useDispatch, useSelector } from "react-redux";
 import { selectNavHeight } from "../../../features/util/screenSelector";
 import { setShowCategories } from "../../../features/util/screenSlice";
@@ -12,6 +11,16 @@ import {
   useGetStoreById,
 } from "../../../hooks/useStore";
 import { toast } from "react-toastify";
+import {
+  Store as StoreIcon,
+  MapPin,
+  Phone,
+  Mail,
+  FileText,
+  ArrowLeft,
+  Save,
+  Loader2,
+} from "lucide-react";
 
 const StoreForm: React.FC = () => {
   const navHeight = useSelector(selectNavHeight);
@@ -31,7 +40,6 @@ const StoreForm: React.FC = () => {
 
   const storeData = data && isApiResponse(data) ? data.data : null;
 
-  // Use storeId directly for editing, it's safer.
   const editStoreMutation = useEditStore(storeId);
   const createStoreMutation = useCreateStore();
 
@@ -72,7 +80,7 @@ const StoreForm: React.FC = () => {
       !formData.email ||
       !formData.about
     ) {
-      alert("Please fill all the fields.");
+      toast.error("Please fill all the fields.");
       return;
     }
 
@@ -93,14 +101,47 @@ const StoreForm: React.FC = () => {
           navigate(-1);
         },
         onError: (error) => {
-          alert("Failed to create: " + (error as Error).message);
+          toast.error("Failed to create: " + (error as Error).message);
         },
       });
     }
   };
 
-  if (isLoading) return <p>Loading store data...</p>;
-  if (isError) return <p>Failed to load store data.</p>;
+  if (isLoading) {
+    return (
+      <div
+        style={{ marginTop: `${navHeight + 36}px` }}
+        className="bg-gray-50 flex items-center justify-center"
+      >
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-teal-600 mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Loading store data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div
+        style={{ marginTop: `${navHeight + 36}px` }}
+        className="min-h-screen bg-gray-50 flex items-center justify-center"
+      >
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <StoreIcon className="w-8 h-8 text-red-600" />
+          </div>
+          <p className="text-red-600 font-medium">Failed to load store data.</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="mt-4 text-sm text-gray-600 hover:text-gray-900 underline"
+          >
+            Go back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const isSubmitting = shouldFetchStore
     ? editStoreMutation.isPending
@@ -108,97 +149,203 @@ const StoreForm: React.FC = () => {
 
   return (
     <div
-      style={{
-        marginTop: `${navHeight - 36}px`,
-        width: "70%",
-        maxWidth: "100%",
-        marginLeft: "auto",
-        marginRight: "auto",
-      }}
-      className="p-6 bg-white"
+      style={{ marginTop: `${navHeight - 40}px` }}
+      className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 py-8 px-4"
     >
-      <h2 className="text-2xl font-semibold mb-4">
-        {shouldFetchStore ? "Update Store" : "Create New Store"}
-      </h2>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Store Name"
-          name="name"
-          type="text"
-          value={formData.name}
-          onChange={onChange}
-          required
-        />
-        <Input
-          label="Location"
-          name="location"
-          type="text"
-          value={formData.location}
-          onChange={onChange}
-          required
-        />
-        <Input
-          label="Contact Number"
-          name="contact_number"
-          type="tel"
-          value={formData.contact_number}
-          onChange={onChange}
-          placeholder="e.g. +1 234 567 890"
-          required
-        />
-        <Input
-          label="Email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={onChange}
-          placeholder="example@domain.com"
-          required
-        />
-
-        {/* Textarea for About */}
-        <div>
-          <label
-            htmlFor="about"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            About
-          </label>
-          <textarea
-            id="about"
-            name="about"
-            rows={5}
-            value={formData.about}
-            onChange={onChange}
-            required
-            className="mt-1 p-2 block w-full rounded-md border border-gray-300 focus:border-black focus:ring-black"
-          />
-        </div>
-
-        <div className="flex items-center justify-between mt-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header Section */}
+        <div className="mb-8">
           <button
-            type="button"
             onClick={() => navigate(-1)}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded"
-            style={{ maxWidth: "max-content" }}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4 group"
           >
-            Back
+            <ArrowLeft
+              size={20}
+              className="group-hover:-translate-x-1 transition-transform"
+            />
+            <span className="font-medium">Back to Stores</span>
           </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-black text-white py-2 px-4 rounded disabled:opacity-50"
-            style={{ maxWidth: "max-content" }}
-          >
-            {isSubmitting
-              ? "Submitting..."
-              : shouldFetchStore
-              ? "Update Store"
-              : "Create Store"}
-          </button>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-14 h-14 bg-linear-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <StoreIcon size={28} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {shouldFetchStore ? "Update Store" : "Create New Store"}
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  {shouldFetchStore
+                    ? "Modify your store details below"
+                    : "Fill in the details to set up your new store"}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </form>
+
+        {/* Form Section */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+              <StoreIcon size={20} className="text-teal-600" />
+              Store Information
+            </h2>
+
+            <div className="space-y-6">
+              {/* Store Name */}
+              <div className="relative">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Store Name <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <StoreIcon size={18} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={onChange}
+                    required
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none"
+                    placeholder="Enter store name"
+                  />
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className="relative">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Location <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <MapPin size={18} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={onChange}
+                    required
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none"
+                    placeholder="Enter store location"
+                  />
+                </div>
+              </div>
+
+              {/* Contact Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Contact Number */}
+                <div className="relative">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Contact Number <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Phone size={18} className="text-gray-400" />
+                    </div>
+                    <input
+                      type="tel"
+                      name="contact_number"
+                      value={formData.contact_number}
+                      onChange={onChange}
+                      required
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none"
+                      placeholder="+1 234 567 890"
+                    />
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="relative">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail size={18} className="text-gray-400" />
+                    </div>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={onChange}
+                      required
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none"
+                      placeholder="example@domain.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* About Section */}
+              <div className="relative">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  About <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute top-3 left-4 pointer-events-none">
+                    <FileText size={18} className="text-gray-400" />
+                  </div>
+                  <textarea
+                    name="about"
+                    rows={5}
+                    value={formData.about}
+                    onChange={onChange}
+                    required
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all outline-none resize-none"
+                    placeholder="Tell us about your store..."
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Describe your store, its products, and what makes it unique.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-between gap-4">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all flex items-center gap-2"
+            >
+              <ArrowLeft size={18} />
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-8 py-3 bg-linear-to-r from-teal-500 to-teal-600 text-white font-semibold rounded-xl hover:from-teal-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 shadow-lg shadow-teal-200"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Save size={18} />
+                  {shouldFetchStore ? "Update Store" : "Create Store"}
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+
+        {/* Helper Text */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-500">
+            All fields marked with <span className="text-red-500">*</span> are
+            required
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

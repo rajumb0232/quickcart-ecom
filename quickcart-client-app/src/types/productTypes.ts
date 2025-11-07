@@ -24,13 +24,7 @@ export interface Variant {
   description: string;
   created_date: string;
   last_modified_date: string;
-  attributes: {
-    fit: string;
-    size: string;
-    type: string;
-    color: string;
-    "Care Instruction": string;
-  };
+  attributes: Record<string, string>;
   image_uris: string[];
   is_active: boolean;
   is_deleted: boolean;

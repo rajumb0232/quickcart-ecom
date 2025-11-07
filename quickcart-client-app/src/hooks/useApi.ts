@@ -1,11 +1,11 @@
 import type { AxiosRequestConfig } from "axios";
 import { api } from "../api/apiClient";
-import type { ApiAck, ApiResponse, ApiResult } from "../types/apiResponseType";
+import type { ApiAck, ApiResponse, ApiResult, PageResponse } from "../types/apiResponseType";
 import axios from "axios";
 
 async function unwrapResponse<T>(
-  promise: Promise<{ data: ApiResponse<T> | ApiResult<T> | ApiAck }>
-): Promise<ApiResponse<T> | ApiResult<T> | ApiAck> {
+  promise: Promise<{ data: ApiResponse<T> | ApiResult<T> | ApiAck | PageResponse<T>}>
+): Promise<ApiResponse<T> | ApiResult<T> | ApiAck | PageResponse<T>> {
   try {
     const response = await promise;
     return response.data;

@@ -9,8 +9,15 @@ import { isApiResponse } from "../../../types/apiResponseType";
 import { normalizeCategories } from "../../../services/categoryService";
 import { sanitizeCategorySelection } from "../../../services/categoryGroupSanitizer";
 import { useLocation } from "react-router-dom";
-import { IoCaretBackOutline, IoCaretForward } from "react-icons/io5";
-import { MdDelete } from "react-icons/md";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  Loader2,
+} from "lucide-react";
 
 export interface CategoryFilterProps {
   isOpen: boolean;
@@ -42,7 +49,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
 
   useEffect(() => {
     setPath(
-      [selL1?.name, selL2?.name, selL3?.name].filter(Boolean).join("/") ||
+      [selL1?.name, selL2?.name, selL3?.name].filter(Boolean).join(" / ") ||
         "Select Category"
     );
     confirmNames();
@@ -57,14 +64,13 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
   };
 
   useEffect(() => {
-    console.log("prior cats: ", priorSelCat);
     if (!priorSelCat || priorSelCat.length < 0) {
       const fp = parseProductFiltersFromURL(location?.search);
       const resolvedCats = fp?.categories;
       if (resolvedCats && resolvedCats.length > 0)
         updateAllCategories(resolvedCats);
     } else {
-      updateAllCategories(priorSelCat)
+      updateAllCategories(priorSelCat);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
@@ -128,8 +134,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
 
   return (
     <div className="mb-4">
-
-      {/* Select button: always full width of its parent */}
+      {/* Select button */}
       <div className="relative">
         <button
           type="button"
@@ -137,52 +142,85 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
             if (!isOpen) setLevel(1);
             onToggle();
           }}
-          className="w-full text-left border-[1.5px] border-gray-300 rounded-md px-3 py-2 flex items-center justify-between"
+          className="w-full text-left border-2 border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between bg-white hover:border-teal-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-100 transition-all group"
           disabled={isLoading}
-          style={{ zIndex: 10 }}
         >
-          <span className="text-sm">{isLoading ? "Loading..." : path}</span>
-          <span className="text-gray-600">{isOpen ? "▴" : "▾"}</span>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center group-hover:bg-teal-100 transition-colors">
+              <Layers size={16} className="text-teal-600" />
+            </div>
+            <span className={`text-sm font-medium ${path === "Select Category" ? "text-gray-400" : "text-gray-900"}`}>
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  Loading...
+                </span>
+              ) : (
+                path
+              )}
+            </span>
+          </div>
+          {isOpen ? (
+            <ChevronUp size={20} className="text-gray-600" />
+          ) : (
+            <ChevronDown size={20} className="text-gray-600" />
+          )}
         </button>
 
-        {/* Dropdown aligned to the same width as the parent (left:0 right:0) */}
+        {/* Dropdown */}
         {isOpen && (
-          <div className="mt-2 w-full bg-white border border-gray-200 rounded shadow-sm max-h-40 overflow-auto">
-            <div className="flex items-center justify-between mb-2 p-2">
-              <div className="text-sm font-medium">{currentTitle}</div>
+          <div className="mt-2 w-full bg-white border-2 border-gray-200 rounded-xl shadow-lg overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-linear-to-r from-teal-50 to-cyan-50">
+              <div className="flex items-center gap-2">
+                <Layers size={18} className="text-teal-600" />
+                <span className="text-sm font-semibold text-gray-900">
+                  {currentTitle}
+                </span>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={goBack}
-                  className="text-sm px-2 py-1 border rounded text-gray-700"
+                  disabled={level === 1}
+                  className="p-2 border-2 border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  title="Go back"
                 >
-                  <IoCaretBackOutline />
+                  <ChevronLeft size={16} />
                 </button>
                 <button
                   onClick={goForward}
-                  className="text-sm px-2 py-1 border rounded text-gray-700"
+                  disabled={level === 3 || (level === 1 && !selL1) || (level === 2 && !selL2)}
+                  className="p-2 border-2 border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  title="Go forward"
                 >
-                  <IoCaretForward />
+                  <ChevronRight size={16} />
                 </button>
                 <button
                   onClick={resetAll}
-                  className="text-sm px-2 py-1 border rounded text-gray-500"
+                  className="p-2 border-2 border-red-200 rounded-lg text-red-600 hover:bg-red-50 hover:border-red-300 transition-all"
+                  title="Clear selection"
                 >
-                  <MdDelete />
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>
 
-            <div className="max-h-48 overflow-auto">
+            {/* List */}
+            <div className="max-h-64 overflow-auto p-2">
               {isLoading ? (
-                <div className="text-xs text-gray-500">
-                  Loading categories...
+                <div className="flex items-center justify-center py-8 text-gray-500">
+                  <Loader2 size={20} className="animate-spin mr-2" />
+                  <span className="text-sm">Loading categories...</span>
                 </div>
               ) : isError ? (
-                <div className="text-xs text-red-500">
-                  Failed to load categories.
+                <div className="text-center py-8">
+                  <div className="text-sm text-red-600 font-medium">
+                    Failed to load categories
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Please try again</p>
                 </div>
               ) : currentList && currentList.length ? (
-                <ul>
+                <ul className="space-y-1">
                   {currentList.map((it) => {
                     const isActive =
                       (level === 1 && selL1?.category_id === it.category_id) ||
@@ -193,17 +231,35 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                       <li
                         key={it.category_id}
                         onClick={() => handlePick(it)}
-                        className={`px-3 py-3 rounded cursor-pointer text-sm mb-1 ${
-                          isActive ? "bg-green-100" : "hover:bg-gray-50"
+                        className={`px-4 py-3 rounded-lg cursor-pointer text-sm font-medium transition-all ${
+                          isActive
+                            ? "bg-linear-to-r from-teal-500 to-teal-600 text-white shadow-md"
+                            : "hover:bg-gray-50 text-gray-700 hover:shadow-sm"
                         }`}
                       >
-                        {it.name}
+                        <div className="flex items-center justify-between">
+                          <span>{it.name}</span>
+                          {it.child_category && it.child_category.length > 0 && (
+                            <ChevronRight
+                              size={16}
+                              className={isActive ? "text-white" : "text-gray-400"}
+                            />
+                          )}
+                        </div>
                       </li>
                     );
                   })}
                 </ul>
               ) : (
-                <div className="text-xs text-gray-400">No items — go back.</div>
+                <div className="text-center py-8">
+                  <div className="text-sm text-gray-400">No items available</div>
+                  <button
+                    onClick={goBack}
+                    className="mt-2 text-xs text-teal-600 hover:text-teal-700 font-medium"
+                  >
+                    Go back to previous level
+                  </button>
+                </div>
               )}
             </div>
           </div>

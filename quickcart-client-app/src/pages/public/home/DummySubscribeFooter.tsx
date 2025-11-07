@@ -31,8 +31,8 @@ export default DummySubscribeFooter;
 export const Footer: React.FC = () => {
 
   return (
-    <footer className="w-full bg-[#faf7f2] mt-10 py-12">
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 text-sm text-gray-900">
+    <footer className="w-full bg-slate-700 mt-10 py-12">
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 text-sm text-slate-50">
         <div>
           <span className="font-bold mb-3 block">Get to Know Us</span>
           <ul className="space-y-2">

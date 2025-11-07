@@ -1,5 +1,9 @@
 import type { productRequest, Product } from "./../types/productTypes";
-import type { ApiAck, ApiResult } from "./../types/apiResponseType";
+import type {
+  ApiAck,
+  ApiResult,
+  PaginatedRequest,
+} from "./../types/apiResponseType";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAPI } from "./useApi";
 import { productService } from "../services/productService";
@@ -49,5 +53,19 @@ export const useGetBrands = () => {
     queryFn: () => productService.getBrands(api),
     retry: 2,
     staleTime: 30 * 60 * 1000, // 30 mins
+  });
+};
+
+export const useGetProductsByStore = (
+  storeId: string | undefined,
+  pageInfo: PaginatedRequest
+) => {
+  const api = useAPI();
+
+  return useQuery<ApiResult<Product>, Error>({
+    queryKey: ["store", storeId],
+    queryFn: () => productService.fetchProductByStore(api, storeId, pageInfo),
+    retry: 2,
+    staleTime: 2 * 60 * 1000, // 2 mins
   });
 };
