@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -166,9 +167,18 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findDistinctBrands();
     }
 
+    @Transactional
     @Override
     public PageContainer<ProductResponse> getProductsByStore(UUID storeId, int page, int size) {
-        return null;
+        Sort sort = Sort.by(Sort.Direction.DESC, "lifecycleAudit.lastModifiedDate");
+        Pageable pageable = PageRequest.of(page, size);
+        var paged = productRepository.findByStore_StoreId(storeId, pageable);
+
+        var content = paged.stream().map(p -> {
+            var variants = productVariantService.getVariantsByProduct(p.getProductId());
+            return toProductResponse(p, variants);
+        }).toList();
+        return PageContainer.create(paged.getNumber(), paged.getSize(), paged.getTotalElements(), paged.getTotalPages(), content);
     }
 
 

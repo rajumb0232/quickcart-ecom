@@ -107,7 +107,7 @@ public class ProductController {
     public ResponseEntity<PageResponse<ProductResponse>> getProductsByStore(
             @PathVariable UUID storeId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "25") int size) {
+            @RequestParam(defaultValue = "15") int size) {
         log.debug("Fetching products by store: {}", storeId);
         PageContainer<ProductResponse> response = productService.getProductsByStore(storeId, page, size);
         return ResponseEntity.ok(PageResponse.create("Products Found", response));

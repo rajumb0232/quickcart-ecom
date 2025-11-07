@@ -1,7 +1,10 @@
 package com.donkie.quickcart.seller.domain.repository;
 
 import com.donkie.quickcart.seller.domain.model.Product;
+import com.donkie.quickcart.seller.domain.model.Store;
 import com.donkie.quickcart.shared.jpa.CustomJpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,4 +29,7 @@ public interface ProductRepository extends CustomJpaRepository<Product, UUID>, J
 
     @Query("SELECT DISTINCT p.brand FROM Product p")
     List<String> findDistinctBrands();
+
+    Page<Product> findByStore_StoreId(UUID store, Pageable pageable);
+
 }
