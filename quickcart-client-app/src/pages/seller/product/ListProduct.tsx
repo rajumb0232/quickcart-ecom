@@ -172,7 +172,6 @@ const ListProduct: React.FC = () => {
                 {Object.entries(stageInfo).map(([key, info]) => {
                   const isCompleted = info.step < currentStageInfo.step;
                   const isCurrent = info.step === currentStageInfo.step;
-                  const isUpcoming = info.step > currentStageInfo.step;
 
                   return (
                     <div

@@ -304,7 +304,6 @@ export const ProductDetail: React.FC = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

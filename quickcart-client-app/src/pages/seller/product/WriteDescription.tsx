@@ -9,10 +9,7 @@ import {
   selectDescriptionInProductReq,
   selectForcedBackStage,
 } from "../../../features/product/productBuilderSelectors";
-import LinkButton from "../../../components/form/LinkButton";
-import BlackButton from "../../../components/form/BlackButton";
 import {
-  FileText,
   AlertCircle,
   Sparkles,
   CheckCircle,

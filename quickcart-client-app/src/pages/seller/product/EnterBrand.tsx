@@ -9,11 +9,8 @@ import {
   selectBrandInProductReq,
   selectForcedBackStage,
 } from "../../../features/product/productBuilderSelectors";
-import LinkButton from "../../../components/form/LinkButton";
-import BlackButton from "../../../components/form/BlackButton";
 import BrandFilter from "../../public/product/BrandFilter";
 import {
-  Tag,
   CheckCircle,
   AlertCircle,
   Sparkles,
