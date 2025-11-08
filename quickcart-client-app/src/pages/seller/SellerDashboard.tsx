@@ -13,7 +13,7 @@ import { useGetSellerStores } from "../../hooks/useStore";
 import { isApiResponse } from "../../types/apiResponseType";
 import { rehydrateViewStore } from "../../features/product/sellerStoreSlice";
 import Store from "./views/Store";
-import { StoreIcon } from "lucide-react";
+import { RotateCcw, StoreIcon } from "lucide-react";
 
 // Strict view param type
 type ViewParam =
@@ -71,18 +71,28 @@ const SellerDashboard: React.FC = () => {
 
   if (!storeLoaded) {
     return (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <StoreIcon size={40} className="text-gray-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No Stores Found
-            </h3>
-            <p className="text-gray-500 text-center max-w-md">
-              You haven't created any stores yet. Create your first store to
-              start selling your products.
-            </p>
-          </div>
+      <div
+        style={{ marginTop: `${navHeight - 40}px` }}
+        className="flex flex-col items-center justify-center py-16 min-h-screen"
+      >
+        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <StoreIcon size={40} className="text-gray-400" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          No Stores Found
+        </h3>
+        <p className="text-gray-500 text-center max-w-md">
+          You haven't created any stores yet. Create your first store to start
+          selling your products.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-6 py-2 flex bg-gray-700 text-white rounded-lg hover:bg-gray-900 transition-colors"
+        >
+          <RotateCcw />
+          <span className="ml-2">Reload</span>
+        </button>
+      </div>
     );
   } // Once loaded, show dashboard
 
