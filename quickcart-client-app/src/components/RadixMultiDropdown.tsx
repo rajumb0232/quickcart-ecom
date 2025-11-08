@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { ChevronRight } from "lucide-react";
 
 export type MenuItem = {
   name: string;
@@ -32,9 +33,7 @@ export default function RadixMultiDropdown({
     const prevPaddingRight = body.style.paddingRight || "";
 
     if (rootOpen) {
-      // keep scrollbar present to avoid width shift
       body.style.overflowY = "scroll";
-      // don't add paddingRight — leaving unchanged prevents shrinking
       body.style.paddingRight = prevPaddingRight;
     } else {
       body.style.overflowY = prevOverflowY;
@@ -127,17 +126,22 @@ export default function RadixMultiDropdown({
               onMouseLeave={() => handleSubTriggerMouseLeave(idx)}
             >
               <button
-                className="w-full text-left px-4 py-3 text-sm flex items-center hover:bg-emerald-50 hover:text-emerald-500 cursor-pointer outline-none border-none"
+                className="w-full text-left px-4 py-3 text-sm font-medium flex items-center hover:bg-linear-to-r hover:from-teal-50 hover:to-cyan-50 hover:text-teal-700 cursor-pointer outline-none border-none transition-all rounded-lg group"
                 onClick={(e) => {
                   e.preventDefault();
                   item.onClick?.();
                 }}
               >
                 {item.icon && (
-                  <div className="mr-2 text-lg shrink-0">{item.icon}</div>
+                  <div className="mr-3 text-lg shrink-0 text-gray-600 group-hover:text-teal-600 transition-colors">
+                    {item.icon}
+                  </div>
                 )}
                 <span className="flex-1 truncate">{item.name}</span>
-                <span className="ml-2 text-xs opacity-60 shrink-0">›</span>
+                <ChevronRight 
+                  size={16} 
+                  className="ml-2 text-gray-400 group-hover:text-teal-600 group-hover:translate-x-0.5 transition-all shrink-0" 
+                />
               </button>
             </DropdownMenu.SubTrigger>
 
@@ -149,7 +153,7 @@ export default function RadixMultiDropdown({
                   sideOffset: 4,
                   alignOffset: -6,
                 } as any)}
-                className="bg-white rounded-md shadow-lg py-2 border border-slate-200 overflow-hidden"
+                className="bg-white rounded-xl shadow-xl py-2 border-2 border-gray-200 overflow-hidden animate-in fade-in-0 zoom-in-95"
                 style={{
                   width: sideWidth ?? width,
                   maxWidth: "min(90vw, 400px)",
@@ -162,14 +166,14 @@ export default function RadixMultiDropdown({
                 {item.child!.map((child, i) => (
                   <DropdownMenu.Item
                     key={`${child.name}-${i}`}
-                    className="w-full text-left px-4 py-3 text-sm hover:bg-amber-50 hover:text-orange-500 flex items-center cursor-pointer outline-none border-none"
+                    className="w-full text-left px-4 py-3 mx-1 text-sm font-medium hover:bg-linear-to-r hover:from-amber-50 hover:to-orange-50 hover:text-orange-600 flex items-center cursor-pointer outline-none border-none transition-all rounded-lg group"
                     onSelect={() => {
                       child.onClick?.();
                       closeAll();
                     }}
                   >
                     {child.icon && (
-                      <div className="mr-2 text-base shrink-0">
+                      <div className="mr-3 text-base shrink-0 text-gray-600 group-hover:text-orange-600 transition-colors">
                         {child.icon}
                       </div>
                     )}
@@ -186,14 +190,18 @@ export default function RadixMultiDropdown({
     return (
       <DropdownMenu.Item
         key={`${item.name}-${idx}`}
-        className="w-full text-left px-4 py-3 text-sm hover:bg-amber-50 hover:text-orange-500 flex items-center cursor-pointer outline-none border-none"
+        className="w-full text-left px-4 py-3 mx-1 text-sm font-medium hover:bg-linear-to-r hover:from-amber-50 hover:to-orange-50 hover:text-orange-600 flex items-center cursor-pointer outline-none border-none transition-all rounded-lg group"
         onSelect={() => {
           item.onClick?.();
           closeAll();
         }}
         onMouseEnter={handleContentMouseEnter}
       >
-        {item.icon && <div className="mr-2 text-lg shrink-0">{item.icon}</div>}
+        {item.icon && (
+          <div className="mr-3 text-lg shrink-0 text-gray-600 group-hover:text-orange-600 transition-colors">
+            {item.icon}
+          </div>
+        )}
         <span className="truncate">{item.name}</span>
       </DropdownMenu.Item>
     );
@@ -214,7 +222,7 @@ export default function RadixMultiDropdown({
           side="bottom"
           align="start"
           sideOffset={4}
-          className="bg-white rounded-md shadow-lg py-2 border border-slate-200 overflow-hidden"
+          className="bg-white rounded-xl shadow-xl py-2 border-2 border-gray-200 overflow-hidden animate-in fade-in-0 zoom-in-95"
           style={{
             width,
             maxWidth: "min(90vw, 400px)",
