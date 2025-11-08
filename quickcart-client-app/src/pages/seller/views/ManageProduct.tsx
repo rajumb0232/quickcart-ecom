@@ -12,12 +12,13 @@ import {
   Star,
   MapPin,
   ShoppingBag,
+  RotateCcw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { setShowCategories } from "../../../features/util/screenSlice";
 import { API_BASE } from "../../../api/apiClient";
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 10;
 
 const ManageProducts: React.FC = () => {
   const dispatch = useDispatch();
@@ -66,7 +67,7 @@ const ManageProducts: React.FC = () => {
     return (
       <div className="flex h-full bg-linear-to-br from-gray-50 to-gray-100">
         <main className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center max-w-md">
+          <div className="max-w-lg text-center p-8 flex flex-col justify-center items-center">
             <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-10 h-10 text-red-600" />
             </div>
@@ -78,9 +79,10 @@ const ManageProducts: React.FC = () => {
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-amber-400 text-white rounded-lg hover:bg-amber-500 transition-colors"
+              className="px-6 py-2 flex bg-gray-700 text-white rounded-lg hover:bg-gray-900 transition-colors"
             >
-              Retry
+              <RotateCcw />
+              <span className="ml-2">Retry</span>
             </button>
           </div>
         </main>
@@ -93,7 +95,7 @@ const ManageProducts: React.FC = () => {
     return (
       <div className="flex h-full bg-linear-to-br from-gray-50 to-gray-100">
         <main className="flex-1 flex items-center justify-center p-8">
-          <div className="max-w-lg text-center bg-white rounded-2xl shadow-xl border-2 border-gray-200 p-8">
+          <div className="max-w-lg text-center p-8 flex flex-col justify-center items-center">
             <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <ShoppingBag className="w-8 h-8 text-amber-600" />
             </div>
@@ -105,10 +107,11 @@ const ManageProducts: React.FC = () => {
               add new items to your store.
             </p>
             <button
-              onClick={() => navigate("/seller/dashboard")}
-              className="px-6 py-2 bg-amber-400 text-white rounded-lg hover:bg-amber-500 transition-colors"
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 flex bg-gray-700 text-white rounded-lg hover:bg-gray-900 transition-colors"
             >
-              Back to dashboard
+              <RotateCcw />
+              <span className="ml-2">Retry</span>
             </button>
           </div>
         </main>
