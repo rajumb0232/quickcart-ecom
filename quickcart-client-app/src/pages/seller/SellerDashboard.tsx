@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import DashboardSideBar from "./DashboardSideBar";
 import { useDispatch, useSelector } from "react-redux";
 import { selectNavHeight } from "../../features/util/screenSelector";
@@ -9,16 +9,13 @@ import Reports from "./views/Reports";
 import UserProfilePage from "../auth/UserProfilePage";
 import Settings from "./views/Settings";
 import { useParams } from "react-router-dom";
-import { selectSelectStores } from "../../features/product/sellerStoreSelectors";
 import { useGetSellerStores } from "../../hooks/useStore";
 import { isApiResponse } from "../../types/apiResponseType";
-import {
-  setSellerStores,
-  setViewStore,
-} from "../../features/product/sellerStoreSlice";
+import { rehydrateViewStore } from "../../features/product/sellerStoreSlice";
 import Store from "./views/Store";
+import { StoreIcon } from "lucide-react";
 
-// Define the allowed view params strictly as a union type
+// Strict view param type
 type ViewParam =
   | "dashboard"
   | "store"
@@ -29,24 +26,25 @@ type ViewParam =
 
 const SellerDashboard: React.FC = () => {
   const { view } = useParams<{ view?: ViewParam }>();
-
   const navHeight = useSelector(selectNavHeight);
   const dispatch = useDispatch();
-  const sellerStores = useSelector(selectSelectStores);
+  const [storeLoaded, setStoreLoaded] = useState(false);
 
-  // ✅ Call the hook outside of useEffect
-  const { data } = useGetSellerStores();
+  // ✅ Fetch seller stores
+  const { data, isSuccess } = useGetSellerStores();
 
+  // ✅ Rehydrate view store once stores are loaded
   useEffect(() => {
-    // only update state if not already loaded
-    if (data && isApiResponse(data)) {
-      const storeDetails = data.data || [];
-      dispatch(setSellerStores(storeDetails));
-      if (storeDetails.length > 0) {
-        dispatch(setViewStore(storeDetails[0]));
+    if (isSuccess) {
+      if (data && isApiResponse(data)) {
+        const stores = data.data;
+        console.log("🔄 Rehydrating viewStore with:", stores);
+
+        dispatch(rehydrateViewStore(stores));
+        setStoreLoaded(true);
       }
     }
-  }, [sellerStores.length, data, dispatch]);
+  }, [isSuccess, data, dispatch]);
 
   useEffect(() => {
     dispatch(setShowCategories(false));
@@ -69,12 +67,29 @@ const SellerDashboard: React.FC = () => {
       default:
         return <Dashboard />;
     }
-  };
+  }; // Render loader until store info is loaded
+
+  if (!storeLoaded) {
+    return (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <StoreIcon size={40} className="text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No Stores Found
+            </h3>
+            <p className="text-gray-500 text-center max-w-md">
+              You haven't created any stores yet. Create your first store to
+              start selling your products.
+            </p>
+          </div>
+    );
+  } // Once loaded, show dashboard
 
   return (
     <div style={{ marginTop: `${navHeight - 40}px` }} className="flex">
-      <DashboardSideBar />
-      <main className="w-full overflow-y-scroll ">{renderView()}</main>
+      <DashboardSideBar />{" "}
+      <main className="w-full overflow-y-scroll ">{renderView()}</main>{" "}
     </div>
   );
 };

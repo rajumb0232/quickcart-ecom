@@ -20,9 +20,6 @@ import "react-toastify/dist/ReactToastify.css";
 import UserProfilePage from "./pages/auth/UserProfilePage";
 import ListProduct from "./pages/seller/product/ListProduct";
 import StoreForm from "./pages/seller/store/StoreForm";
-import { rehydrateViewStore } from "./features/product/sellerStoreSlice";
-import { useGetSellerStores } from "./hooks/useStore";
-import { isApiResponse } from "./types/apiResponseType";
 
 export default function App() {
   const location = useLocation();
@@ -38,22 +35,6 @@ export default function App() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [dispatch]);
-
-  // ✅ Fetch seller stores
-  const { data, isSuccess } = useGetSellerStores();
-
-  // ✅ Rehydrate view store once stores are loaded
-  useEffect(() => {
-    if (isSuccess) {
-      if(data && isApiResponse(data)) {
-        const stores = data.data;
-        console.log("🔄 Rehydrating viewStore with:", stores);
-
-        dispatch(rehydrateViewStore(stores));
-      }
-      
-    }
-  }, [isSuccess, data, dispatch]);
 
   // 👇 Save background location for modal routing
   const state = location.state as { backgroundLocation?: Location };

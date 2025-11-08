@@ -14,6 +14,7 @@ const LOCAL_STORAGE_KEY = "view_store_id";
 const loadViewStoreId = (): string | undefined => {
   try {
     const id = localStorage.getItem(LOCAL_STORAGE_KEY);
+    console.log("view store ID: ", id);
     return id ? id : undefined;
   } catch (err) {
     console.error("Failed to read viewStore ID from localStorage:", err);
@@ -43,6 +44,7 @@ const sellerStoreSlice = createSlice({
     setViewStore: (state, action: PayloadAction<StoreDetails>) => {
       state.viewStore = action.payload;
       try {
+        console.log("setting new store...");
         localStorage.setItem(LOCAL_STORAGE_KEY, action.payload.store_id);
       } catch (err) {
         console.error("Failed to save viewStore ID to localStorage:", err);
@@ -60,6 +62,8 @@ const sellerStoreSlice = createSlice({
 
       state.sellerStores = stores;
 
+      console.log("stores found: ", stores);
+
       if (stores.length === 0) {
         state.viewStore = undefined;
         return;
@@ -69,11 +73,13 @@ const sellerStoreSlice = createSlice({
         ? stores.find((store) => store.store_id === savedId)
         : undefined;
 
+      console.log("matched store: ", matchedStore);
       state.viewStore = matchedStore ?? stores[0];
 
       // If fallback used, update localStorage to new ID
       if (!matchedStore) {
         try {
+          console.log("setting first store as view store.");
           localStorage.setItem(LOCAL_STORAGE_KEY, stores[0].store_id);
         } catch (err) {
           console.error("Failed to update fallback storeId:", err);
