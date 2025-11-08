@@ -20,6 +20,7 @@ import "react-toastify/dist/ReactToastify.css";
 import UserProfilePage from "./pages/auth/UserProfilePage";
 import ListProduct from "./pages/seller/product/ListProduct";
 import StoreForm from "./pages/seller/store/StoreForm";
+import ProductPreviewAndEditPage from "./pages/seller/product/ProductPreviewAndEdit";
 
 export default function App() {
   const location = useLocation();
@@ -86,6 +87,14 @@ export default function App() {
           element={
             <RequireAuth allowedRoles={["seller"]}>
               <ListProduct />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/product/manage/:id?"
+          element={
+            <RequireAuth allowedRoles={["seller"]}>
+              <ProductPreviewAndEditPage />
             </RequireAuth>
           }
         />

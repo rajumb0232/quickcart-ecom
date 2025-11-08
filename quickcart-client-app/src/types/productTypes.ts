@@ -70,6 +70,14 @@ export interface productRequest {
   description: string;
 }
 
+export interface VariantRequest {
+  title: string;
+  price: number;
+  quantity: number;
+  description: string;
+  attributes: Record<string, string>;
+}
+
 export interface ProductFilters {
   brand: string;
   categories: string[];

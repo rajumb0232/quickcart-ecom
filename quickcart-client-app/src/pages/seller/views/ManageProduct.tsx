@@ -309,9 +309,7 @@ const ManageProducts: React.FC = () => {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(
-                                  `/seller/product/edit/${p.product_id}`
-                                );
+                                window.open(`/product/manage/${p.product_id}`, "_blank")
                               }}
                               className="px-3 py-2 rounded-xl bg-linear-to-r from-amber-400 to-orange-500 text-white font-semibold hover:from-amber-500 hover:to-orange-600 transition text-sm flex items-center gap-1.5"
                               title="Edit product"
