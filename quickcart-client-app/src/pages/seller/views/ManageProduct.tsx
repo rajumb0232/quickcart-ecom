@@ -14,7 +14,6 @@ import {
   ShoppingBag,
   RotateCcw,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { setShowCategories } from "../../../features/util/screenSlice";
 import { API_BASE } from "../../../api/apiClient";
 
@@ -22,7 +21,6 @@ const PAGE_SIZE = 10;
 
 const ManageProducts: React.FC = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(setShowCategories(false));
