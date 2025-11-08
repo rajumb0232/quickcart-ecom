@@ -141,7 +141,7 @@ const ProductSearchResultPage: React.FC = () => {
                   className="bg-white rounded-2xl overflow-hidden border-2 border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col"
                   onClick={() => {
                     if (variant.product_id) {
-                      navigate(`/product/${variant.product_id}`);
+                      window.open(`/product/${variant.product_id}`, "_blank");
                     }
                   }}
                   role="button"
