@@ -11,6 +11,7 @@ import { useUpdateProduct } from "../../../hooks/useProducts";
 import { useGetProductIgnoreStatus } from "../../../hooks/useProducts"; // make sure this exists in your hooks index
 import type { Product, productEditRequest } from "../../../types/productTypes";
 import { selectNavHeight } from "../../../features/util/screenSelector";
+import BrandFilter from "../../public/product/BrandFilter";
 
 export interface EditProductProps {
   exProduct?: Product; // optional: if caller provides product already
@@ -265,21 +266,7 @@ const EditProductForm: React.FC<EditProductProps> = ({
           </div>
 
           {/* Brand */}
-          <div className="mb-6">
-            <label
-              htmlFor="brand"
-              className="block text-sm font-semibold text-gray-700 mb-2"
-            >
-              Brand
-            </label>
-            <input
-              id="brand"
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-amber-400 focus:ring-4 focus:ring-amber-100 transition"
-              placeholder="Brand name (optional)"
-            />
-          </div>
+          <BrandFilter onSelect={(b) => setBrand(b)} selectedBrand={brand}/>
 
           {/* Description */}
           <div className="mb-6">
