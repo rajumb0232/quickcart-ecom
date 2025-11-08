@@ -10,7 +10,7 @@ import { CiCircleChevLeft, CiCircleChevRight } from "react-icons/ci";
 import { setShowCategories } from "../../../features/util/screenSlice";
 import { Footer } from "../home/DummySubscribeFooter";
 import { useGetProductById } from "../../../hooks/useProducts";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { isApiResponse } from "../../../types/apiResponseType";
 
 const formatPrice = (p: number) =>
@@ -20,10 +20,8 @@ const formatPrice = (p: number) =>
     maximumFractionDigits: 0,
   });
 
-export const ProductDetail: React.FC = () => {
-  // ----- hooks: MUST stay at top, unconditional -----
+const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id?: string }>();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { data, isLoading, isError } = useGetProductById(id);
@@ -32,24 +30,23 @@ export const ProductDetail: React.FC = () => {
   const screenHeight = useSelector(selectScreenHeight);
 
   const [viewHeight, setViewHeight] = useState<number>(600);
-
   useEffect(() => {
     const base =
-      typeof screenHeight === "number" ? screenHeight : window?.innerHeight ?? 800;
-    setViewHeight(Math.max(600, base - (navHeight || 0)));
+      typeof screenHeight === "number"
+        ? screenHeight
+        : window?.innerHeight ?? 800;
+    setViewHeight(Math.max(580, base - (navHeight || 0)));
   }, [screenHeight, navHeight]);
 
   useEffect(() => {
+    // keep category UI hidden on product page
     dispatch(setShowCategories(false));
   }, [dispatch]);
 
-  // product extraction (no hooks)
   const product = data && isApiResponse(data) ? data.data : null;
 
-  // memoized derived data (hooks still called unconditionally)
   const activeVariants = useMemo(
-    () =>
-      (product?.variants ?? []).filter((v) => v.is_active && !v.is_deleted),
+    () => (product?.variants ?? []).filter((v) => !v.is_deleted),
     [product?.variants]
   );
 
@@ -75,8 +72,17 @@ export const ProductDetail: React.FC = () => {
   );
 
   const images = useMemo(() => {
-    if (!selectedVariant?.image_uris || selectedVariant.image_uris.length === 0) return [];
-    return selectedVariant.image_uris.map((u) => `${API_BASE}${u}`);
+    if (!selectedVariant?.image_uris || selectedVariant.image_uris.length === 0)
+      return [];
+    return selectedVariant.image_uris.map((u) => {
+      if (!u) return u;
+      if (u.startsWith("http://") || u.startsWith("https://")) return u;
+      if (API_BASE.endsWith("/") && u.startsWith("/"))
+        return `${API_BASE}${u.slice(1)}`;
+      if (!API_BASE.endsWith("/") && !u.startsWith("/"))
+        return `${API_BASE}/${u}`;
+      return `${API_BASE}${u}`;
+    });
   }, [selectedVariant]);
 
   const [imageIndex, setImageIndex] = useState(0);
@@ -103,11 +109,23 @@ export const ProductDetail: React.FC = () => {
     setImageIndex(Math.max(0, Math.min(idx, images.length - 1)));
   };
 
-  // ----- now safe to early-return for loading / error UI -----
   if (isLoading) {
     return (
-      <div style={{ marginTop: `${navHeight - 36}px` }}>
-        <div className="max-w-4xl mx-auto py-16 px-4 text-center">Loading...</div>
+      <div
+        style={{ marginTop: `${navHeight - 36}px` }}
+        className="min-h-[60vh]"
+      >
+        <div className="max-w-7xl mx-auto py-16 px-6 text-center">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-50 shadow-sm mb-6">
+            <CiCircleChevRight className="text-3xl text-amber-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-700 mb-2">
+            Loading product…
+          </h3>
+          <p className="text-sm text-gray-500">
+            Fetching details from the server
+          </p>
+        </div>
         <Footer />
       </div>
     );
@@ -115,56 +133,69 @@ export const ProductDetail: React.FC = () => {
 
   if (isError || !product) {
     return (
-      <div style={{ marginTop: `${navHeight - 36}px` }}>
-        <div className="max-w-4xl mx-auto py-16 px-4 text-center">
+      <div
+        style={{ marginTop: `${navHeight - 36}px` }}
+        className="min-h-[60vh]"
+      >
+        <div className="max-w-4xl mx-auto py-16 px-6 text-center">
           <h2 className="text-2xl font-semibold mb-4">Product not found</h2>
-          <button
-            onClick={() => navigate(-1)}
-            className="px-6 py-3 rounded-md bg-gray-800 text-white hover:bg-gray-900 transition-colors"
-          >
-            Go Back
-          </button>
+          <p className="text-gray-600 mb-6">
+            We couldn't find the product you requested.
+          </p>
         </div>
         <Footer />
       </div>
     );
   }
 
-  // ----- visual / constants -----
   const slideVariants = {
-    enter: (dir: number) => ({ x: dir > 0 ? 300 : -300, opacity: 0, scale: 0.98 }),
+    enter: (dir: number) => ({
+      x: dir > 0 ? 260 : -260,
+      opacity: 0,
+      scale: 0.995,
+    }),
     center: { x: 0, opacity: 1, scale: 1 },
-    exit: (dir: number) => ({ x: dir > 0 ? -300 : 300, opacity: 0, scale: 0.98 }),
+    exit: (dir: number) => ({
+      x: dir > 0 ? -260 : 260,
+      opacity: 0,
+      scale: 0.995,
+    }),
   };
 
   const RESERVED_VERTICAL = 120;
   const imageContainerHeight = Math.max(420, viewHeight - RESERVED_VERTICAL);
 
-  // ----- render main UI -----
   return (
-    <div style={{ marginTop: `${navHeight - 36}px` }}>
-      <div className="max-w-7xl mx-auto py-6 px-8">
-        <div className="grid grid-cols-12 gap-8 items-start">
-          {/* IMAGE COLUMN */}
-          <div className="col-span-7 flex items-center justify-center">
-            <div className="relative w-full flex items-center justify-center">
+    <div
+      style={{ marginTop: `${navHeight - 42}px` }}
+      className="bg-white min-h-screen"
+    >
+      <div className="max-w-7xl mx-auto py-8 px-6">
+        {/* Top area: brand / title */}
+
+        {/* Main grid (images + details) — no card surface */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Images column */}
+          <div className="lg:col-span-7">
+            <div
+              className="relative rounded-xl overflow-hidden"
+              style={{ height: imageContainerHeight }}
+            >
               <button
-                onClick={prev}
-                aria-label="prev"
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full hover:scale-110 active:scale-95 transition-transform flex items-center justify-center outline-none focus:outline-none"
-                style={{ border: "none", boxShadow: "none" }}
+                onClick={next}
+                aria-label="Previous"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 transition"
               >
-                <CiCircleChevLeft className="text-4xl text-gray-700 hover:text-black transition-colors" />
+                <CiCircleChevLeft className="text-3xl text-gray-700" />
               </button>
 
-              <div
-                className="w-full max-w-[900px] flex items-center justify-center bg-white"
-                style={{ height: `${imageContainerHeight}px` }}
-              >
+              <div className="w-full h-full flex items-center justify-center">
                 <AnimatePresence mode="wait" initial={false}>
                   {images.length > 0 ? (
                     <motion.img
-                      key={`${selectedVariant?.variant_id ?? "no-variant"}-${imageIndex}`}
+                      key={`${
+                        selectedVariant?.variant_id ?? "no"
+                      }-${imageIndex}`}
                       src={images[imageIndex]}
                       alt={product.title ?? "product image"}
                       custom={direction}
@@ -172,21 +203,19 @@ export const ProductDetail: React.FC = () => {
                       initial="enter"
                       animate="center"
                       exit="exit"
-                      transition={{ duration: 0.22, ease: "easeInOut" }}
-                      className="object-contain select-none"
-                      style={{ maxHeight: "100%", maxWidth: "100%" }}
+                      transition={{ duration: 0.28, ease: "easeInOut" }}
+                      className="object-contain max-h-full max-w-full select-none"
                     />
                   ) : (
                     <motion.div
-                      key="placeholder"
-                      className="flex items-center justify-center text-gray-400 select-none"
+                      key="no-img"
                       custom={0}
                       variants={slideVariants}
                       initial="enter"
                       animate="center"
                       exit="exit"
                       transition={{ duration: 0.22 }}
-                      style={{ width: "100%", height: "100%" }}
+                      className="text-gray-400 select-none"
                     >
                       No image available
                     </motion.div>
@@ -195,115 +224,191 @@ export const ProductDetail: React.FC = () => {
               </div>
 
               <button
-                onClick={next}
-                aria-label="next"
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full hover:scale-110 active:scale-95 transition-transform flex items-center justify-center outline-none focus:outline-none"
-                style={{ border: "none", boxShadow: "none" }}
+                onClick={prev}
+                aria-label="Next"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 transition"
               >
-                <CiCircleChevRight className="text-4xl text-gray-700 hover:text-black transition-colors" />
+                <CiCircleChevRight className="text-3xl text-gray-700" />
               </button>
 
-              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3">
+              {/* Dots */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-30">
                 {images.map((_, idx) => (
                   <button
                     key={idx}
-                    aria-label={`dot-${idx}`}
                     onClick={() => goToIndex(idx)}
+                    aria-label={`Image ${idx + 1}`}
                     className={`w-2.5 h-2.5 rounded-full transition-colors ${
                       idx === imageIndex ? "bg-black" : "bg-gray-300"
                     }`}
-                    style={{ border: "none", outline: "none" }}
                   />
                 ))}
               </div>
             </div>
+
+            {/* Thumbnails grid for selected variant (show all images) */}
+            <div className="mt-4 grid grid-cols-4 sm:grid-cols-6 gap-3">
+              {selectedVariant?.image_uris &&
+              selectedVariant.image_uris.length > 0 ? (
+                selectedVariant.image_uris.map((u, idx) => {
+                  const src = u.startsWith("http")
+                    ? u
+                    : `${API_BASE}${u.startsWith("/") ? u : `/${u}`}`;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setImageIndex(idx)}
+                      className={`rounded-md overflow-hidden border ${
+                        idx === imageIndex
+                          ? "border-teal-300 shadow-lg"
+                          : "border-gray-100"
+                      } bg-white`}
+                      aria-label={`Thumbnail ${idx + 1}`}
+                    >
+                      <img
+                        src={src}
+                        alt={`thumb-${idx}`}
+                        className="w-full h-24 object-cover"
+                      />
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="col-span-4 text-center py-6 text-gray-400">
+                  No variant images
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* DETAILS COLUMN */}
-          <div className="col-span-5">
-            <div className="text-xs text-gray-400">
-              Home / {product.brand ?? "Brand"} / {product.title ?? "Product"}
-            </div>
+          {/* Details column */}
+          <div className="lg:col-span-5">
+            <div className="mb-6">
+              <div className="text-xs text-gray-400">
+                Home / {product.brand ?? "Brand"} / {product.title ?? "Product"}
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-gray-600">
+                    {product.brand ?? ""}
+                  </div>
+                  <h1 className="mt-2 text-3xl md:text-4xl font-semibold text-gray-900">
+                    {product.title}
+                  </h1>
+                </div>
 
-            <div className="mt-4 text-xs uppercase tracking-wider text-gray-600">
-              {product.brand ?? ""}
-            </div>
-
-            <h1 className="mt-3 text-3xl font-light">{product.title}</h1>
-
-            <div className="mt-3 text-lg font-semibold">
-              {formatPrice(selectedVariant?.price ?? 0)}
-            </div>
-
-            <div className="mt-6">
-              <div className="text-sm text-gray-400 mb-2">Select Variants</div>
-              <div className="flex flex-wrap gap-2">
-                {activeVariants.length === 0 ? (
-                  <div className="text-sm text-gray-500">No variants available</div>
-                ) : (
-                  activeVariants.map((v) => (
-                    <button
-                      key={v.variant_id}
-                      onClick={() => setSelectedVariantId(v.variant_id)}
-                      className={`px-4 py-2 rounded-md border shadow-sm text-sm font-medium transition-all duration-150
-                        ${
-                          v.variant_id === selectedVariant?.variant_id
-                            ? "bg-black text-white border-black"
-                            : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
-                        }`}
-                      style={{ minWidth: "fit-content", whiteSpace: "nowrap" }}
-                    >
-                      {v.title}
-                    </button>
-                  ))
-                )}
+                {/* Price visible near top for quick glance */}
+                <div className="text-2xl md:text-3xl font-bold text-gray-900">
+                  {formatPrice(selectedVariant?.price ?? 0)}
+                </div>
               </div>
             </div>
+            {/* Variant selector */}
+            <div className="text-sm text-gray-400 mb-3">Select Variant</div>
+            <div className="mt-1 flex flex-wrap gap-3">
+              {activeVariants.length === 0 ? (
+                <div className="text-sm text-gray-500">
+                  No variants available
+                </div>
+              ) : (
+                activeVariants.map((v) => (
+                  <button
+                    key={v.variant_id}
+                    onClick={() => setSelectedVariantId(v.variant_id)}
+                    className={`px-3 py-2 rounded-full border text-sm font-medium transition ${
+                      v.variant_id === selectedVariant?.variant_id
+                        ? "bg-black text-white border-black"
+                        : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
+                    }`}
+                  >
+                    {v.title}
+                  </button>
+                ))
+              )}
+            </div>
 
-            <div className="mt-6 flex items-center gap-4">
-              <button className="flex-1 py-3 rounded-md bg-yellow-400 text-black font-semibold tracking-wide hover:bg-yellow-500 transition-colors">
+            {/* CTAs */}
+            <div className="mt-6 flex gap-3">
+              <button className="flex-1 py-3 rounded-md bg-amber-400 text-black font-semibold tracking-wide hover:bg-amber-500 transition">
                 ADD TO BAG
               </button>
-
-              <button className="px-6 py-3 rounded-md border border-black text-black font-medium hover:bg-black hover:text-white transition-colors">
+              <button className="px-6 py-3 rounded-md border border-black text-black font-medium hover:bg-black hover:text-white transition">
                 WISHLIST
               </button>
             </div>
 
-            <div className="mt-8 flex gap-6 text-sm text-gray-400">
-              <button className="pb-2 border-b-2 border-transparent">Product Details</button>
-              <button className="pb-2 border-b-2 border-transparent">Shipping & Returns</button>
-              <button className="pb-2 border-b-2 border-transparent">About Designer</button>
-            </div>
-
-            <div className="mt-6 text-sm text-gray-600">
-              <p className="mb-3">{selectedVariant?.description ?? product.description ?? ""}</p>
+            {/* Description & product code */}
+            <div className="mt-6 text-sm text-gray-700">
+              <p className="mb-3">
+                {selectedVariant?.description ?? product.description ?? ""}
+              </p>
               <div className="text-xs text-gray-400">
                 Product code: {(product.product_id ?? "").slice(0, 8)}
               </div>
             </div>
 
-            <div className="mt-8 border-t pt-6">
-              <h3 className="text-lg font-medium text-gray-800 mb-6">Additional Details</h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-y-4">
+            {/* Attributes */}
+            <div className="mt-8">
+              <h3 className="text-lg font-medium text-gray-800 mb-4">
+                Additional Details
+              </h3>
+              <div className="grid grid-cols-1 gap-y-4">
                 {selectedVariant &&
-                  selectedVariant.attributes &&
-                  Object.entries(selectedVariant.attributes).map(([k, v], idx, arr) => (
-                    <React.Fragment key={k}>
-                      <div className={`sm:col-span-4 text-gray-500 font-medium py-2 pr-4 ${idx < arr.length - 1 ? "border-b border-gray-100" : ""}`}>
-                        {k}
+                selectedVariant.attributes &&
+                Object.keys(selectedVariant.attributes).length > 0 ? (
+                  Object.entries(selectedVariant.attributes).map(
+                    ([k, v]) => (
+                      <div
+                        key={k}
+                        className={`grid grid-cols-1 sm:grid-cols-12 gap-2 py-2`}
+                      >
+                        <div className="sm:col-span-4 text-gray-500 font-medium">
+                          {k}
+                        </div>
+                        <div
+                          className="sm:col-span-8 text-gray-900"
+                          style={{ wordBreak: "break-word" }}
+                        >
+                          {String(v)}
+                        </div>
                       </div>
-                      <div className={`sm:col-span-8 text-gray-900 py-2 whitespace-normal ${idx < arr.length - 1 ? "border-b border-gray-100" : ""}`} style={{ wordBreak: "break-word" }}>
-                        {String(v)}
-                      </div>
-                    </React.Fragment>
-                  ))}
+                    )
+                  )
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    No additional details provided.
+                  </div>
+                )}
+              </div>
+
+              {/* Minimal audit for customers */}
+              <div className="mt-6 text-sm text-gray-600 border-t pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs text-gray-500">Variant ID</div>
+                    <div className="font-medium text-gray-800">
+                      {selectedVariant?.variant_id ?? "—"}
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <div className="text-xs text-gray-500">Last updated</div>
+                    <div className="font-medium text-gray-800">
+                      {selectedVariant
+                        ? new Date(
+                            selectedVariant.last_modified_date
+                          ).toLocaleString()
+                        : "—"}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </div>{" "}
     </div>
   );
 };
+
+export default ProductDetail;

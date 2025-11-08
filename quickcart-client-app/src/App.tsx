@@ -8,7 +8,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import RequireUnAuth from "./routes/RequiresUnAuth";
 import ProductSearchResultPage from "./pages/public/product/ProductSearchResultPage";
 import Navbar from "./pages/public/navbar/Navbar";
-import { ProductDetail } from "./pages/public/product/ProductDetail";
+import ProductDetail from "./pages/public/product/ProductDetail";
 import { useDispatch } from "react-redux";
 import { setScreenHeight } from "./features/util/screenSlice";
 import { useEffect } from "react";
