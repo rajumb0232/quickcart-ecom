@@ -1,18 +1,15 @@
-import { MdOutlineLocationOn } from "react-icons/md";
+import { MapPin, ChevronRight } from "lucide-react";
 
 export const SetLocation: React.FC = () => {
   return (
-    <>
-      {/* Location check */}
-      <div className="flex items-center bg-gray-100 py-1.5 sm:py-2 px-3 sm:px-4 md:px-6 gap-2">
-        <MdOutlineLocationOn className="text-amber-600 text-sm sm:text-base" />
-        <span className="text-gray-800 text-xs sm:text-sm">
-          Check availability by location
-        </span>
-        <span className="ml-auto text-gray-500 text-xs sm:text-sm cursor-pointer">
-          →
-        </span>
+    <div className="flex items-center bg-linear-to-r from-amber-50 to-orange-50 py-2.5 px-4 sm:px-6 md:px-8 gap-2 border-y border-amber-100 hover:from-amber-100 hover:to-orange-100 transition-all cursor-pointer group">
+      <div className="">
+        <MapPin size={16} className="text-amber-600" />
       </div>
-    </>
+      <span className="text-gray-800 text-sm font-medium">
+        Check availability by location
+      </span>
+      <ChevronRight size={16} className="ml-auto text-gray-500 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
+    </div>
   );
 };

@@ -1,6 +1,4 @@
 import React from "react";
-import { FaHeart, FaRegUser, FaShoppingCart } from "react-icons/fa";
-import { SlOptionsVertical } from "react-icons/sl";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -11,25 +9,20 @@ import RadixMultiDropdown, {
   type MenuItem,
 } from "../../../components/RadixMultiDropdown";
 import {
-  CiHashtag,
-  CiLogin,
-  CiLogout,
-  CiSettings,
-  CiShop,
-  CiUser,
-} from "react-icons/ci";
-import {
-  PiChatsLight,
-  PiCreditCardLight,
-  PiPackageLight,
-  PiTagLight,
-  PiUserCircleGearLight,
-} from "react-icons/pi";
-import {
-  CircleUser,
-  EllipsisVertical,
+  User,
   Heart,
   ShoppingCart,
+  Settings,
+  Package,
+  Tag,
+  CreditCard,
+  LogIn,
+  LogOut,
+  Store,
+  ShieldCheck,
+  HelpCircle,
+  Info,
+  MoreVertical,
 } from "lucide-react";
 
 export const MainMenu: React.FC = () => {
@@ -41,22 +34,22 @@ export const MainMenu: React.FC = () => {
   const accountMenu: MenuItem[] = [
     {
       name: "My Profile",
-      icon: <CiUser />,
+      icon: <User size={18} />,
       onClick: () => secureNavigate("/profile"),
     },
     {
       name: "Orders",
-      icon: <PiPackageLight />,
+      icon: <Package size={18} />,
       onClick: () => secureNavigate("/orders"),
     },
     {
       name: "Coupons",
-      icon: <PiTagLight />,
+      icon: <Tag size={18} />,
       onClick: () => secureNavigate("/coupons"),
     },
     {
       name: "Gift Cards",
-      icon: <PiCreditCardLight />,
+      icon: <CreditCard size={18} />,
       onClick: () => secureNavigate("/gift-cards"),
     },
   ];
@@ -64,7 +57,7 @@ export const MainMenu: React.FC = () => {
   if (!isAuthenticated) {
     accountMenu.splice(0, 0, {
       name: "Login",
-      icon: <CiLogin />,
+      icon: <LogIn size={18} />,
       onClick: () => {
         navigate("/sign", { state: { backgroundLocation: location } });
       },
@@ -73,7 +66,7 @@ export const MainMenu: React.FC = () => {
   if (isAuthenticated) {
     accountMenu.push({
       name: "Logout",
-      icon: <CiLogout />,
+      icon: <LogOut size={18} />,
       onClick: () => {
         navigate("/logout", { state: { backgroundLocation: location } });
       },
@@ -82,14 +75,14 @@ export const MainMenu: React.FC = () => {
     if (userRoles.includes("seller")) {
       accountMenu.splice(accountMenu.length - 1, 0, {
         name: "Switch to Seller Profile",
-        icon: <CiShop />,
+        icon: <Store size={18} />,
         onClick: () => navigate("/seller/dashboard"),
       });
     }
     if (userRoles.includes("admin")) {
       accountMenu.splice(accountMenu.length - 1, 0, {
         name: "Switch to Admin Profile",
-        icon: <PiUserCircleGearLight />,
+        icon: <ShieldCheck size={18} />,
         onClick: () => navigate("/admin-dashboard"),
       });
     }
@@ -98,29 +91,27 @@ export const MainMenu: React.FC = () => {
   const optionsMenu: MenuItem[] = [
     {
       name: "Settings",
-      icon: <CiSettings />,
+      icon: <Settings size={18} />,
       onClick: () => navigate("/settings"),
     },
     {
       name: "Help Center",
-      icon: <PiChatsLight />,
+      icon: <HelpCircle size={18} />,
       onClick: () => navigate("/help-center"),
     },
     {
       name: "About Us",
-      icon: <CiHashtag />,
+      icon: <Info size={18} />,
       onClick: () => navigate("/about"),
     },
   ];
-
-  const buttonClass =
-    "relative flex flex-col items-center text-gray-900 hover:text-black hover:scale-105 transition-all ease-in-out duration-200 cursor-pointer mx-1 md:mx-4";
 
   const secureNavigate = (link: string) => {
     if (!isAuthenticated)
       navigate("/sign", { state: { backgroundLocation: location } });
     else navigate(link);
   };
+
   const handleUnAuthorizedClicks = () => {
     if (!isAuthenticated) {
       navigate("/sign", { state: { backgroundLocation: location } });
@@ -130,34 +121,29 @@ export const MainMenu: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center gap-2 overflow-visible text-gray-700">
-      {" "}
+    <div className="flex items-center gap-2 sm:gap-3">
       {/* Account dropdown menu */}
       <RadixMultiDropdown
         trigger={
           <button
-            className={buttonClass}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-teal-50 transition-colors group"
             title="Account"
-            onClick={() => secureNavigate("/profile")}
             type="button"
           >
-            <div className="flex gap-2 hover:text-orange-500 font-normal text-gray-700">
-              <span className="text-lg mx-1.5 md:mx-0 sm:text-lg md:text-xl mb-0 sm:mb-1">
-                <CircleUser />
-              </span>
-              <span className="hidden lg:block text-gray-700">
-                Account
-              </span>
-            </div>
+            <User size={20} className="text-gray-700 group-hover:text-teal-600 transition-colors" />
+            <span className="hidden lg:block text-sm font-medium text-gray-700 group-hover:text-teal-600 transition-colors">
+              Account
+            </span>
           </button>
         }
         items={accountMenu}
         width={240}
         sideWidth={260}
       />
+
       {/* Wishlist Button */}
       <button
-        className={buttonClass}
+        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-amber-50 transition-colors group"
         title="Wishlist"
         onClick={() => {
           if (!handleUnAuthorizedClicks()) {
@@ -166,16 +152,15 @@ export const MainMenu: React.FC = () => {
         }}
         type="button"
       >
-        <div className="flex gap-2 hover:text-orange-500 font-normal text-gray-700">
-          <span className="text-lg mx-1.5 md:mx-0 sm:text-lg md:text-xl mb-0 sm:mb-1">
-            <Heart />
-          </span>
-          <span className="hidden lg:block text-gray-700">Wishlist</span>
-        </div>
+        <Heart size={20} className="text-gray-700 group-hover:text-amber-600 transition-colors" />
+        <span className="hidden lg:block text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">
+          Wishlist
+        </span>
       </button>
+
       {/* Cart Button */}
       <button
-        className={buttonClass}
+        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-orange-50 transition-colors group relative"
         title="Cart"
         onClick={() => {
           if (!handleUnAuthorizedClicks()) {
@@ -184,35 +169,30 @@ export const MainMenu: React.FC = () => {
         }}
         type="button"
       >
-        <div className="flex gap-2 hover:text-orange-500 font-normal text-gray-700">
-          <span className="text-lg mx-1.5 md:mx-0 mb-0 sm:mb-1">
-            <ShoppingCart />
-          </span>
-          <span className="hidden lg:block text-gray-700">Cart</span>
-        </div>
+        <ShoppingCart size={20} className="text-gray-700 group-hover:text-orange-600 transition-colors" />
+        <span className="hidden lg:block text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors">
+          Cart
+        </span>
+        {/* Cart badge - you can make this dynamic */}
+        <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+          0
+        </span>
       </button>
+
       {/* Options dropdown menu */}
       <RadixMultiDropdown
         trigger={
           <button
-            className={buttonClass}
+            className="p-2 rounded-lg hover:bg-cyan-50 transition-colors group"
             title="Options"
-            onClick={() => {
-              if (!handleUnAuthorizedClicks()) {
-                /* dropdown open handled by Radix */
-              }
-            }}
             type="button"
           >
-            <span className="flex gap-2 hover:text-orange-500 font-normal text-gray-700">
-              <EllipsisVertical />
-            </span>
+            <MoreVertical size={20} className="text-gray-700 group-hover:text-cyan-600 transition-colors" />
           </button>
         }
         items={optionsMenu}
         width={220}
         sideWidth={220}
-        // portal={true}  // Enable portal rendering here as well
       />
     </div>
   );

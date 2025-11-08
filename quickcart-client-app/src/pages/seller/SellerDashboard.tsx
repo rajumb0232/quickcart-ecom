@@ -38,8 +38,6 @@ const SellerDashboard: React.FC = () => {
     if (isSuccess) {
       if (data && isApiResponse(data)) {
         const stores = data.data;
-        console.log("🔄 Rehydrating viewStore with:", stores);
-
         dispatch(rehydrateViewStore(stores));
         setStoreLoaded(true);
       }
