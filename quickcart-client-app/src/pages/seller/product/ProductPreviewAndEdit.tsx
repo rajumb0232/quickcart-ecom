@@ -92,11 +92,11 @@ const ProductPreviewAndEditPage: React.FC = () => {
     };
 
     const handleEditProduct = () => {
-      window.location.href = `/edit-product/${product.product_id}`;
+      window.location.href = `/product/edit/${product.product_id}`;
     };
 
     const handleAddVariant = () => {
-      window.location.href = `/add-variant/${product.product_id}`;
+      window.location.href = `/variant/add/${product.product_id}`;
     };
 
     const categories = product.category_path.split("/");

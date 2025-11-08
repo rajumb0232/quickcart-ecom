@@ -1,4 +1,8 @@
-import type { productRequest, Product } from "./../types/productTypes";
+import type {
+  productRequest,
+  Product,
+  productEditRequest,
+} from "./../types/productTypes";
 import type {
   ApiAck,
   ApiResult,
@@ -72,13 +76,13 @@ export const useGetProductsByStore = (
 
 export const useGetProductIgnoreStatus = (productId: string | undefined) => {
   const api = useAPI();
-  if(productId) {
+  if (productId) {
     return useQuery<ApiResult<Product>, Error>({
-        queryKey: ["product", "ignore_case", productId],
-        queryFn: () => productService.fetchProductIgnoreStatus(api, productId),
-        retry: 2,
-        staleTime: 2 * 60 * 1000, // 2 mins
-      })
+      queryKey: ["product", "ignore_case", productId],
+      queryFn: () => productService.fetchProductIgnoreStatus(api, productId),
+      retry: 2,
+      staleTime: 2 * 60 * 1000, // 2 mins
+    });
   } else throw Error("Invalid product ID");
 };
 
@@ -88,6 +92,19 @@ export const usePublishProduct = (productId: string | undefined) => {
   return productId
     ? useMutation<ApiAck, Error>({
         mutationFn: () => productService.publishProduct(api, productId),
+      })
+    : async () => {
+        throw Error("Invalid product ID");
+      };
+};
+
+export const useUpdateProduct = (productId: string | undefined) => {
+  const api = useAPI();
+
+  return productId
+    ? useMutation<ApiResult<Product>, Error, productEditRequest>({
+        mutationFn: (body: productEditRequest) =>
+          productService.updateProduct(api, productId, body),
       })
     : async () => {
         throw Error("Invalid product ID");

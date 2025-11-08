@@ -287,7 +287,7 @@ const ProductDetail: React.FC = () => {
               <div className="text-xs text-gray-400">
                 Home / {product.brand ?? "Brand"} / {product.title ?? "Product"}
               </div>
-              <div className="mt-1 flex items-center justify-between gap-4">
+              <div className="mt-1 flex items-center justify-between gap-4 mb-5">
                 <div>
                   <div className="text-xs uppercase tracking-wide text-gray-600">
                     {product.brand ?? ""}
@@ -296,12 +296,11 @@ const ProductDetail: React.FC = () => {
                     {product.title}
                   </h1>
                 </div>
-
-                {/* Price visible near top for quick glance */}
-                <div className="text-2xl md:text-3xl font-bold text-gray-900">
+              </div>
+              {/* Price visible near top for quick glance */}
+                <div className="text-2xl font-bold text-gray-900">
                   {formatPrice(selectedVariant?.price ?? 0)}
                 </div>
-              </div>
             </div>
             {/* Variant selector */}
             <div className="text-sm text-gray-400 mb-3">Select Variant</div>
@@ -340,7 +339,10 @@ const ProductDetail: React.FC = () => {
             {/* Description & product code */}
             <div className="mt-6 text-sm text-gray-700">
               <p className="mb-3">
-                {selectedVariant?.description ?? product.description ?? ""}
+                {product.description ?? ""}
+              </p>
+              <p className="mb-3">
+                {selectedVariant?.description ?? ""}
               </p>
               <div className="text-xs text-gray-400">
                 Product code: {(product.product_id ?? "").slice(0, 8)}

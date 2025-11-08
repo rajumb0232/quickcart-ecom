@@ -1,6 +1,6 @@
 import type { useAPI } from "../hooks/useApi";
 import type { ApiAck, PaginatedRequest } from "../types/apiResponseType";
-import type { Product, productRequest } from "../types/productTypes";
+import type { Product, productEditRequest, productRequest } from "../types/productTypes";
 
 export const productService = {
     search: (api: ReturnType< typeof useAPI>, params: URLSearchParams) => {
@@ -33,5 +33,8 @@ export const productService = {
     },
     publishProduct: (api: ReturnType< typeof useAPI>, productId: string) => {
         return api.post<ApiAck>(`/products/${productId}/publish`)
+    },
+    updateProduct: (api: ReturnType<typeof useAPI>, productId: string, body: productEditRequest) => {
+        return api.put(`/products/${productId}`, body);
     },
 }

@@ -53,6 +53,7 @@ export interface ProductCard {
   title: string;
   price: number;
   quantity: number;
+  product_description?: string;
   description?: string;
   avg_rating: number;
   rating_count: number;
@@ -65,6 +66,12 @@ export interface ProductCard {
 export interface productRequest {
   store_id: string;
   category_id: string;
+  title: string;
+  brand: string;
+  description: string;
+}
+
+export interface productEditRequest {
   title: string;
   brand: string;
   description: string;
@@ -86,7 +93,9 @@ export interface ProductFilters {
   max_price: string;
 }
 
-export const flattenProductsAndVariants = (products: Product[]) : ProductCard[] => {
+export const flattenProductsAndVariants = (
+  products: Product[]
+): ProductCard[] => {
   const out: ProductCard[] = [];
   products.forEach((product: Product) => {
     (product.variants || []).forEach((v: any) => {
@@ -102,12 +111,12 @@ export const flattenProductsAndVariants = (products: Product[]) : ProductCard[] 
         avg_rating: product.avg_rating ?? v.avg_rating ?? 0,
         rating_count: product.rating_count ?? v.rating_count ?? 0,
         product_id: product.product_id,
+        product_description: product.description
       });
     });
   });
   return out;
 };
-
 
 export function parseProductFiltersFromURL(query: string): ProductFilters {
   const params = new URLSearchParams(query);

@@ -21,6 +21,7 @@ import UserProfilePage from "./pages/auth/UserProfilePage";
 import ListProduct from "./pages/seller/product/ListProduct";
 import StoreForm from "./pages/seller/store/StoreForm";
 import ProductPreviewAndEditPage from "./pages/seller/product/ProductPreviewAndEdit";
+import EditProductForm from "./pages/seller/product/EditProductForm";
 
 export default function App() {
   const location = useLocation();
@@ -113,6 +114,14 @@ export default function App() {
               <AdminDashboard />
             </RequireAuth>
           }
+        />
+        <Route 
+        path="/product/edit/:id"
+        element= {
+          <RequireAuth allowedRoles={["seller"]}>
+            <EditProductForm/>
+          </RequireAuth>
+        }
         />
       </Routes>
 
