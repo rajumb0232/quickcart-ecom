@@ -5,7 +5,6 @@ import { setNavHeight } from "../../../features/util/screenSlice";
 import { NavLogo } from "./NavLogo";
 import { SearchBar } from "./SearchBar";
 import { MainMenu } from "./MainMenu";
-import { SetLocation } from "./SetLocation";
 import NavCategories from "./NavCategories";
 
 const Navbar: React.FC = () => {
