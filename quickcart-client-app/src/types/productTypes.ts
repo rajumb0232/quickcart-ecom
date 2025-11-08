@@ -1,3 +1,5 @@
+import { API_BASE } from "../api/apiClient";
+
 export type CategoryStatus = "ACTIVE" | "DRAFT" | "ARCHIVE";
 export type CategoryLevel = 1 | 2 | 3;
 
@@ -45,12 +47,27 @@ export interface Product {
   is_deleted: boolean;
 }
 
+export interface ProductCard {
+  product_id?: string;
+  variant_id: string;
+  title: string;
+  price: number;
+  quantity: number;
+  description?: string;
+  avg_rating: number;
+  rating_count: number;
+  attributes: Record<string, string>;
+  image_uris: string[];
+  is_active?: boolean;
+  is_deleted?: boolean;
+}
+
 export interface productRequest {
-  store_id: string,
-  category_id: string,
-  title: string,
-  brand: string,
-  description: string
+  store_id: string;
+  category_id: string;
+  title: string;
+  brand: string;
+  description: string;
 }
 
 export interface ProductFilters {
@@ -61,11 +78,34 @@ export interface ProductFilters {
   max_price: string;
 }
 
+export const flattenProductsAndVariants = (products: Product[]) : ProductCard[] => {
+  const out: ProductCard[] = [];
+  products.forEach((product: Product) => {
+    (product.variants || []).forEach((v: any) => {
+      const imageUris: string[] = Array.isArray(v.image_uris)
+        ? v.image_uris.map((u: string) =>
+            u ? (u.startsWith("http") ? u : `${API_BASE}${u}`) : ""
+          )
+        : [];
+      out.push({
+        ...v,
+        image_uris: imageUris,
+        title: `${product.title || ""} - ${v.title || ""}`,
+        avg_rating: product.avg_rating ?? v.avg_rating ?? 0,
+        rating_count: product.rating_count ?? v.rating_count ?? 0,
+        product_id: product.product_id,
+      });
+    });
+  });
+  return out;
+};
+
+
 export function parseProductFiltersFromURL(query: string): ProductFilters {
   const params = new URLSearchParams(query);
-  
+
   const brand = params.get("brand") ?? "";
-  
+
   const categoriesParam = params.get("categories") ?? "";
   const categories = categoriesParam
     ? categoriesParam.split(",").map((c) => c.trim())

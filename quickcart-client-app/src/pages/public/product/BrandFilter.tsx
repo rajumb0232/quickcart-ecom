@@ -54,7 +54,7 @@ export const BrandFilter: React.FC<BrandFilterProps> = ({
             name="brand"
             value={query}
             onChange={(e) => setQuery(e.target?.value)}
-            className="border-2 border-gray-200 rounded-xl w-full pl-12 pr-12 py-3 text-sm font-medium focus:border-teal-500 focus:ring-4 focus:ring-teal-100 hover:border-teal-300 transition-all outline-none"
+            className="border-2 border-gray-200 rounded-xl w-full pl-12 pr-12 py-3 text-sm font-medium focus:border-teal-500 focus:ring-4 focus:ring-teal-100 hover:border-teal-300 transition-all outline-none text-slate-700"
             placeholder={placeholder}
             autoComplete="off"
             onClick={() => setDropdownOpen(true)}

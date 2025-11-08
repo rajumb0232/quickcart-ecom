@@ -6,7 +6,7 @@ import { SideBar } from "./SideBar";
 import { useSearchProduct } from "../../../hooks/useProducts";
 import { isApiResponse } from "../../../types/apiResponseType";
 import { setShowCategories } from "../../../features/util/screenSlice";
-import { API_BASE } from "../../../api/apiClient";
+import { flattenProductsAndVariants, type ProductCard } from "../../../types/productTypes";
 import {
   Search,
   ShoppingBag,
@@ -17,29 +17,6 @@ import {
   TrendingUp,
   MapPin,
 } from "lucide-react";
-
-interface Result {
-  variant_id: string;
-  title: string;
-  price: number;
-  quantity: number;
-  description?: string;
-  created_date?: string;
-  last_modified_date?: string;
-  avg_rating: number;
-  rating_count: number;
-  attributes: {
-    fit?: string;
-    size?: string;
-    type?: string;
-    color?: string;
-    "Care Instruction"?: string;
-  };
-  image_uris: string[];
-  is_active?: boolean;
-  is_deleted?: boolean;
-  productId?: string;
-}
 
 const ProductSearchResultPage: React.FC = () => {
   const location = useLocation();
@@ -55,27 +32,8 @@ const ProductSearchResultPage: React.FC = () => {
   const products = data && isApiResponse(data) ? data.data : [];
 
   // Flatten variants and attach productId
-  const variants: Result[] = React.useMemo(() => {
-    const out: Result[] = [];
-    products.forEach((product: any) => {
-      (product.variants || []).forEach((v: any) => {
-        const imageUris: string[] = Array.isArray(v.image_uris)
-          ? v.image_uris.map((u: string) =>
-              u ? (u.startsWith("http") ? u : `${API_BASE}${u}`) : ""
-            )
-          : [];
-
-        out.push({
-          ...v,
-          image_uris: imageUris,
-          title: `${product.title || ""} - ${v.title || ""}`,
-          avg_rating: product.avg_rating ?? v.avg_rating ?? 0,
-          rating_count: product.rating_count ?? v.rating_count ?? 0,
-          productId: product.product_id,
-        });
-      });
-    });
-    return out;
+  const variants: ProductCard[] = React.useMemo(() => {
+    return  flattenProductsAndVariants(products)
   }, [products]);
 
   if (isLoading) {
@@ -182,16 +140,16 @@ const ProductSearchResultPage: React.FC = () => {
                   key={variant.variant_id}
                   className="bg-white rounded-2xl overflow-hidden border-2 border-gray-200 hover:border-gray-300 hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col"
                   onClick={() => {
-                    if (variant.productId) {
-                      navigate(`/product/${variant.productId}`);
+                    if (variant.product_id) {
+                      navigate(`/product/${variant.product_id}`);
                     }
                   }}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
-                      if (variant.productId)
-                        navigate(`/product/${variant.productId}`);
+                      if (variant.product_id)
+                        navigate(`/product/${variant.product_id}`);
                     }
                   }}
                 >
