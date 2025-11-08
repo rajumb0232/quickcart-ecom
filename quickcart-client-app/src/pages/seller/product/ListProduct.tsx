@@ -14,9 +14,9 @@ import {
 } from "../../../features/product/productBuilderSelectors";
 import PreviewProduct from "./Preview";
 import { setShowCategories } from "../../../features/util/screenSlice";
-import { 
-  X, 
-  Package, 
+import {
+  X,
+  Package,
   CheckCircle,
   Layers,
   Tag,
@@ -26,6 +26,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { selectViewStore } from "../../../features/product/sellerStoreSelectors";
 import { toast } from "react-toastify";
+import { clearProductBuilderData } from "../../../features/product/productBuilderSlice";
 
 const stageComponents: Record<string, JSX.Element> = {
   select_category: <Categorize />,
@@ -35,12 +36,27 @@ const stageComponents: Record<string, JSX.Element> = {
   preview_product: <PreviewProduct />,
 };
 
-const stageInfo: Record<string, { title: string; icon: JSX.Element; step: number }> = {
-  select_category: { title: "Select Category", icon: <Layers size={20} />, step: 1 },
+const stageInfo: Record<
+  string,
+  { title: string; icon: JSX.Element; step: number }
+> = {
+  select_category: {
+    title: "Select Category",
+    icon: <Layers size={20} />,
+    step: 1,
+  },
   enter_title: { title: "Enter Title", icon: <Tag size={20} />, step: 2 },
   enter_brand: { title: "Enter Brand", icon: <Package size={20} />, step: 3 },
-  write_description: { title: "Write Description", icon: <FileText size={20} />, step: 4 },
-  preview_product: { title: "Preview Product", icon: <Eye size={20} />, step: 5 },
+  write_description: {
+    title: "Write Description",
+    icon: <FileText size={20} />,
+    step: 4,
+  },
+  preview_product: {
+    title: "Preview Product",
+    icon: <Eye size={20} />,
+    step: 5,
+  },
 };
 
 /**
@@ -85,8 +101,12 @@ const ListProduct: React.FC = () => {
     dispatch(setShowCategories(false));
   }, []);
 
+  let notified = false;
   useEffect(() => {
-    if (currentStore) toast.info("Listing product to " + currentStore?.name);
+    if (currentStore && !notified) {
+      toast.info("Listing product to " + currentStore?.name);
+      notified = true;
+    }
   }, [currentStore]);
 
   useEffect(() => {
@@ -94,10 +114,10 @@ const ListProduct: React.FC = () => {
   }, [productReq]);
 
   const currentStage = canonicalStageFor(currentStageRaw);
-  const currentStageInfo = stageInfo[currentStage] || { 
-    title: "Unknown Stage", 
-    icon: <Package size={20} />, 
-    step: 0 
+  const currentStageInfo = stageInfo[currentStage] || {
+    title: "Unknown Stage",
+    icon: <Package size={20} />,
+    step: 0,
   };
 
   const [viewHeight, setViewHeight] = useState<number>(600);
@@ -144,19 +164,28 @@ const ListProduct: React.FC = () => {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">
-                    {currentStageInfo.step === 5 ? "Product Preview" : "Create Product"}
+                    {currentStageInfo.step === 5
+                      ? "Product Preview"
+                      : "Create Product"}
                   </h1>
                   <p className="text-sm text-gray-600">
-                    Step {currentStageInfo.step} of {totalSteps} - {currentStageInfo.title}
+                    Step {currentStageInfo.step} of {totalSteps} -{" "}
+                    {currentStageInfo.title}
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => navigate("/seller/dashboard")}
+                onClick={() => {
+                  navigate("/seller/dashboard");
+                  dispatch(clearProductBuilderData());
+                }}
                 className="p-2 hover:bg-red-50 rounded-xl transition-colors group"
                 title="Close"
               >
-                <X size={24} className="text-gray-400 group-hover:text-red-600 transition-colors" />
+                <X
+                  size={24}
+                  className="text-gray-400 group-hover:text-red-600 transition-colors"
+                />
               </button>
             </div>
 
@@ -220,8 +249,12 @@ const ListProduct: React.FC = () => {
                   <Package size={16} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 font-medium">Listing to Store:</p>
-                  <p className="text-sm font-bold text-gray-900">{currentStore.name}</p>
+                  <p className="text-xs text-gray-600 font-medium">
+                    Listing to Store:
+                  </p>
+                  <p className="text-sm font-bold text-gray-900">
+                    {currentStore.name}
+                  </p>
                 </div>
               </div>
             </div>
@@ -230,9 +263,7 @@ const ListProduct: React.FC = () => {
 
         {/* Main Content Card */}
         <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
-          <div className="p-8 md:p-12">
-            {RenderComponent}
-          </div>
+          <div className="p-8 md:p-12">{RenderComponent}</div>
         </div>
       </div>
     </div>

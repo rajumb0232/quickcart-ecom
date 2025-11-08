@@ -112,7 +112,7 @@ const PreviewProduct: React.FC = () => {
               <button
                 onClick={() => editRequestHandler("category")}
                 aria-label="Edit category"
-                className="ml-4 p-2 rounded-md hover:bg-gray-50 transition-colors text-gray-600"
+                className="ml-4 p-2 rounded-md hover:bg-gray-100 hover:text-orange-500 transition-colors text-gray-600"
                 title="Edit Category"
               >
                 <SquarePen />
@@ -132,7 +132,7 @@ const PreviewProduct: React.FC = () => {
               <button
                 onClick={() => editRequestHandler("title")}
                 aria-label="Edit title"
-                className="p-2 rounded-md hover:bg-gray-50 transition-colors text-gray-600"
+                className="p-2 rounded-md hover:bg-gray-100 hover:text-orange-500 transition-colors text-gray-600"
                 title="Edit Title"
               >
                 <SquarePen />
@@ -152,7 +152,7 @@ const PreviewProduct: React.FC = () => {
               <button
                 onClick={() => editRequestHandler("brand")}
                 aria-label="Edit brand"
-                className="p-2 rounded-md hover:bg-gray-50 transition-colors text-gray-600"
+                className="p-2 rounded-md hover:bg-gray-100 hover:text-orange-500 transition-colors text-gray-600"
                 title="Edit Brand"
               >
                 <SquarePen />
@@ -172,7 +172,7 @@ const PreviewProduct: React.FC = () => {
               <button
                 onClick={() => editRequestHandler("description")}
                 aria-label="Edit description"
-                className="ml-4 p-2 rounded-md hover:bg-gray-50 transition-colors text-gray-600 self-start"
+                className="ml-4 p-2 rounded-md hover:bg-gray-100 hover:text-orange-500 transition-colors text-gray-600 self-start"
                 title="Edit Description"
               >
                 <SquarePen />

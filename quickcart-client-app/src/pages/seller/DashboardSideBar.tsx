@@ -10,7 +10,10 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { selectNavHeight, selectScreenHeight } from "../../features/util/screenSelector";
+import {
+  selectNavHeight,
+  selectScreenHeight,
+} from "../../features/util/screenSelector";
 import { selectViewStore } from "../../features/product/sellerStoreSelectors";
 
 const labelToPathMap: Record<string, string> = {
@@ -32,20 +35,26 @@ const DashboardSideBar: React.FC = () => {
   const location = useLocation();
 
   return (
-    <div className="bg-white w-64 border-r border-gray-200 flex flex-col"
+    <div
+      className="bg-white w-64 border-r border-gray-200 flex flex-col"
       style={{ height: sidebarHeight }}
     >
       <div className="p-6 border-b border-gray-100 shrink-0">
-        <h1 className="text-xl font-bold text-gray-900">{viewingStore ? viewingStore.name : "Store"}</h1>
+        <h1 className="text-xl font-bold text-gray-900">
+          {viewingStore ? viewingStore.name : "Store"}
+        </h1>
       </div>
 
       <nav
         className="flex-1 py-4 overflow-y-auto"
         style={{ scrollbarWidth: "none" /* Firefox */ }}
       >
-        <div className="px-3" style={{
-          height: sidebarHeight - 6 * 24,
-        }}>
+        <div
+          className="px-3"
+          style={{
+            height: sidebarHeight - 6 * 24,
+          }}
+        >
           {Object.entries(labelToPathMap).map(([label, path]) => (
             <NavItem
               key={label}
@@ -108,7 +117,11 @@ const NavItem: React.FC<NavItemProps> = ({
   const handleClick = () => {
     const path = labelToPathMap[label];
     if (path) {
-      navigate(path);
+      if (path === "/list-product") {
+        window.open(path, "_blank");
+      } else {
+        navigate(path);
+      }
     }
   };
 

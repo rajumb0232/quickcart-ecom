@@ -147,7 +147,10 @@ const EnterBrand: React.FC = () => {
               <button
                 onClick={handleNext}
                 disabled={!brand.trim()}
-                className="px-8 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg bg-linear-to-r from-teal-500 to-cyan-600 text-white hover:from-teal-600 hover:to-cyan-700 shadow-teal-200"
+                className={`px-8 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg ${brand.trim()
+                  ? "bg-linear-to-r from-teal-500 to-cyan-600 text-white hover:from-teal-600 hover:to-cyan-700 shadow-teal-200 cursor-pointer"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
+                }`}
               >
                 <span>Continue</span>
                 <ArrowRight size={18} />
