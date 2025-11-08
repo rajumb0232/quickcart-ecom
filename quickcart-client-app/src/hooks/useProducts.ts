@@ -69,3 +69,27 @@ export const useGetProductsByStore = (
     staleTime: 2 * 60 * 1000, // 2 mins
   });
 };
+
+export const useGetProductIgnoreStatus = (productId: string | undefined) => {
+  const api = useAPI();
+  if(productId) {
+    return useQuery<ApiResult<Product>, Error>({
+        queryKey: ["product", "ignore_case", productId],
+        queryFn: () => productService.fetchProductIgnoreStatus(api, productId),
+        retry: 2,
+        staleTime: 2 * 60 * 1000, // 2 mins
+      })
+  } else throw Error("Invalid product ID");
+};
+
+export const usePublishProduct = (productId: string | undefined) => {
+  const api = useAPI();
+
+  return productId
+    ? useMutation<ApiAck, Error>({
+        mutationFn: () => productService.publishProduct(api, productId),
+      })
+    : async () => {
+        throw Error("Invalid product ID");
+      };
+};

@@ -27,5 +27,11 @@ export const productService = {
         const pageNo = pageInfo.page ? pageInfo.page : 0;
         const size = pageInfo.size ? pageInfo.size : 15;
         return api.get<Product>(`/stores/${storeId}/products?page=${pageNo}&size=${size}`)
-    }
+    },
+    fetchProductIgnoreStatus: (api: ReturnType< typeof useAPI>, productId: string) => {
+        return api.get<Product>(`/products/${productId}`)
+    },
+    publishProduct: (api: ReturnType< typeof useAPI>, productId: string) => {
+        return api.post<ApiAck>(`/products/${productId}/publish`)
+    },
 }
