@@ -12,6 +12,8 @@ import {
   AlertCircle,
   RotateCcw,
   Loader2,
+  Upload,
+  EyeOff,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectNavHeight } from "../../../features/util/screenSelector";
@@ -21,6 +23,7 @@ import { useParams } from "react-router-dom";
 import {
   useAddVariant,
   useGetProductIgnoreStatus,
+  usePublishProduct,
 } from "../../../hooks/useProducts";
 import { isApiResponse } from "../../../types/apiResponseType";
 import { toast } from "react-toastify";
@@ -34,6 +37,9 @@ const ProductPreviewAndEditPage: React.FC = () => {
   const product = data && isApiResponse(data) ? data.data : null;
 
   const addVariantMutation = useAddVariant();
+  const publishProductMutation = usePublishProduct();
+
+  const [isPublishing, setIsPublishing] = React.useState(false);
 
   // For now, using mock data structure
   const dispatch = useDispatch();
@@ -42,7 +48,7 @@ const ProductPreviewAndEditPage: React.FC = () => {
   // Fetch product data on mount
   React.useEffect(() => {
     dispatch(setShowCategories(false));
-  }, []);
+  }, [dispatch]);
 
   // Loading state
   if (isLoading) {
@@ -124,6 +130,29 @@ const ProductPreviewAndEditPage: React.FC = () => {
       }
     };
 
+    const handlePublishProduct = async () => {
+      if (!product_id) return;
+
+      const isPublished = product.is_active;
+      const action = isPublished ? "unpublish" : "publish";
+
+      try {
+        setIsPublishing(true);
+        await publishProductMutation.mutateAsync({ productId: product_id });
+
+        toast.success(`Product ${action}ed successfully! Refreshing page...`);
+
+        // Wait a moment for the toast to be visible, then reload
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } catch (error) {
+        console.error(`Failed to ${action} product:`, error);
+        toast.error(`Failed to ${action} product. Please try again.`);
+        setIsPublishing(false);
+      }
+    };
+
     const categories = product.category_path.split("/");
 
     return (
@@ -201,15 +230,46 @@ const ProductPreviewAndEditPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Status Badge */}
-                <div
-                  className={`px-4 py-2 rounded-lg font-semibold ${
-                    product.is_active
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {product.is_active ? "Published" : "Unpublished"}
+                {/* Status Badge and Publish Button */}
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`px-4 py-2 rounded-lg font-semibold ${
+                      product.is_active
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {product.is_active ? "Published" : "Unpublished"}
+                  </div>
+
+                  {!product.is_active && product.variants.length > 0 && (
+                    <button
+                      onClick={handlePublishProduct}
+                      disabled={isPublishing}
+                      className={`px-4 py-2 rounded-lg font-semibold transition-all flex items-center gap-2 ${
+                        product.is_active
+                          ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                          : "bg-linear-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700"
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {isPublishing ? (
+                        <>
+                          <Loader2 size={18} className="animate-spin" />
+                          <span>Processing...</span>
+                        </>
+                      ) : product.is_active ? (
+                        <>
+                          <EyeOff size={18} />
+                          <span>Unpublish</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={18} />
+                          <span>Publish</span>
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
               </div>
 

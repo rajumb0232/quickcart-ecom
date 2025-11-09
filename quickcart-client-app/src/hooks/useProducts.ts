@@ -96,8 +96,8 @@ export const useGetProductIgnoreStatus = (productId: string | undefined) => {
 export const usePublishProduct = () => {
   const api = useAPI();
 
-  return useMutation<ApiAck, Error, string>({
-    mutationFn: async (productId: string) => {
+  return useMutation<ApiAck, Error, {productId: string}>({
+    mutationFn: async ({productId}) => {
       if (!productId) throw new Error("Invalid product ID");
       return productService.publishProduct(api, productId);
     },
