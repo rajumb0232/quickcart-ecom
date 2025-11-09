@@ -41,6 +41,7 @@ export const useAPI = () => {
     data?: object | FormData | URLSearchParams,
     config?: AxiosRequestConfig
   ) => {
+    console.log("Requested made...");
     return unwrapResponse(
       api.post<ApiResult<T>>(url, data, {
         ...resolveConfig(data),

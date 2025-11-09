@@ -10,7 +10,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { moveToPrevStage } from "../../../features/variant/variantBuilderSlice";
 import { selectVariantAtBuilder } from "../../../features/variant/variantBuilderSelector";
 import type { Variant } from "../../../types/productTypes";
-import { API_BASE } from "../../../api/apiClient";
 
 export interface UploadVariantImageProps {
   onSubmit: (files: File[]) => void;
@@ -196,6 +195,7 @@ const UploadVariantImages: React.FC<UploadVariantImageProps> = ({
       setError("Select images before continuing.");
       return;
     }
+    console.log("submitting files");
     onSubmit(files);
   };
 
