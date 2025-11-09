@@ -4,6 +4,7 @@ import screenReducer from "../features/util/screenSlice";
 import productResultReducer from "../features/product/productResultSlice"
 import sellerStoreReducer from "../features/product/sellerStoreSlice"
 import productRequestBuilderReducer from "../features/product/productBuilderSlice"
+import variantBuilderReducer from "../features/variant/variantBuilderSlice"
 
 export const store = configureStore({
     reducer: {
@@ -11,7 +12,8 @@ export const store = configureStore({
         screen: screenReducer,
         productResult: productResultReducer,
         sellerStore: sellerStoreReducer,
-        productRequest: productRequestBuilderReducer
+        productRequest: productRequestBuilderReducer,
+        variantBuilder: variantBuilderReducer
     },
 });
 

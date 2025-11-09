@@ -2,6 +2,8 @@ import type {
   productRequest,
   Product,
   productEditRequest,
+  VariantRequest,
+  Variant,
 } from "./../types/productTypes";
 import type {
   ApiAck,
@@ -29,7 +31,10 @@ export const useGetProductById = (id: string | undefined) => {
 
   return useQuery<ApiResult<Product>, Error>({
     queryKey: ["product", id],
-    queryFn: () => productService.fetchProduct(api, id),
+    queryFn: () => {
+      if (!id) throw new Error("Invalid product ID");
+      return productService.fetchProduct(api, id);
+    },
     retry: 2,
     staleTime: 24 * 60 * 60 * 1000,
   });
@@ -39,13 +44,10 @@ export const useCreateProduct = (storeId: string, categoryId: string) => {
   const api = useAPI();
 
   return useMutation<ApiAck, Error, productRequest>({
-    mutationFn:
-      storeId && categoryId
-        ? (body: productRequest) =>
-            productService.createProduct(api, storeId, categoryId, body)
-        : async () => {
-            throw new Error("Invalid storeId or categoryId");
-          },
+    mutationFn: async (body: productRequest) => {
+      if (!storeId || !categoryId) throw new Error("Invalid storeId or categoryId");
+      return productService.createProduct(api, storeId, categoryId, body);
+    },
   });
 };
 
@@ -56,7 +58,7 @@ export const useGetBrands = () => {
     queryKey: ["brands"],
     queryFn: () => productService.getBrands(api),
     retry: 2,
-    staleTime: 30 * 60 * 1000, // 30 mins
+    staleTime: 30 * 60 * 1000,
   });
 };
 
@@ -67,46 +69,81 @@ export const useGetProductsByStore = (
   const api = useAPI();
 
   return useQuery<ApiResult<Product>, Error>({
-    queryKey: ["store", storeId],
-    queryFn: () => productService.fetchProductByStore(api, storeId, pageInfo),
+    queryKey: ["store", storeId, pageInfo],
+    queryFn: () => {
+      if (!storeId) throw new Error("Invalid storeId");
+      return productService.fetchProductByStore(api, storeId, pageInfo);
+    },
     retry: 2,
-    staleTime: 2 * 60 * 1000, // 2 mins
+    staleTime: 2 * 60 * 1000,
   });
 };
 
 export const useGetProductIgnoreStatus = (productId: string | undefined) => {
   const api = useAPI();
-  if (productId) {
-    return useQuery<ApiResult<Product>, Error>({
-      queryKey: ["product", "ignore_case", productId],
-      queryFn: () => productService.fetchProductIgnoreStatus(api, productId),
-      retry: 2,
-      staleTime: 2 * 60 * 1000, // 2 mins
-    });
-  } else throw Error("Invalid product ID");
+
+  return useQuery<ApiResult<Product>, Error>({
+    queryKey: ["product", "ignore_case", productId],
+    queryFn: () => {
+      if (!productId) throw new Error("Invalid product ID");
+      return productService.fetchProductIgnoreStatus(api, productId);
+    },
+    retry: 2,
+    staleTime: 2 * 60 * 1000,
+  });
 };
 
-export const usePublishProduct = (productId: string | undefined) => {
+export const usePublishProduct = () => {
   const api = useAPI();
 
-  return productId
-    ? useMutation<ApiAck, Error>({
-        mutationFn: () => productService.publishProduct(api, productId),
-      })
-    : async () => {
-        throw Error("Invalid product ID");
-      };
+  return useMutation<ApiAck, Error, string>({
+    mutationFn: async (productId: string) => {
+      if (!productId) throw new Error("Invalid product ID");
+      return productService.publishProduct(api, productId);
+    },
+  });
 };
 
-export const useUpdateProduct = (productId: string | undefined) => {
+export const useUpdateProduct = () => {
   const api = useAPI();
 
-  return productId
-    ? useMutation<ApiResult<Product>, Error, productEditRequest>({
-        mutationFn: (body: productEditRequest) =>
-          productService.updateProduct(api, productId, body),
-      })
-    : async () => {
-        throw Error("Invalid product ID");
-      };
+  return useMutation<ApiResult<Product>, Error, { productId: string; body: productEditRequest }>({
+    mutationFn: async ({ productId, body }) => {
+      if (!productId) throw new Error("Invalid product ID");
+      return productService.updateProduct(api, productId, body);
+    },
+  });
+};
+
+export const useAddVariant = () => {
+  const api = useAPI();
+
+  return useMutation<ApiResult<Variant>, Error, { productId: string; body: VariantRequest }>({
+    mutationFn: async ({ productId, body }) => {
+      if (!productId) throw new Error("Invalid product ID");
+      return productService.addVariant(api, productId, body);
+    },
+  });
+};
+
+export const useUpdateVariant = () => {
+  const api = useAPI();
+
+  return useMutation<ApiResult<Variant>, Error, { variantId: string; body: VariantRequest }>({
+    mutationFn: async ({ variantId, body }) => {
+      if (!variantId) throw new Error("Invalid variant ID");
+      return productService.updateVariant(api, variantId, body);
+    },
+  });
+};
+
+export const useGetVariant = (variantId: string) => {
+  const api = useAPI();
+
+  return useQuery<ApiResult<Variant>, Error>({
+    queryKey: ["variant", variantId],
+    queryFn: () => productService.fetchVariant(api, variantId),
+    retry: 2,
+    staleTime: 5 * 1000,
+  });
 };

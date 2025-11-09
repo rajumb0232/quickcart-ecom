@@ -19,7 +19,7 @@ export interface categoryGroup {
 }
 
 export interface Variant {
-  variant_id: string;
+  variant_id: string | null;
   title: string;
   price: number;
   quantity: number;

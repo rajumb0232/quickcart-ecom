@@ -18,8 +18,12 @@ import { selectNavHeight } from "../../../features/util/screenSelector";
 import { setShowCategories } from "../../../features/util/screenSlice";
 import VariantPreviewAndEditPage from "./VariantPreviewAndEdit";
 import { useParams } from "react-router-dom";
-import { useGetProductIgnoreStatus } from "../../../hooks/useProducts";
+import {
+  useAddVariant,
+  useGetProductIgnoreStatus,
+} from "../../../hooks/useProducts";
 import { isApiResponse } from "../../../types/apiResponseType";
+import { toast } from "react-toastify";
 
 // Component
 const ProductPreviewAndEditPage: React.FC = () => {
@@ -28,6 +32,8 @@ const ProductPreviewAndEditPage: React.FC = () => {
 
   const { data, isError, isLoading } = useGetProductIgnoreStatus(product_id);
   const product = data && isApiResponse(data) ? data.data : null;
+
+  const addVariantMutation = useAddVariant();
 
   // For now, using mock data structure
   const dispatch = useDispatch();
@@ -45,9 +51,7 @@ const ProductPreviewAndEditPage: React.FC = () => {
         <main className="flex-1 flex items-center justify-center p-8">
           <div className="text-center">
             <Loader2 className="w-16 h-16 animate-spin text-gray-700 mx-auto mb-4" />
-            <p className="text-gray-600 font-medium text-lg">
-              Loading…
-            </p>
+            <p className="text-gray-600 font-medium text-lg">Loading…</p>
             <p className="text-gray-400 text-sm mt-2">
               We are fetching your product from store, hang tight!
             </p>
@@ -86,7 +90,6 @@ const ProductPreviewAndEditPage: React.FC = () => {
   }
 
   if (!isLoading && !isError && product) {
-
     const handleBack = () => {
       window.location.href = "/seller/manage-product";
     };
@@ -95,8 +98,30 @@ const ProductPreviewAndEditPage: React.FC = () => {
       window.location.href = `/product/edit/${product.product_id}`;
     };
 
-    const handleAddVariant = () => {
-      window.location.href = `/variant/add/${product.product_id}`;
+    const handleAddVariant = async () => {
+      console.log("Adding variant for product: ", product_id);
+      if (product_id) {
+        try {
+          const data = await addVariantMutation.mutateAsync({
+            productId: product_id,
+            body: {
+              title: "",
+              description: "",
+              price: 0,
+              quantity: 0,
+              attributes: {},
+            },
+          });
+          console.log(data);
+          if (isApiResponse(data)) {
+            const variant = data.data;
+            window.open(`/variant/build/${variant.variant_id}`, "_blank");
+          } else throw Error("Failed to create variant.");
+        } catch (error) {
+          console.error("Failed to create Variant, ", error);
+          toast.error("Failed to initiate building variant");
+        }
+      }
     };
 
     const categories = product.category_path.split("/");

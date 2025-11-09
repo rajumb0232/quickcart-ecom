@@ -10,8 +10,10 @@ import {
   Layers,
   TrendingUp,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { API_BASE } from "../../../api/apiClient";
+import { useAddVariant } from "../../../hooks/useProducts";
+import { isApiResponse } from "../../../types/apiResponseType";
+import { toast } from "react-toastify";
 
 export interface VariantPreviewProps {
   product_id: string;
@@ -23,30 +25,60 @@ const safeUrl = (uri: string) => {
   // If uri already looks absolute, return as-is, else prefix with API_BASE
   if (uri.startsWith("http://") || uri.startsWith("https://")) return uri;
   // Ensure slash handling
-  if (API_BASE.endsWith("/") && uri.startsWith("/")) return `${API_BASE}${uri.slice(1)}`;
-  if (!API_BASE.endsWith("/") && !uri.startsWith("/")) return `${API_BASE}/${uri}`;
+  if (API_BASE.endsWith("/") && uri.startsWith("/"))
+    return `${API_BASE}${uri.slice(1)}`;
+  if (!API_BASE.endsWith("/") && !uri.startsWith("/"))
+    return `${API_BASE}/${uri}`;
   return `${API_BASE}${uri}`;
 };
 
-const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, product_id }) => {
-  const navigate = useNavigate();
-  const [currentVariantIndex, setCurrentVariantIndex] = useState(0);
+const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({
+  variants,
+  product_id,
+}) => {
+  const [currentVariantIndex, setCurrentVariantIndex] = useState<number>(0);
+  const addVariantMutation = useAddVariant();
 
   const variantCount = variants.length;
   const currentVariant = variants[currentVariantIndex];
 
   const allThumbnails = useMemo(
     () =>
-      variants.map((v) => (v.image_uris && v.image_uris.length > 0 ? safeUrl(v.image_uris[0]) : null)),
+      variants.map((v) =>
+        v.image_uris && v.image_uris.length > 0
+          ? safeUrl(v.image_uris[0])
+          : null
+      ),
     [variants]
   );
 
-  const handleAddVariant = () => {
-    navigate(`/add-variant/${product_id}`);
+  const handleAddVariant = async () => {
+    console.log("Adding variant for product: ", product_id);
+    if (product_id) {
+      try {
+        const data = await addVariantMutation.mutateAsync({
+          productId: product_id,
+          body: {
+            title: "",
+            description: "",
+            price: 0,
+            quantity: 0,
+            attributes: {},
+          },
+        });
+        if (isApiResponse(data)) {
+          const variant = data.data;
+          window.open(`/variant/build/${variant.variant_id}`, "_blank");
+        } else throw Error("Failed to create variant.");
+      } catch (error) {
+        console.error("Failed to create Variant, ", error);
+        toast.error("Failed to initiate building variant");
+      }
+    }
   };
 
-  const handleEditVariant = (variantId: string) => {
-    navigate(`/edit-variant/${variantId}`);
+  const handleEditVariant = (variantId: string | null) => {
+    window.open(`/variant/build/${variantId}`, "_blank");
   };
 
   const handlePrevVariant = (e?: React.MouseEvent) => {
@@ -66,9 +98,12 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
           <div className="mx-auto w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mb-4">
             <Box className="w-8 h-8 text-amber-600" />
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No variants yet</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            No variants yet
+          </h3>
           <p className="text-sm text-gray-600 mb-4">
-            This product currently has no variants. Add your first variant to get started.
+            This product currently has no variants. Add your first variant to
+            get started.
           </p>
           <div className="flex justify-center gap-3">
             <button
@@ -93,8 +128,12 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
               <Layers size={20} className="text-white" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-gray-900">Product Variants</h3>
-              <p className="text-sm text-gray-600 mt-1">Preview and quick-edit individual variants for this product.</p>
+              <h3 className="text-2xl font-bold text-gray-900">
+                Product Variants
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Preview and quick-edit individual variants for this product.
+              </p>
             </div>
           </div>
 
@@ -105,7 +144,9 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
               title="Edit current variant"
             >
               <Edit3 size={16} className="text-gray-700" />
-              <span className="text-sm font-medium text-gray-700">Edit Variant</span>
+              <span className="text-sm font-medium text-gray-700">
+                Edit Variant
+              </span>
             </button>
 
             <button
@@ -144,25 +185,38 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
             {/* All images for current variant: grid layout */}
             <div className="p-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {currentVariant.image_uris && currentVariant.image_uris.length > 0 ? (
+                {currentVariant.image_uris &&
+                currentVariant.image_uris.length > 0 ? (
                   currentVariant.image_uris.map((uri, i) => {
                     const src = safeUrl(uri);
                     return (
-                      <div key={i} className="rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+                      <div
+                        key={i}
+                        className="rounded-xl overflow-hidden border border-gray-100 bg-gray-50"
+                      >
                         <button
                           onClick={() => window.open(src, "_blank")}
                           className="w-full h-44 md:h-56 flex items-center justify-center overflow-hidden"
                           aria-label={`Open image ${i + 1}`}
                         >
-                          <img src={src} alt={`${currentVariant.title}-img-${i}`} className="w-full h-full object-cover" />
+                          <img
+                            src={src}
+                            alt={`${currentVariant.title}-img-${i}`}
+                            className="w-full h-full object-cover"
+                          />
                         </button>
                       </div>
                     );
                   })
                 ) : (
                   <div className="col-span-full text-center py-12">
-                    <ImageIcon size={48} className="text-gray-300 mx-auto mb-4" />
-                    <div className="text-gray-600">No images uploaded for this variant</div>
+                    <ImageIcon
+                      size={48}
+                      className="text-gray-300 mx-auto mb-4"
+                    />
+                    <div className="text-gray-600">
+                      No images uploaded for this variant
+                    </div>
                   </div>
                 )}
               </div>
@@ -175,13 +229,21 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
                   <button
                     key={idx}
                     onClick={() => setCurrentVariantIndex(idx)}
-                    className={`rounded-lg overflow-hidden border-2 transition-all focus:outline-none ${idx === currentVariantIndex ? "border-teal-400 shadow-lg" : "border-gray-100"} shrink-0`}
+                    className={`rounded-lg overflow-hidden border-2 transition-all focus:outline-none ${
+                      idx === currentVariantIndex
+                        ? "border-teal-400 shadow-lg"
+                        : "border-gray-100"
+                    } shrink-0`}
                     aria-label={`Show variant ${idx + 1}`}
                     title={`Variant ${idx + 1}`}
                   >
                     <div className="w-24 h-24 bg-gray-50 flex items-center justify-center">
                       {thumb ? (
-                        <img src={thumb} alt={`variant-${idx}`} className="w-full h-full object-cover" />
+                        <img
+                          src={thumb}
+                          alt={`variant-${idx}`}
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <ImageIcon size={24} className="text-gray-300" />
                       )}
@@ -196,8 +258,12 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
           <aside className="rounded-xl border-2 border-gray-100 p-6 bg-white">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h4 className="text-lg font-semibold text-gray-900">{currentVariant.title}</h4>
-                <div className="text-sm text-gray-500 mt-1">{currentVariant.description || "—"}</div>
+                <h4 className="text-lg font-semibold text-gray-900">
+                  {currentVariant.title}
+                </h4>
+                <div className="text-sm text-gray-500 mt-1">
+                  {currentVariant.description || "—"}
+                </div>
               </div>
 
               <div className="text-right">
@@ -211,7 +277,11 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
                       : "bg-amber-50 text-amber-800 border border-amber-200"
                   }`}
                 >
-                  {currentVariant.is_deleted ? "Deleted" : currentVariant.is_active ? "Active" : "Unpublished"}
+                  {currentVariant.is_deleted
+                    ? "Deleted"
+                    : currentVariant.is_active
+                    ? "Active"
+                    : "Unpublished"}
                 </div>
               </div>
             </div>
@@ -220,18 +290,24 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
             <div className="flex items-center gap-3 mt-6">
               <div className="px-4 py-2 rounded-lg bg-gray-100 text-sm font-semibold text-gray-800 inline-flex items-center gap-2">
                 <IndianRupee size={16} className="text-green-600" />
-                <span className="text-lg">{currentVariant.price?.toFixed(2)}</span>
+                <span className="text-lg">
+                  {currentVariant.price?.toFixed(2)}
+                </span>
               </div>
 
               <div className="px-4 py-2 rounded-lg bg-gray-100 text-sm font-semibold text-gray-800 inline-flex items-center gap-2">
                 <TrendingUp size={14} className="text-blue-600" />
-                <span className="text-sm">Stock: {currentVariant.quantity}</span>
+                <span className="text-sm">
+                  Stock: {currentVariant.quantity}
+                </span>
               </div>
             </div>
 
             {/* Description */}
             <div className="mt-6">
-              <div className="text-sm font-semibold text-gray-700 mb-2">Description</div>
+              <div className="text-sm font-semibold text-gray-700 mb-2">
+                Description
+              </div>
               <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap border-b pb-4">
                 {currentVariant.description || "—"}
               </div>
@@ -239,13 +315,20 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
 
             {/* Attributes */}
             <div className="mt-6">
-              <div className="text-sm font-semibold text-gray-700 mb-3">Other Details (attributes)</div>
+              <div className="text-sm font-semibold text-gray-700 mb-3">
+                Other Details (attributes)
+              </div>
               <div className="grid grid-cols-1 gap-3">
                 <div className="flex flex-wrap gap-2">
-                  {currentVariant.attributes && Object.keys(currentVariant.attributes).length > 0 ? (
+                  {currentVariant.attributes &&
+                  Object.keys(currentVariant.attributes).length > 0 ? (
                     Object.entries(currentVariant.attributes).map(([k, v]) => (
-                      <div key={k} className="px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-sm text-gray-700">
-                        <span className="font-medium">{k}:</span> <span className="ml-1">{v}</span>
+                      <div
+                        key={k}
+                        className="px-3 py-2 rounded-lg bg-gray-50 border border-gray-100 text-sm text-gray-700"
+                      >
+                        <span className="font-medium">{k}:</span>{" "}
+                        <span className="ml-1">{v}</span>
                       </div>
                     ))
                   ) : (
@@ -259,17 +342,25 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
             <div className="mt-6 border-t pt-4 text-sm text-gray-600">
               <div className="mb-2">
                 <span className="text-xs text-gray-500">Variant ID:</span>
-                <div className="font-medium text-gray-800">{currentVariant.variant_id}</div>
+                <div className="font-medium text-gray-800">
+                  {currentVariant.variant_id}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-2 text-xs">
                 <div>
                   <div className="text-xs text-gray-500">Created</div>
-                  <div className="text-sm text-gray-700">{new Date(currentVariant.created_date).toLocaleString()}</div>
+                  <div className="text-sm text-gray-700">
+                    {new Date(currentVariant.created_date).toLocaleString()}
+                  </div>
                 </div>
                 <div>
                   <div className="text-xs text-gray-500">Last modified</div>
-                  <div className="text-sm text-gray-700">{new Date(currentVariant.last_modified_date).toLocaleString()}</div>
+                  <div className="text-sm text-gray-700">
+                    {new Date(
+                      currentVariant.last_modified_date
+                    ).toLocaleString()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -286,7 +377,9 @@ const VariantPreviewAndEditPage: React.FC<VariantPreviewProps> = ({ variants, pr
 
               <button
                 onClick={() => {
-                  setCurrentVariantIndex((prev) => (prev < variantCount - 1 ? prev + 1 : 0));
+                  setCurrentVariantIndex((prev) =>
+                    prev < variantCount - 1 ? prev + 1 : 0
+                  );
                 }}
                 className="px-4 py-2 rounded-lg bg-amber-400 text-white text-sm font-semibold hover:bg-amber-500 transition"
               >

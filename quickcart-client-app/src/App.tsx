@@ -22,6 +22,7 @@ import ListProduct from "./pages/seller/product/ListProduct";
 import StoreForm from "./pages/seller/store/StoreForm";
 import ProductPreviewAndEditPage from "./pages/seller/product/ProductPreviewAndEdit";
 import EditProductForm from "./pages/seller/product/EditProductForm";
+import ListVariant from "./pages/seller/variant/ListVariant";
 
 export default function App() {
   const location = useLocation();
@@ -115,14 +116,15 @@ export default function App() {
             </RequireAuth>
           }
         />
-        <Route 
-        path="/product/edit/:id"
-        element= {
-          <RequireAuth allowedRoles={["seller"]}>
-            <EditProductForm/>
-          </RequireAuth>
-        }
+        <Route
+          path="/product/edit/:id"
+          element={
+            <RequireAuth allowedRoles={["seller"]}>
+              <EditProductForm />
+            </RequireAuth>
+          }
         />
+        <Route path="/variant/build/:id" element={<ListVariant />} />
       </Routes>
 
       {/* Modal routes */}
