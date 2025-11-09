@@ -63,4 +63,12 @@ public class ProductGalleryController {
                 .body(file.bytes());
     }
 
+    @DeleteMapping("/varints/images/{imageId}")
+    public ResponseEntity<ApiAck> deleteImageUploads(
+            @PathVariable UUID imageId
+            ) {
+        productGalleryService.deleteImage(imageId);
+        return ResponseEntity.ok(ApiAck.success("Image deleted successfully"));
+    }
+
 }

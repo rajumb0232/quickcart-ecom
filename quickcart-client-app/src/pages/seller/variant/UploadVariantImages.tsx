@@ -16,6 +16,7 @@ export interface UploadVariantImageProps {
   onSubmit: (files: File[]) => void;
   maxFiles?: number; // default 12
   maxFileSizeMB?: number; // default 8
+  onDelete?: (uri: string) => void; // return the uri of the image that has to be deleted
 }
 
 const humanFileSize = (size: number) =>
@@ -36,6 +37,10 @@ const UploadVariantImages: React.FC<UploadVariantImageProps> = ({
   const dropRef = useRef<HTMLDivElement | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const variant: Variant = useSelector(selectVariantAtBuilder);
+
+  useEffect(() => {
+    variant
+  })
 
   useEffect(() => {
     // generate previews for newly added files

@@ -13,4 +13,6 @@ public interface ProductGalleryService {
     void confirmImageUploads(UUID variantId, String[] objectKeys, String productGalleryDifferentiator);
 
     DownloadFile getImage(UUID imageId);
+
+    void deleteImage(UUID imageId);
 }

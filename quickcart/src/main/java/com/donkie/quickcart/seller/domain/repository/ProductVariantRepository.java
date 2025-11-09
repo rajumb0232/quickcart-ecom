@@ -55,4 +55,5 @@ public interface ProductVariantRepository extends CustomJpaRepository<ProductVar
         ));
     }
 
+    void deleteByImage_ImageId(UUID imageId);
 }

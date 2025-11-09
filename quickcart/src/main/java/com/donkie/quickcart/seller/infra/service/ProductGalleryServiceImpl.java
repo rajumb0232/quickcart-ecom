@@ -75,4 +75,9 @@ public class ProductGalleryServiceImpl implements ProductGalleryService {
             throw new QuickcartBaseException(HttpStatus.NOT_FOUND, "Product image not found");
         }
     }
+
+    @Override
+    public void deleteImage(UUID imageId) {
+        // TODO: this is complex due to many to many relationship, will do it later.
+    }
 }
