@@ -9,9 +9,9 @@ import java.util.UUID;
 
 public interface ProductVariantService {
 
-    UUID createProductVariant(UUID productId, ProductVariantRequest request);
+    ProductVariantResponse createProductVariant(UUID productId, ProductVariantRequest request);
 
-    void updateProductVariant(UUID variantId, ProductVariantRequest request);
+    ProductVariantResponse updateProductVariant(UUID variantId, ProductVariantRequest request);
 
     void deleteProductVariant(UUID variantId);
 

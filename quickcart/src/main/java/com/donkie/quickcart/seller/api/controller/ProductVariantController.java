@@ -2,6 +2,7 @@ package com.donkie.quickcart.seller.api.controller;
 
 import com.donkie.quickcart.seller.application.dto.request.ProductVariantRequest;
 import com.donkie.quickcart.seller.application.dto.response.ProductByVariantResponse;
+import com.donkie.quickcart.seller.application.dto.response.ProductVariantResponse;
 import com.donkie.quickcart.seller.application.service.contracts.ProductVariantService;
 import com.donkie.quickcart.shared.dto.ApiAck;
 import com.donkie.quickcart.shared.dto.ApiResponse;
@@ -21,15 +22,15 @@ public class ProductVariantController {
     private final ProductVariantService variantService;
 
     @PostMapping("/products/{productId}/variants")
-    public ResponseEntity<ApiAck> createVariant(
+    public ResponseEntity<ApiResponse<ProductVariantResponse>> createVariant(
             @PathVariable UUID productId,
             @RequestBody @Valid ProductVariantRequest request
     ) {
-        UUID id = variantService.createProductVariant(productId, request);
+        var response = variantService.createProductVariant(productId, request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .location(URI.create("/api/v1/products/" + productId))
-                .body(ApiAck.success("Product Variant Created."));
+                .body(ApiResponse.success("Product Variant Created.", response));
     }
 
     /**
@@ -46,12 +47,12 @@ public class ProductVariantController {
     }
 
     @PutMapping("/variants/{variantId}")
-    public ResponseEntity<ApiAck> updateVariant(
+    public ResponseEntity<ApiResponse<ProductVariantResponse>> updateVariant(
             @PathVariable UUID variantId,
             @RequestBody @Valid ProductVariantRequest request
     ) {
-        variantService.updateProductVariant(variantId, request);
-        return ResponseEntity.ok(ApiAck.success("Product Variant Updated."));
+        var response = variantService.updateProductVariant(variantId, request);
+        return ResponseEntity.ok(ApiResponse.success("Product Variant Updated.", response));
     }
 
     @DeleteMapping("/variants/{variantId}")

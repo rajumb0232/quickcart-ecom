@@ -36,7 +36,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
     @Transactional
     @Override
-    public UUID createProductVariant(UUID productId, ProductVariantRequest request) {
+    public ProductVariantResponse createProductVariant(UUID productId, ProductVariantRequest request) {
         Product product = productRepository.findActiveById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(HttpStatus.NOT_FOUND, "Product not found by Id: " + productId));
 
@@ -52,13 +52,12 @@ public class ProductVariantServiceImpl implements ProductVariantService {
                 .build();
 
         productVariantRepository.save(variant);
-
-        return variant.getVariantId();
+        return toResponse(variant, resolveImageURIs(variant));
     }
 
     @Transactional
     @Override
-    public void updateProductVariant(UUID variantId, ProductVariantRequest request) {
+    public ProductVariantResponse updateProductVariant(UUID variantId, ProductVariantRequest request) {
         // All edit to non deleted, ignoring the active status
         var variant = getIfNotDeletedAndIsOwner(variantId);
 
@@ -69,6 +68,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         variant.setAttributes(request.attributes());
 
         productVariantRepository.save(variant);
+        return toResponse(variant, resolveImageURIs(variant));
     }
 
     @Transactional
@@ -100,8 +100,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
         return variants.stream()
                 .map(v -> {
-                    var imageURIs = v.getImages().stream().map(img -> "/public/products/variants/images/" + img.getImageId())
-                            .collect(Collectors.toSet());
+                    var imageURIs = resolveImageURIs(v);
                     return toResponse(v, imageURIs);
                 })
                 .toList();
@@ -113,8 +112,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         return productVariantRepository.findById(variantId)
                 .map(v -> {
                     var product = v.getProduct();
-                    var imageURIs = v.getImages().stream().map(img -> "/public/products/variants/images/" + img.getImageId())
-                            .collect(Collectors.toSet());
+                    var imageURIs = resolveImageURIs(v);
                     return new ProductByVariantResponse(
                             product.getProductId(),
                             product.getTitle(),
@@ -135,6 +133,11 @@ public class ProductVariantServiceImpl implements ProductVariantService {
     }
 
     // ======================== Private Helpers ========================
+
+    private static @NotNull Set<String> resolveImageURIs(ProductVariant v) {
+        return v.getImages().stream().map(img -> "/public/products/variants/images/" + img.getImageId())
+                .collect(Collectors.toSet());
+    }
 
     private @NotNull ProductVariant getIfNotDeletedAndIsOwner(UUID variantId) {
         ProductVariant variant = productVariantRepository.findByIdIfNonDeleted(variantId)
