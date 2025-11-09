@@ -108,28 +108,10 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
     @Transactional(readOnly = true)
     @Override
-    public ProductByVariantResponse getProductByVariant(UUID variantId) {
+    public ProductVariantResponse getVariant(UUID variantId) {
         return productVariantRepository.findById(variantId)
-                .map(v -> {
-                    var product = v.getProduct();
-                    var imageURIs = resolveImageURIs(v);
-                    return new ProductByVariantResponse(
-                            product.getProductId(),
-                            product.getTitle(),
-                            product.getDescription(),
-                            product.getBrand(),
-                            product.getCategoryPath(),
-                            product.getAvgRating(),
-                            product.getRatingCount(),
-                            product.getLifecycleAudit().getCreatedDate(),
-                            product.getLifecycleAudit().getLastModifiedDate(),
-                            toResponse(v, imageURIs),
-                            product.isActive(),
-                            product.getLifecycleAudit().isDeleted()
-                    );
-                })
+                .map(v -> toResponse(v, resolveImageURIs(v)))
                 .orElseThrow(() -> new ProductVariantNotFoundException(HttpStatus.NOT_FOUND, "Product not found by variant ID: " + variantId));
-
     }
 
     // ======================== Private Helpers ========================

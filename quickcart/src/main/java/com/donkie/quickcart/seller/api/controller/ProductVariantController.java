@@ -38,8 +38,8 @@ public class ProductVariantController {
      * Useful when product details need to be found when associated with orders, sales, etc.
      */
     @GetMapping("/variants/{variantId}")
-    public ResponseEntity<ApiResponse<ProductByVariantResponse>> getProductByVariant(@PathVariable UUID variantId) {
-        ProductByVariantResponse response = variantService.getProductByVariant(variantId);
+    public ResponseEntity<ApiResponse<ProductVariantResponse>> getVariant(@PathVariable UUID variantId) {
+        var response = variantService.getVariant(variantId);
         return ResponseEntity.ok(ApiResponse.success(
                 response.isDeleted() ? "Retrieved deleted product record." : "Product found.",
                 response
