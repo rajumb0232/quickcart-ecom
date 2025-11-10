@@ -64,7 +64,7 @@ const EditProductForm: React.FC<EditProductProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.product_id]);
 
-  const updateProduct = useUpdateProduct(id);
+  const updateProduct = useUpdateProduct();
 
   const titleValid =
     title.trim().length >= MIN_TITLE && title.trim().length <= MAX_TITLE;
@@ -90,23 +90,16 @@ const EditProductForm: React.FC<EditProductProps> = ({
     };
 
     try {
-      setSubmitting(true);
-      // updateProduct returns a mutation object when productId is valid
-      // call mutateAsync for optimistic flow
-      // @ts-ignore
-      if (updateProduct && typeof updateProduct.mutateAsync === "function") {
-        // @ts-ignore
-        await updateProduct.mutateAsync(body);
-      } else if (typeof updateProduct === "function") {
-        // fallback (shouldn't happen)
-        // @ts-ignore
-        await updateProduct(body);
-      } else {
-        throw new Error("Unable to update product (invalid hook).");
-      }
+      if (product) {
+        setSubmitting(true);
+        await updateProduct.mutateAsync({
+          productId: product.product_id,
+          body: body,
+        });
 
-      toast.success("Product updated successfully.");
-      if (id) navigate(`/product/${id}`);
+        toast.success("Product updated successfully.");
+        if (id) navigate(`/product/${id}`);
+      }
     } catch (err: any) {
       console.error("Update failed", err);
       toast.error(err?.message ?? "Failed to update product");
@@ -266,7 +259,7 @@ const EditProductForm: React.FC<EditProductProps> = ({
           </div>
 
           {/* Brand */}
-          <BrandFilter onSelect={(b) => setBrand(b)} selectedBrand={brand}/>
+          <BrandFilter onSelect={(b) => setBrand(b)} selectedBrand={product?.brand} />
 
           {/* Description */}
           <div className="mb-6">

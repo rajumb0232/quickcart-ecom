@@ -1,5 +1,5 @@
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { selectRoles } from "../../features/auth/authSelectors";
 import { selectNavHeight } from "../../features/util/screenSelector";
 import { useGetUserProfile } from "../../hooks/useAuth";
@@ -20,6 +20,7 @@ import {
   Store,
   Award,
 } from "lucide-react";
+import { setShowCategories } from "../../features/util/screenSlice";
 
 export interface UserProfilePageProps {
   modal: boolean;
@@ -29,8 +30,13 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
   const roles = useSelector(selectRoles);
   const navHeight = useSelector(selectNavHeight);
   const { data, isLoading, isError } = useGetUserProfile();
+  const dispatch = useDispatch();
 
   const userData = data && isApiResponse(data) ? data.data : null;
+
+  useEffect(() => {
+    dispatch(setShowCategories(false));
+  }, []);
 
   const getDisplayTag = () => {
     if (roles.includes("admin")) return "admin";
@@ -49,7 +55,9 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
       >
         <div className="text-center">
           <Loader2 className="w-16 h-16 animate-spin text-teal-600 mx-auto mb-4" />
-          <p className="text-gray-600 font-medium text-lg">Loading profile...</p>
+          <p className="text-gray-600 font-medium text-lg">
+            Loading profile...
+          </p>
         </div>
       </div>
     );
@@ -90,8 +98,8 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
         <div className="text-black p-6 mb-4 bg-white border-2 border-gray-200 rounded-2xl">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-md shrink-0">
-                <User size={20} className="text-white" />
-              </div>
+              <User size={20} className="text-white" />
+            </div>
             <div>
               <h1 className="text-2xl font-bold mb-1">My Profile</h1>
               <p className="text-gray-500">Manage your account information</p>
@@ -120,7 +128,10 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
                   <button className="w-full border-2 border-dashed border-gray-300 rounded-xl px-4 py-4 hover:border-teal-400 hover:bg-teal-50 transition-all group">
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-10 h-10 bg-gray-100 group-hover:bg-teal-100 rounded-lg flex items-center justify-center transition-colors">
-                        <Upload size={20} className="text-gray-400 group-hover:text-teal-600" />
+                        <Upload
+                          size={20}
+                          className="text-gray-400 group-hover:text-teal-600"
+                        />
                       </div>
                       <span className="text-sm font-medium text-gray-600 group-hover:text-teal-600">
                         Upload Logo
@@ -132,7 +143,10 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
                     <button className="w-full border-2 border-dashed border-gray-300 rounded-xl px-4 py-4 hover:border-orange-400 hover:bg-orange-50 transition-all group">
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-10 h-10 bg-gray-100 group-hover:bg-orange-100 rounded-lg flex items-center justify-center transition-colors">
-                          <FileText size={20} className="text-gray-400 group-hover:text-orange-600" />
+                          <FileText
+                            size={20}
+                            className="text-gray-400 group-hover:text-orange-600"
+                          />
                         </div>
                         <span className="text-sm font-medium text-gray-600 group-hover:text-orange-600">
                           Upload Vendor Docs
@@ -144,11 +158,13 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
 
                 {/* Role Badge Card */}
                 {displayTag && (
-                  <div className={`w-full mt-6 rounded-xl p-4 ${
-                    displayTag === "admin"
-                      ? "bg-linear-to-br from-gray-900 to-black"
-                      : "bg-linear-to-br from-amber-400 to-orange-500"
-                  }`}>
+                  <div
+                    className={`w-full mt-6 rounded-xl p-4 ${
+                      displayTag === "admin"
+                        ? "bg-linear-to-br from-gray-900 to-black"
+                        : "bg-linear-to-br from-amber-400 to-orange-500"
+                    }`}
+                  >
                     <div className="flex items-center gap-3 text-white">
                       {displayTag === "admin" ? (
                         <Shield size={24} />
@@ -156,8 +172,12 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
                         <Store size={24} />
                       )}
                       <div>
-                        <p className="text-xs font-medium opacity-90">Account Type</p>
-                        <p className="text-lg font-bold uppercase">{displayTag}</p>
+                        <p className="text-xs font-medium opacity-90">
+                          Account Type
+                        </p>
+                        <p className="text-lg font-bold uppercase">
+                          {displayTag}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -175,12 +195,15 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
                     {displayTag === "seller" && (
                       <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-lg shadow-sm">
                         <Award size={16} className="text-amber-600" />
-                        <span className="text-xs font-semibold text-gray-700">Verified Seller</span>
+                        <span className="text-xs font-semibold text-gray-700">
+                          Verified Seller
+                        </span>
                       </div>
                     )}
                   </div>
                   <p className="text-sm text-gray-600">
-                    Member since {new Date(userData.created_at).toLocaleDateString("en-US", {
+                    Member since{" "}
+                    {new Date(userData.created_at).toLocaleDateString("en-US", {
                       month: "long",
                       year: "numeric",
                     })}
@@ -202,7 +225,9 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
                         <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
                           Email Address
                         </p>
-                        <p className="text-sm font-medium text-gray-900">{userData.email}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {userData.email}
+                        </p>
                       </div>
                     </div>
 
@@ -214,7 +239,9 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
                         <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
                           Phone Number
                         </p>
-                        <p className="text-sm font-medium text-gray-900">{userData.phone}</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {userData.phone}
+                        </p>
                       </div>
                     </div>
 
@@ -247,7 +274,9 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
                           <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
                             Bio
                           </p>
-                          <p className="text-sm text-gray-700">{sellerProfile.bio}</p>
+                          <p className="text-sm text-gray-700">
+                            {sellerProfile.bio}
+                          </p>
                         </div>
                       )}
                       <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
@@ -257,11 +286,14 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
                             Member Since
                           </p>
                           <p className="text-sm font-medium text-gray-900">
-                            {new Date(userData.created_at).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
+                            {new Date(userData.created_at).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              }
+                            )}
                           </p>
                         </div>
                       </div>
@@ -272,7 +304,10 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
                 {/* Edit Profile Button */}
                 <div className="pt-6">
                   <button className="w-full sm:w-auto px-8 py-4 bg-linear-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-teal-200 hover:shadow-xl hover:shadow-teal-300 flex items-center justify-center gap-3 group">
-                    <Edit3 size={20} className="group-hover:rotate-12 transition-transform" />
+                    <Edit3
+                      size={20}
+                      className="group-hover:rotate-12 transition-transform"
+                    />
                     <span>Edit Profile</span>
                   </button>
                 </div>
@@ -284,7 +319,8 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
         {/* Bottom Tip */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-500">
-            💡 Keep your profile information up to date for better account security
+            💡 Keep your profile information up to date for better account
+            security
           </p>
         </div>
       </div>

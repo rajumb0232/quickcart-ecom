@@ -6,8 +6,9 @@ import TopCategories from "./TopCategories";
 import { OffersBar } from "./Offers";
 import ProductCategoryBar from "./ProductCategoryBar";
 import DummySubscribeFooter from "./DummySubscribeFooter";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectNavHeight } from "../../../features/util/screenSelector";
+import { setShowCategories } from "../../../features/util/screenSlice";
 
 const Homepage: React.FC = () => {
   useEffect(() => {
@@ -16,6 +17,11 @@ const Homepage: React.FC = () => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const navHeight = useSelector(selectNavHeight);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(setShowCategories(true));
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -29,7 +35,6 @@ const Homepage: React.FC = () => {
 
   return (
     <div style={{ marginTop: `${navHeight}px` }}>
-
       {/* Hero Section - Responsive padding and overflow */}
       <div className="relative w-full h-full overflow-hidden px-4 sm:px-5 md:px-6 lg:px-7 pt-3 sm:pt-4 md:pt-5">
         <AnimatePresence mode="popLayout">
@@ -38,9 +43,9 @@ const Homepage: React.FC = () => {
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ 
-              duration: 0.7, 
-              ease: [0.43, 0.13, 0.23, 0.96] 
+            transition={{
+              duration: 0.7,
+              ease: [0.43, 0.13, 0.23, 0.96],
             }}
             className="h-full"
           >
