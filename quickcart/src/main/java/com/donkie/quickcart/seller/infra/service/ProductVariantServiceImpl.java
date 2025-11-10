@@ -1,7 +1,6 @@
 package com.donkie.quickcart.seller.infra.service;
 
 import com.donkie.quickcart.seller.application.dto.request.ProductVariantRequest;
-import com.donkie.quickcart.seller.application.dto.response.ProductByVariantResponse;
 import com.donkie.quickcart.seller.application.dto.response.ProductVariantResponse;
 import com.donkie.quickcart.seller.application.exception.ProductNotFoundException;
 import com.donkie.quickcart.seller.application.exception.ProductVariantNotFoundException;
@@ -37,7 +36,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
     @Transactional
     @Override
     public ProductVariantResponse createProductVariant(UUID productId, ProductVariantRequest request) {
-        Product product = productRepository.findActiveById(productId)
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(HttpStatus.NOT_FOUND, "Product not found by Id: " + productId));
 
         ensureOwnership(product.getLifecycleAudit().getCreatedBy());

@@ -54,6 +54,4 @@ public interface ProductVariantRepository extends CustomJpaRepository<ProductVar
                 cb.isFalse(root.get("lifecycleAudit").get("isDeleted"))
         ));
     }
-
-    void deleteByImage_ImageId(UUID imageId);
 }
