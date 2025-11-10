@@ -15,6 +15,7 @@ import {
   selectScreenHeight,
 } from "../../features/util/screenSelector";
 import { selectViewStore } from "../../features/product/sellerStoreSelectors";
+import { toast } from "react-toastify";
 
 const labelToPathMap: Record<string, string> = {
   Dashboard: "/seller/dashboard",
@@ -119,7 +120,11 @@ const NavItem: React.FC<NavItemProps> = ({
     const path = labelToPathMap[label];
     if (path) {
       if (path === "/product/list") {
-        window.open(`${path}/${viewingStore?.store_id}`, "_blank");
+        if(viewingStore && viewingStore.store_id) window.open(`${path}/${viewingStore?.store_id}`, "_blank");
+        else {
+          toast.warn("You cannot list product without store. Create a store first!!");
+          navigate("/store"); // ask to create new store
+        }
       } else {
         navigate(path);
       }

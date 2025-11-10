@@ -70,10 +70,10 @@ const ManageProducts: React.FC = () => {
               <AlertCircle className="w-10 h-10 text-red-600" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Could not load products
+              {viewingStore && viewingStore.store_id ? "Could not load products" : "No Store Found"}
             </h3>
             <p className="text-gray-600 mb-4">
-              There was a problem fetching your products. Try reloading.
+              {viewingStore && viewingStore.store_id ? "There was a problem fetching your products. Try reloading." : "Try creating a new store or retry."}
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -101,8 +101,7 @@ const ManageProducts: React.FC = () => {
               No products found
             </h3>
             <p className="text-gray-600 mb-4">
-              You haven't listed any products yet. Use the product builder to
-              add new items to your store.
+              You haven't listed any products yet. List new product or retry.
             </p>
             <button
               onClick={() => window.location.reload()}
