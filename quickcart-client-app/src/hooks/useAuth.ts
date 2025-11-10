@@ -161,3 +161,11 @@ export const useUpdateSellerProfile = () => {
     },
   });
 };
+
+export const useCreateSellerProfile = () => {
+  const api = useAPI();
+
+  return useMutation<ApiResult<UserProfile>, Error>({
+    mutationFn: async () => authService.createSellerProfile(api),
+  });
+};

@@ -134,5 +134,9 @@ export const authService = {
 
   updateSellerProfile: (api: ReturnType< typeof useAPI>, data: SellerProfileEditRequest) => {
     return api.put<UserProfile>("/sellers/profile", data);
-  }
+  },
+
+  createSellerProfile: (api: ReturnType< typeof useAPI>) => {
+    return api.post<UserProfile>("/sellers/profile");
+  },
 }

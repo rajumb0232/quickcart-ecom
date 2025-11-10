@@ -1,5 +1,5 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   selectIsAuthenticated,
@@ -24,12 +24,19 @@ import {
   Info,
   MoreVertical,
 } from "lucide-react";
+import { useCreateSellerProfile } from "../../../hooks/useAuth";
+import { toast } from "react-toastify";
+import { logout } from "../../../features/auth/authSlice";
+import { clearTokens } from "../../../services/tokenStorage";
 
 export const MainMenu: React.FC = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const userRoles = useSelector(selectRoles);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const createSellerProfileMutation = useCreateSellerProfile();
+  const dispatch = useDispatch();
 
   const accountMenu: MenuItem[] = [
     {
@@ -79,6 +86,33 @@ export const MainMenu: React.FC = () => {
         onClick: () => navigate("/seller/dashboard"),
       });
     }
+
+    if (!userRoles.includes("seller")) {
+      accountMenu.splice(accountMenu.length - 1, 0, {
+        name: "Become a Seller",
+        icon: <Store size={18} />,
+        onClick: async () => {
+          console.log("Creating seller profile...");
+          try {
+            await createSellerProfileMutation.mutateAsync();
+            console.log("Making API Call....");
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            toast.success("Seller Profile Created.");
+
+            dispatch(logout());
+            clearTokens();
+
+            toast.info("You are now logged out! Please login again.")
+
+            navigate("/sign")
+          } catch (error) {
+            toast.error("There was an error creating seller profile!");
+            console.error("Error creating seller profile, ", error);
+          }
+        },
+      });
+    }
+
     if (userRoles.includes("admin")) {
       accountMenu.splice(accountMenu.length - 1, 0, {
         name: "Switch to Admin Profile",
@@ -130,7 +164,10 @@ export const MainMenu: React.FC = () => {
             title="Account"
             type="button"
           >
-            <User size={20} className="text-gray-700 group-hover:text-teal-600 transition-colors" />
+            <User
+              size={20}
+              className="text-gray-700 group-hover:text-teal-600 transition-colors"
+            />
             <span className="hidden lg:block text-sm font-medium text-gray-700 group-hover:text-teal-600 transition-colors">
               Account
             </span>
@@ -152,7 +189,10 @@ export const MainMenu: React.FC = () => {
         }}
         type="button"
       >
-        <Heart size={20} className="text-gray-700 group-hover:text-amber-600 transition-colors" />
+        <Heart
+          size={20}
+          className="text-gray-700 group-hover:text-amber-600 transition-colors"
+        />
         <span className="hidden lg:block text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">
           Wishlist
         </span>
@@ -169,7 +209,10 @@ export const MainMenu: React.FC = () => {
         }}
         type="button"
       >
-        <ShoppingCart size={20} className="text-gray-700 group-hover:text-orange-600 transition-colors" />
+        <ShoppingCart
+          size={20}
+          className="text-gray-700 group-hover:text-orange-600 transition-colors"
+        />
         <span className="hidden lg:block text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors">
           Cart
         </span>
@@ -187,7 +230,10 @@ export const MainMenu: React.FC = () => {
             title="Options"
             type="button"
           >
-            <MoreVertical size={20} className="text-gray-700 group-hover:text-cyan-600 transition-colors" />
+            <MoreVertical
+              size={20}
+              className="text-gray-700 group-hover:text-cyan-600 transition-colors"
+            />
           </button>
         }
         items={optionsMenu}
