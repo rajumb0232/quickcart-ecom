@@ -17,7 +17,13 @@ import {
   getRefreshToken,
   setTokens,
 } from "../services/tokenStorage";
-import type { UserRole, AuthResponsePayload, UserProfile } from "../types/auth";
+import {
+  type UserRole,
+  type AuthResponsePayload,
+  type UserProfile,
+  type UserProfileEditRequest,
+  type SellerProfileEditRequest,
+} from "../types/auth";
 import { loginSuccess, logout } from "../features/auth/authSlice";
 import { store } from "../app/store";
 import { selectIsAuthenticated } from "../features/auth/authSelectors";
@@ -133,5 +139,25 @@ export const useGetUserProfile = () => {
     enabled: isAuthenticated,
     staleTime: 30 * 1000, // 30 seconds
     retry: 1,
+  });
+};
+
+export const useUpdateUserProfile = () => {
+  const api = useAPI();
+
+  return useMutation<ApiResult<UserProfile>, Error, UserProfileEditRequest>({
+    mutationFn: async (data: UserProfileEditRequest) => {
+      return authService.updateProfile(api, data);
+    },
+  });
+};
+
+export const useUpdateSellerProfile = () => {
+  const api = useAPI();
+
+  return useMutation<ApiResult<UserProfile>, Error, SellerProfileEditRequest>({
+    mutationFn: async (data: SellerProfileEditRequest) => {
+      return authService.updateSellerProfile(api, data);
+    },
   });
 };

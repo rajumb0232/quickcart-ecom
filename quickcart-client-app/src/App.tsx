@@ -23,6 +23,7 @@ import StoreForm from "./pages/seller/store/StoreForm";
 import ProductPreviewAndEditPage from "./pages/seller/product/ProductPreviewAndEdit";
 import EditProductForm from "./pages/seller/product/EditProductForm";
 import ListVariant from "./pages/seller/variant/ListVariant";
+import EditProfile from "./pages/auth/EditProfile";
 
 export default function App() {
   const location = useLocation();
@@ -57,6 +58,14 @@ export default function App() {
           element={
             <RequireAuth allowedRoles={["customer", "admin", "seller"]}>
               <UserProfilePage modal={false} />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/profile/edit"
+          element={
+            <RequireAuth allowedRoles={["customer", "admin", "seller"]}>
+              <EditProfile />
             </RequireAuth>
           }
         />

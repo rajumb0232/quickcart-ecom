@@ -25,3 +25,13 @@ export interface UserProfile {
   updated_at: string;
   profiles: UserRoleProfile[];
 }
+
+export interface UserProfileEditRequest {
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+}
+
+export interface SellerProfileEditRequest {
+  bio: string;
+}

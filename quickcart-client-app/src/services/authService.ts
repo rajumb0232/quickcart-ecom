@@ -1,5 +1,5 @@
 import type { ApiResponse } from './../types/apiResponseType';
-import type { UserProfile, AuthResponsePayload, UserRole } from "../types/auth";
+import type { UserProfile, AuthResponsePayload, UserRole, UserProfileEditRequest, SellerProfileEditRequest } from "../types/auth";
 import { api } from "../api/apiClient"; // plain axios wrapper instance
 import { selectRoles } from "../features/auth/authSelectors";
 import { store } from "../app/store";
@@ -126,5 +126,13 @@ export const authService = {
 
   fetchProfileInfo: (api: ReturnType< typeof useAPI>) => {
     return api.get<UserProfile>("/users/profile");
+  },
+
+  updateProfile: (api: ReturnType< typeof useAPI>, data: UserProfileEditRequest) => {
+    return api.put<UserProfile>("/users/profile", data);
+  },
+
+  updateSellerProfile: (api: ReturnType< typeof useAPI>, data: SellerProfileEditRequest) => {
+    return api.put<UserProfile>("/sellers/profile", data);
   }
 }

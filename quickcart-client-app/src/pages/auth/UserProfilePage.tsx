@@ -7,7 +7,6 @@ import { isApiResponse } from "../../types/apiResponseType";
 import {
   User,
   Mail,
-  Phone,
   MapPin,
   Calendar,
   Edit3,
@@ -21,6 +20,7 @@ import {
   Award,
 } from "lucide-react";
 import { setShowCategories } from "../../features/util/screenSlice";
+import { useNavigate } from "react-router-dom";
 
 export interface UserProfilePageProps {
   modal: boolean;
@@ -31,6 +31,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
   const navHeight = useSelector(selectNavHeight);
   const { data, isLoading, isError } = useGetUserProfile();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const userData = data && isApiResponse(data) ? data.data : null;
 
@@ -50,7 +51,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
   if (isLoading) {
     return (
       <div
-        style={{ marginTop: `${modal ? 0 : navHeight}px` }}
+        style={{ marginTop: `${modal ? 0 : navHeight - 60}px` }}
         className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex justify-center items-center p-12"
       >
         <div className="text-center">
@@ -66,7 +67,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
   if (isError || !userData) {
     return (
       <div
-        style={{ marginTop: `${modal ? 0 : navHeight}px` }}
+        style={{ marginTop: `${modal ? 0 : navHeight - 60}px` }}
         className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center p-12 text-center"
       >
         <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -90,7 +91,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
 
   return (
     <div
-      style={{ marginTop: `${modal ? 0 : navHeight}px` }}
+      style={{ marginTop: `${modal ? 0 : navHeight - 60}px` }}
       className="min-h-screen h-max bg-linear-to-br from-gray-50 via-white to-gray-50 p-4"
     >
       <div className="w-full max-w-6xl mx-auto">
@@ -232,20 +233,6 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
                     </div>
 
                     <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
-                      <div className="w-10 h-10 bg-cyan-100 rounded-lg flex items-center justify-center shrink-0">
-                        <Phone size={18} className="text-cyan-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
-                          Phone Number
-                        </p>
-                        <p className="text-sm font-medium text-gray-900">
-                          {userData.phone}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
                       <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
                         <MapPin size={18} className="text-amber-600" />
                       </div>
@@ -303,7 +290,9 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ modal }) => {
 
                 {/* Edit Profile Button */}
                 <div className="pt-6">
-                  <button className="w-full sm:w-auto px-8 py-4 bg-linear-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-teal-200 hover:shadow-xl hover:shadow-teal-300 flex items-center justify-center gap-3 group">
+                  <button className="w-full sm:w-auto px-8 py-4 bg-linear-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-3 group"
+                  onClick={() => navigate("/profile/edit")}
+                  >
                     <Edit3
                       size={20}
                       className="group-hover:rotate-12 transition-transform"
