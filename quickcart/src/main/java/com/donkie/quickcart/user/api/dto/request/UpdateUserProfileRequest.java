@@ -15,7 +15,6 @@ public record UpdateUserProfileRequest(
         String lastName,
         
         @JsonProperty("phone_number")
-        @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Phone number must be valid")
         String phoneNumber
 ) {
 }
