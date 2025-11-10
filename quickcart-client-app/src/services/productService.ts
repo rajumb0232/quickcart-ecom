@@ -46,7 +46,7 @@ export const productService = {
     },
 
     addVariant: (api: ReturnType< typeof useAPI>, productId: string, body: VariantRequest) => {
-        return api.post<Variant>(`/product/${productId}/variants`, body);
+        return api.post<Variant>(`/products/${productId}/variants`, body);
     },
 
     updateVariant: (api: ReturnType< typeof useAPI>, variantId: string, body: VariantRequest) => {
