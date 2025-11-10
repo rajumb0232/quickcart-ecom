@@ -19,7 +19,7 @@ import { selectViewStore } from "../../features/product/sellerStoreSelectors";
 const labelToPathMap: Record<string, string> = {
   Dashboard: "/seller/dashboard",
   Store: "/seller/store",
-  "List Product": "/list-product",
+  "List Product": "/product/list",
   "Manage Products": "/seller/manage-products",
   Reports: "/seller/reports",
   Profile: "/seller/profile",
@@ -113,12 +113,13 @@ const NavItem: React.FC<NavItemProps> = ({
   hasBadge,
 }) => {
   const navigate = useNavigate();
+  const viewingStore = useSelector(selectViewStore);
 
   const handleClick = () => {
     const path = labelToPathMap[label];
     if (path) {
-      if (path === "/list-product") {
-        window.open(path, "_blank");
+      if (path === "/product/list") {
+        window.open(`${path}/${viewingStore?.store_id}`, "_blank");
       } else {
         navigate(path);
       }

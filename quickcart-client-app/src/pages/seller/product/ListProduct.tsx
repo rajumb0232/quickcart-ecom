@@ -22,11 +22,14 @@ import {
   Tag,
   FileText,
   Eye,
+  StoreIcon,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { selectViewStore } from "../../../features/product/sellerStoreSelectors";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { clearProductBuilderData } from "../../../features/product/productBuilderSlice";
+import { useGetStoreById } from "../../../hooks/useStore";
+import { isApiResponse } from "../../../types/apiResponseType";
+import { type StoreDetails } from "../../../types/storeTypes";
 
 const stageComponents: Record<string, JSX.Element> = {
   select_category: <Categorize />,
@@ -89,13 +92,27 @@ const canonicalStageFor = (raw: unknown): string => {
 };
 
 const ListProduct: React.FC = () => {
+  const params = useParams<{ store_id: string }>();
+  const { store_id } = params;
+
   const navHeight = useSelector(selectNavHeight) ?? 0;
   const screenHeight = useSelector(selectScreenHeight);
   const currentStageRaw = useSelector(selectProductReqBuildStage);
   const productReq = useSelector(selectProductReq);
-  const currentStore = useSelector(selectViewStore);
+  const [store, setStore] = useState<StoreDetails | null>(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { data, isSuccess } = store_id ? useGetStoreById(store_id) : {};
+
+  useEffect(() => {
+    if (isSuccess) {
+      if (data && isApiResponse(data)) {
+        const store = data.data;
+        setStore(store);
+      }
+    }
+  }, [isSuccess, data, dispatch]);
 
   useEffect(() => {
     dispatch(setShowCategories(false));
@@ -103,14 +120,14 @@ const ListProduct: React.FC = () => {
 
   let notified = false;
   useEffect(() => {
-    if (currentStore && !notified) {
-      toast.info("Listing product to " + currentStore?.name);
+    if (store && !notified) {
+      toast.info("Listing product to " + store?.name);
       notified = true;
     }
-  }, [currentStore]);
+  }, [store]);
 
   useEffect(() => {
-    console.log("🧩 Product Request Updated:", productReq);
+    console.log("Product Request Updated:", productReq);
   }, [productReq]);
 
   const currentStage = canonicalStageFor(currentStageRaw);
@@ -144,6 +161,35 @@ const ListProduct: React.FC = () => {
 
   const totalSteps = 5;
   const progressPercentage = (currentStageInfo.step / totalSteps) * 100;
+
+  if (!store || !store.store_id) {
+    return (
+      <div
+        style={{
+          marginTop: `${navHeight - 36}px`,
+          minHeight: `${imageContainerHeight + 90}px`,
+        }}
+        className="flex flex-col items-center justify-center py-16"
+      >
+        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <StoreIcon size={40} className="text-gray-400" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          No Stores Found
+        </h3>
+        <p className="text-gray-500 text-center max-w-md">
+          You haven't created any stores yet. Create your first store to start
+          listing your products.
+        </p>
+        <button
+          className="px-6 py-2 my-4 text-white border-2 border-gray-700 hover:border-gray-900 rounded-lg bg-gray-700 hover:bg-gray-900 transform transition duration-75 cursor-pointer"
+          onClick={() => navigate("/store")}
+        >
+          Create Store
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -242,7 +288,7 @@ const ListProduct: React.FC = () => {
           </div>
 
           {/* Store Info */}
-          {currentStore && (
+          {store && (
             <div className="mt-4 bg-linear-to-r from-teal-50 to-cyan-50 rounded-xl border-2 border-teal-200 p-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
@@ -253,7 +299,7 @@ const ListProduct: React.FC = () => {
                     Listing to Store:
                   </p>
                   <p className="text-sm font-bold text-gray-900">
-                    {currentStore.name}
+                    {store.name}
                   </p>
                 </div>
               </div>

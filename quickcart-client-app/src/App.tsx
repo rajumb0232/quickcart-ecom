@@ -94,7 +94,7 @@ export default function App() {
           }
         />
         <Route
-          path="/list-product"
+          path="/product/list/:store_id"
           element={
             <RequireAuth allowedRoles={["seller"]}>
               <ListProduct />
