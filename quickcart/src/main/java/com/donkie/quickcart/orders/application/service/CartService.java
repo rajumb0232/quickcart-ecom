@@ -9,7 +9,9 @@ public interface CartService {
 
     void addItemToCart(UUID cartId, AddCartItemRequest request);
 
-    void removeCartItem(UUID cartId, UUID itemId);
+    void removeCartItem(UUID itemId);
 
     CartResponse getCart(UUID cartId);
+
+    void createCart();
 }

@@ -13,11 +13,12 @@ public record CartResponse(
         @JsonProperty("items") List<CartItemDetail> cartItemDetails
 ) {
 
-    public record  CartItemDetail(
+    public record CartItemDetail(
             @JsonProperty("item_id") UUID itemId,
             @JsonProperty("quantity") int quantity,
             @JsonProperty("product_snapshot") ProductSnapshot productSnapshot
-    ) {}
+    ) {
+    }
 
     public static CartResponseBuilder builder(UUID cartId) {
         return new CartResponseBuilder(cartId);

@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface OrderService {
 
-    void createOrder(UUID cartId);
+    void createOrder(UUID cartId, String shippingAddress);
 
     void confirmOrder(UUID orderId);
 
@@ -18,7 +18,7 @@ public interface OrderService {
 
     void cancelOrder(UUID orderId);
 
-    OrderItemResponse getOrdersForSeller(UUID storeId);
+    PageContainer<OrderItemResponse> getOrdersForSeller(UUID storeId, int page, int size);
 
     OrderResponse getOrder(UUID orderId);
 

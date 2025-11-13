@@ -83,6 +83,11 @@ public class Order {
         this.orderStatus = OrderStatus.CONFIRMED;
     }
 
+    public void confirmOrder() {
+        this.orderStatus = OrderStatus.CONFIRMED;
+        this.paymentStatus = PaymentStatus.PAID;
+    }
+
     public void shipProduct() {
         this.orderStatus = OrderStatus.SHIPPED;
     }

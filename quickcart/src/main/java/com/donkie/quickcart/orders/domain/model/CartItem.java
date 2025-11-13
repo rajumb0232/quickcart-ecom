@@ -26,6 +26,9 @@ public class CartItem {
     @Column(name = "product_variant_id", nullable = false, updatable = false)
     private UUID productVariantId;
 
+    @Column(name = "store_id", nullable = false, updatable = false)
+    private UUID storeId;
+
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
@@ -45,9 +48,10 @@ public class CartItem {
     @Column(name = "last_modified_date", nullable = false)
     private Instant lastModifiedDate;
 
-    public static CartItem create(UUID productVariantId, int quantity) {
+    public static CartItem create(UUID productVariantId, UUID storeId, int quantity) {
         CartItem cartItem = new CartItem();
         cartItem.setProductVariantId(productVariantId);
+        cartItem.setStoreId(storeId);
         cartItem.setQuantity(quantity);
         return cartItem;
     }

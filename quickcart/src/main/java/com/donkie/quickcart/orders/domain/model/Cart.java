@@ -32,8 +32,4 @@ public class Cart {
     public static Cart create() {
         return new Cart();
     }
-
-    public void addItem(CartItem item) {
-        cartItems.add(item);
-    }
 }

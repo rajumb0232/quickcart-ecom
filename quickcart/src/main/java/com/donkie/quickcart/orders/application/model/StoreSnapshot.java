@@ -9,6 +9,7 @@ public record StoreSnapshot(
         @JsonProperty("name") String name,
         @JsonProperty("location") String location,
         @JsonProperty("contact_number") String contactNumber,
-        @JsonProperty("contact_email") String contactEmail
+        @JsonProperty("contact_email") String contactEmail,
+        @JsonProperty("owner_id") UUID ownerId
 ) {
 }
