@@ -20,8 +20,11 @@ public class OrderItem {
     @Column(name = "item_id", updatable = false, nullable = false)
     private UUID itemId;
 
-    @Column(name = "product_id", nullable = false, updatable = false)
-    private UUID productId;
+    @Column(name = "product_variant_id", nullable = false, updatable = false)
+    private UUID productVariantId;
+
+    @Column(name = "store_id", nullable = false, updatable = false)
+    private UUID storeId;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
@@ -37,11 +40,17 @@ public class OrderItem {
     @Column(name = "created_by", updatable = false, nullable = false)
     private String createdBy;
 
-    public static OrderItem create(UUID productId, int quantity, double pricePerUnit) {
-        OrderItem cartItem = new OrderItem();
-        cartItem.setProductId(productId);
-        cartItem.setQuantity(quantity);
-        cartItem.setPricePerUnit(pricePerUnit);
-        return cartItem;
+    public static OrderItem create(UUID productVariantId, UUID storeId, int quantity, double pricePerUnit) {
+        OrderItem item = new OrderItem();
+        item.setProductVariantId(productVariantId);
+        item.setStoreId(storeId);
+        item.setQuantity(quantity);
+        item.setPricePerUnit(pricePerUnit);
+        return item;
+    }
+
+    public OrderItem associateWith(Order order) {
+        this.order = order;
+        return this;
     }
 }

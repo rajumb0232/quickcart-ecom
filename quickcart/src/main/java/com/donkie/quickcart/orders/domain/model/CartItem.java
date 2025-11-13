@@ -23,8 +23,8 @@ public class CartItem {
     @Column(name = "item_id", updatable = false, nullable = false)
     private UUID itemId;
 
-    @Column(name = "product_id", nullable = false, updatable = false)
-    private UUID productId;
+    @Column(name = "product_variant_id", nullable = false, updatable = false)
+    private UUID productVariantId;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
@@ -45,10 +45,15 @@ public class CartItem {
     @Column(name = "last_modified_date", nullable = false)
     private Instant lastModifiedDate;
 
-    public static CartItem create(UUID productId, int quantity) {
+    public static CartItem create(UUID productVariantId, int quantity) {
         CartItem cartItem = new CartItem();
-        cartItem.setProductId(productId);
+        cartItem.setProductVariantId(productVariantId);
         cartItem.setQuantity(quantity);
         return cartItem;
+    }
+
+    public CartItem associateWith(Cart cart) {
+        this.cart = cart;
+        return this;
     }
 }
