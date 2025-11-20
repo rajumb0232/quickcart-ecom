@@ -6,6 +6,7 @@ import com.donkie.quickcart.user.domain.repository.UserProfileRepo;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 public class UserSnapServiceImpl implements UserSnapService {
     private final UserProfileRepo userRepository;
 
+    @Transactional
     @Override
     public UserSnapshot getUserSnapshot(UUID userId) {
         return userRepository.findById(userId)

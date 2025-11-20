@@ -54,7 +54,7 @@ public class RevokedTokenFilter extends OncePerRequestFilter {
             log.debug("Token is not blocked/revoked");
         }
 
-        log.info("Continuing to next filters in the chain");
+        log.debug("Continuing to next filters in the chain");
         // Continue with request if the token is valid
         filterChain.doFilter(request, response);
     }

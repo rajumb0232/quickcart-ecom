@@ -46,6 +46,7 @@ public class ResourceSnapServiceImpl implements ResourceSnapService {
                 .orElseThrow(() -> new ProductVariantNotFoundException(HttpStatus.NOT_FOUND, "Product variant not found"));
     }
 
+    @Transactional
     @Override
     public StoreSnapshot getStoreSnapshot(UUID storeId) {
         return storeRepository.findById(storeId)
