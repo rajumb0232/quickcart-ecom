@@ -4,9 +4,10 @@
 
 QuickCart is a fully functional e-commerce application built end-to-end, covering the core features of a modern online store. This project demonstrates real-world system design, robust backend development, and full-stack integration.
 
+## Architecture
+<img width="2915" height="1565" alt="Screenshot 2026-02-08 090033" src="https://github.com/user-attachments/assets/10984d8b-a232-41aa-a725-92dd6e7446ad" />
 
 ## 📺 Video Demonstration
-
 **Click the image 👇 to watch the full feature rundown.**
 
 [![QuickCart Feature Rundown - Click to Watch](https://img.youtube.com/vi/7g2Dz2abCbY/maxresdefault.jpg)](https://youtu.be/7g2Dz2abCbY?si=rPXCm0xsntObvLFw)
